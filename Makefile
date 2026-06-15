@@ -13,6 +13,7 @@ install:
 
 test:
 	policyengine-core test -c policyengine_fr policyengine_fr/tests
+	pytest tests/ -q
 
 build:
 	python -m build

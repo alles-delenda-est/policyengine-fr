@@ -1,0 +1,1 @@
+- Add independent test layers: property-based/metamorphic tests (hypothesis) and a golden-master regression grid, wired into `make test`.
