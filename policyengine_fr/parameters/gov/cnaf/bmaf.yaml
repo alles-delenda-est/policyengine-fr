@@ -1,0 +1,14 @@
+description: Base mensuelle de calcul des allocations familiales (BMAF). Montant mensuel de référence servant au calcul de la plupart des prestations familiales, revalorisé chaque 1er avril.
+values:
+  2023-04-01: 445.93
+  2024-04-01: 466.44
+metadata:
+  unit: currency-EUR
+  label: Base mensuelle des allocations familiales (BMAF)
+  reference:
+    - title: Article L551-1 du Code de la sécurité sociale (BMAF)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006743137
+    - title: Circulaire CNAF — Revalorisation de la BMAF au 1er avril 2024 (466,44 €)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049387443
+    - title: Service-Public.fr — Allocations familiales (montants)
+      href: https://www.service-public.fr/particuliers/vosdroits/F13213

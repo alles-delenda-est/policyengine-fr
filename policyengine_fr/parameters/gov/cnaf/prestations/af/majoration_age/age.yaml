@@ -1,0 +1,11 @@
+description: Âge à partir duquel un enfant à charge ouvre droit à la majoration pour âge des allocations familiales.
+values:
+  2008-05-01: 14
+metadata:
+  unit: year
+  label: Âge ouvrant droit à la majoration pour âge des AF
+  reference:
+    - title: Article R521-1 du Code de la sécurité sociale
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000018603065
+    - title: Décret 2008-409 du 28/04/2008
+      href: https://www.legifrance.gouv.fr/loda/id/JORFTEXT000018721097

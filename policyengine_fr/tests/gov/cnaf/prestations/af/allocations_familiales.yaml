@@ -1,0 +1,125 @@
+# Allocations familiales (CSS art. L521-1 et s.) — revenus/barèmes 2024.
+# BMAF au 1er janvier 2024 = 445,93 € (revalorisation à 466,44 € au 1er avril).
+# Taux: 0,32 BMAF (2 enfants) + 0,41 BMAF par enfant supplémentaire ;
+# majoration pour âge 0,16 BMAF par enfant >= 14 ans ;
+# modulation 1 / 0,5 / 0,25 selon deux plafonds de ressources.
+- name: Couple, deux enfants, ressources sous le plafond 1 (taux plein)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 30_000
+      parent_2: {}
+      enfant_1:
+        age: 8
+      enfant_2:
+        age: 10
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2]
+  output:
+    # 445,93 × 0,32 = 142,6976 ; ressources 27 000 <= plafond 1 (74 966)
+    allocations_familiales: 142.6976
+
+- name: Couple, trois enfants dont un de 16 ans (majoration pour âge)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 30_000
+      parent_2: {}
+      enfant_1:
+        age: 5
+      enfant_2:
+        age: 8
+      enfant_3:
+        age: 16
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2, enfant_3]
+  output:
+    # base 445,93 × (0,32 + 0,41) = 325,5289 ;
+    # majoration 445,93 × 0,16 × 1 = 71,3488 ; total 396,8777
+    allocations_familiales: 396.8777
+
+- name: Famille de deux enfants tous deux >= 14 ans (l'aîné exclu de la majoration)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 30_000
+      enfant_1:
+        age: 17
+      enfant_2:
+        age: 15
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1, enfant_2]
+  output:
+    # base 142,6976 + majoration 445,93 × 0,16 × 1 = 71,3488 ; total 214,0464
+    allocations_familiales: 214.0464
+
+- name: Couple, deux enfants, ressources en tranche 2 (montant réduit de moitié)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 100_000
+      parent_2: {}
+      enfant_1:
+        age: 8
+      enfant_2:
+        age: 10
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2]
+  output:
+    # ressources 90 000 : 74 966 < 90 000 <= 99 922 -> coefficient 0,5
+    # 142,6976 × 0,5 = 71,3488
+    allocations_familiales: 71.3488
+
+- name: Couple, deux enfants, ressources en tranche 3 (montant réduit au quart)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 130_000
+      parent_2: {}
+      enfant_1:
+        age: 8
+      enfant_2:
+        age: 10
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2]
+  output:
+    # ressources 117 000 > 99 922 -> coefficient 0,25
+    # 142,6976 × 0,25 = 35,6744
+    allocations_familiales: 35.6744
+
+- name: Un seul enfant (pas d'allocations familiales)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 30_000
+      parent_2: {}
+      enfant_1:
+        age: 8
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1]
+  output:
+    allocations_familiales: 0
