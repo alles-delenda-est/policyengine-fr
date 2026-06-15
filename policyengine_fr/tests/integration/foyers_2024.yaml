@@ -1,0 +1,154 @@
+# Scénarios de bout en bout (whole-household) — revenus/barèmes 2024, métropole.
+#
+# Chaque cas part du seul `salaire_brut` et vérifie toute la chaîne du MVP:
+#   salaire_brut → revenu_net_imposable → nombre_parts → impot_brut
+#   → plafonnement_quotient_familial → décote → impot_revenu
+#   → (CSG/CRDS, allocations familiales) → revenu_disponible.
+#
+# Les composantes individuelles (CSG, CRDS) et familiales (AF) sont vérifiées
+# unitairement ailleurs; ici on contrôle leur intégration via l'agrégat
+# `revenu_disponible` au niveau du ménage. Barèmes utilisés:
+#   - IR: 11 294 @ 11 % / 28 797 @ 30 % / 82 341 @ 41 % / 177 106 @ 45 %
+#   - abattement salaires 10 % (plancher 504, plafond 14 426)
+#   - plafonnement QF: 1 759 €/demi-part (général), 4 149 € (parent isolé, case T)
+#   - décote: seuils 889 (seul) / 1 470 (couple), taux 0,4525
+#   - CSG 9,2 % et CRDS 0,5 % sur 98,25 % du brut
+#   - AF: BMAF 445,93 (jan.–mars) puis 466,44 (avr.–déc.) 2024,
+#     0,32 BMAF (2 enfants) + 0,41 par enfant suppl., modulation 1/0,5/0,25.
+
+- name: Célibataire sans enfant, salaire brut 30 000
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      declarant_1:
+        salaire_brut: 30_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+    familles:
+      famille_1:
+        parents: [declarant_1]
+    menages:
+      menage_1:
+        personnes_de_reference: [declarant_1]
+  output:
+    revenu_net_imposable: 27_000        # 30 000 − abattement 3 000
+    nombre_parts: 1
+    impot_brut: 1_727.66                 # (27 000 − 11 294) × 11 %
+    plafonnement_quotient_familial: 1_727.66  # pas de demi-part suppl.
+    decote: 107.23385                    # 889 − 0,4525 × 1 727,66
+    impot_revenu: 1_620.42615            # 1 727,66 − décote
+    # 30 000 − 1 620,42615 − CSG 2 711,70 − CRDS 147,375 + AF 0
+    revenu_disponible: 25_520.49885
+
+- name: Couple, deux enfants (8 et 10 ans), salaire brut 60 000
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 60_000
+      parent_2: {}
+      enfant_1:
+        age: 8
+      enfant_2:
+        age: 10
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [parent_1, parent_2]
+        personnes_a_charge: [enfant_1, enfant_2]
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2]
+    menages:
+      menage_1:
+        personnes_de_reference: [parent_1]
+        conjoints: [parent_2]
+        enfants: [enfant_1, enfant_2]
+  output:
+    revenu_net_imposable: 54_000
+    nombre_parts: 3                      # 2 déclarants + 2 × 0,5 part PAC
+    impot_brut: 2_212.98                 # barème(18 000) × 3
+    plafonnement_quotient_familial: 2_212.98  # avantage QF < plafond
+    decote: 468.62655                    # 1 470 − 0,4525 × 2 212,98
+    impot_revenu: 1_744.35345
+    # AF annuelles taux plein = 3×142,6976 + 9×149,2608 = 1 771,44
+    # 60 000 − 1 744,35345 − CSG 5 423,40 − CRDS 294,75 + AF 1 771,44
+    revenu_disponible: 54_308.93655
+
+- name: Parent isolé, un enfant (10 ans), salaire brut 40 000 (case T)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      declarant_1:
+        salaire_brut: 40_000
+      enfant_1:
+        age: 10
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+        personnes_a_charge: [enfant_1]
+        parent_isole: true
+    familles:
+      famille_1:
+        parents: [declarant_1]
+        enfants: [enfant_1]
+    menages:
+      menage_1:
+        personnes_de_reference: [declarant_1]
+        enfants: [enfant_1]
+  output:
+    revenu_net_imposable: 36_000
+    nombre_parts: 2                      # 1 déclarant + 0,5 PAC + 0,5 parent isolé
+    impot_brut: 1_475.32                 # barème(18 000) × 2
+    # avantage QF (4 086,23 − 1 475,32 = 2 610,91) < plafond isolé 4 149
+    plafonnement_quotient_familial: 1_475.32
+    decote: 221.4177                     # 889 − 0,4525 × 1 475,32
+    impot_revenu: 1_253.9023
+    # un seul enfant: pas d'allocations familiales
+    # 40 000 − 1 253,9023 − CSG 3 615,60 − CRDS 196,50 + AF 0
+    revenu_disponible: 34_933.9977
+
+- name: Couple, trois enfants (8, 10, 12 ans), salaire brut 120 000 — plafonnement QF
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      parent_1:
+        salaire_brut: 120_000
+      parent_2: {}
+      enfant_1:
+        age: 8
+      enfant_2:
+        age: 10
+      enfant_3:
+        age: 12
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [parent_1, parent_2]
+        personnes_a_charge: [enfant_1, enfant_2, enfant_3]
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2, enfant_3]
+    menages:
+      menage_1:
+        personnes_de_reference: [parent_1]
+        conjoints: [parent_2]
+        enfants: [enfant_1, enfant_2, enfant_3]
+  output:
+    revenu_net_imposable: 108_000
+    nombre_parts: 4                      # 2 déclarants + 2×0,5 + 1 part 3e enfant
+    impot_brut: 6_910.64                 # barème(27 000) × 4
+    # impôt sans QF = barème(54 000) × 2 = 18 972,46
+    # avantage QF (12 061,82) > plafond 4 × 1 759 = 7 036 → plancher 11 936,46
+    plafonnement_quotient_familial: 11_936.46
+    decote: 0                            # impôt trop élevé pour la décote
+    impot_revenu: 11_936.46
+    # AF: 3 enfants (taux 0,73), ressources 108 000 > plafond 2 (106 168)
+    # → tranche 3 (0,25); annuel = 3×81,382225 + 9×85,1253 = 1 010,274375
+    # 120 000 − 11 936,46 − CSG 10 846,80 − CRDS 589,50 + AF 1 010,274375
+    revenu_disponible: 97_637.514375
