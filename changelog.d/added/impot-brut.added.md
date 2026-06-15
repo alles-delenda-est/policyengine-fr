@@ -1,0 +1,1 @@
+- Increment 3: `impot_brut` applies the barème to the quotient familial (replaces the `impot_revenu_bareme` slice).
