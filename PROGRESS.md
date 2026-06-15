@@ -37,7 +37,7 @@ Idempotent: re-running a half-done increment is safe (branch + tests gate it).
 ## Increment backlog
 
 - [x] 0. Scaffolding + per-foyer income-tax barème slice (pre-MVP, on `main`)
-- [ ] 1. `revenu_net_imposable` from `salaire_brut` — 10% abattement (floor/ceiling). `gov/dgfip/ir/abattement_salaires`
+- [x] 1. `revenu_net_imposable` from `salaire_brut` — 10% abattement (plancher 504 / plafond 14 426, revenus 2024). `gov/dgfip/ir/abattement_salaires` (PR #2)
 - [ ] 2. `nombre_parts` — quotient familial (declarants + personnes_à_charge; single-parent majoration). `gov/dgfip/ir/parts`
 - [ ] 3. `impot_brut` — `bareme.calc(rni / parts) * parts` (refit existing `bareme.yaml`/`impot_revenu_bareme`)
 - [ ] 4. `plafonnement_quotient_familial` — cap the advantage of extra half-parts
