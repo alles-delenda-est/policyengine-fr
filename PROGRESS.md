@@ -46,7 +46,7 @@ Idempotent: re-running a half-done increment is safe (branch + tests gate it).
 - [x] 7. `csg` / `crds` — on employment income, 98.25% base. `gov/urssaf/...`
 - [x] 8. `allocations_familiales` — on `famille`; base by #children, 3-tranche modulation, age majoration. `gov/cnaf/prestations/af/...`
 - [x] 9. `revenu_disponible` — headline aggregate
-- [ ] 10. Integration tests — whole-household end-to-end scenarios
+- [x] 10. Integration tests — whole-household end-to-end scenarios
 - [ ] 11. Finalize — update `CLAUDE.md`, `modelled_policies.yaml`, `docs/`; review pass
 
 ## Validation oracles
