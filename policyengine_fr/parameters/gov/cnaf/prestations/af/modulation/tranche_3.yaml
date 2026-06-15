@@ -1,0 +1,11 @@
+description: Coefficient de modulation des allocations familiales pour la troisième tranche de ressources (ressources supérieures au deuxième plafond) — montant réduit au quart.
+values:
+  2015-07-01: 0.25
+metadata:
+  unit: /1
+  label: Coefficient de modulation des AF — tranche 3 (quart)
+  reference:
+    - title: Article D521-1 du Code de la sécurité sociale
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000030680318
+    - title: Décret 2015-611 du 03/06/2015 (modulation des allocations familiales)
+      href: https://www.legifrance.gouv.fr/loda/id/JORFTEXT000030674064

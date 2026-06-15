@@ -1,0 +1,11 @@
+description: Nombre minimal d'enfants à charge ouvrant droit aux allocations familiales.
+values:
+  1946-08-22: 2
+metadata:
+  unit: int
+  label: Nombre d'enfants minimum pour les AF
+  reference:
+    - title: Article L521-1 du Code de la sécurité sociale
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033697313
+    - title: Service-Public.fr — Allocations familiales (conditions)
+      href: https://www.service-public.fr/particuliers/vosdroits/F13213

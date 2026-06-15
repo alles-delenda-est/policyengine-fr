@@ -1,0 +1,14 @@
+description: Plafond annuel de ressources n°1 des allocations familiales (montant de base, pour deux enfants à charge ; majoré par enfant supplémentaire). En deçà, les AF sont versées à taux plein.
+values:
+  2023-01-01: 59_330
+  2024-01-01: 62_474
+metadata:
+  unit: currency-EUR
+  label: Plafond de ressources AF n°1 — base
+  reference:
+    - title: Article D521-3 du Code de la sécurité sociale
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000030680312
+    - title: Instruction interministérielle DSS/2B/2023/205 du 21/12/2023 (plafonds 2024)
+      href: https://sante.gouv.fr/fichiers/bo/2023/2023.24.sante.pdf
+    - title: Service-Public.fr — Allocations familiales (plafonds de ressources)
+      href: https://www.service-public.fr/particuliers/vosdroits/F13213

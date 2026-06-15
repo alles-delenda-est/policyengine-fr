@@ -1,0 +1,1 @@
+Allocations familiales (CSS art. L521-1 et s.) sur la `famille` : montant à taux plein selon le nombre d'enfants, majoration pour âge (>= 14 ans) et modulation des ressources en trois tranches (`gov/cnaf/prestations/af`).
