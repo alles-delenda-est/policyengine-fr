@@ -1,0 +1,67 @@
+# Expected values computed from the 2024 barème (1 part, raw barème, no
+# quotient familial / décote), tranches: 0% / 11% / 30% / 41% / 45% at
+# thresholds 11 294 / 28 797 / 82 341 / 177 106.
+- name: Revenu nul - aucun impôt
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        revenu_net_imposable: 0
+  output:
+    impot_revenu_bareme: 0
+
+- name: Revenu sous le seuil de la premiere tranche - aucun impot
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        revenu_net_imposable: 10_000
+  output:
+    impot_revenu_bareme: 0
+
+- name: Revenu dans la tranche a 30 pourcent (30 000)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        revenu_net_imposable: 30_000
+  output:
+    impot_revenu_bareme: 2_286.23
+
+- name: Revenu de 50 000
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        revenu_net_imposable: 50_000
+  output:
+    impot_revenu_bareme: 8_286.23
+
+- name: Revenu de 100 000 (atteint la tranche a 41 pourcent)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        revenu_net_imposable: 100_000
+  output:
+    impot_revenu_bareme: 25_228.72

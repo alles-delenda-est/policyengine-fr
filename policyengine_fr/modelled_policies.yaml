@@ -1,0 +1,8 @@
+core:
+  modelled:
+    - Impôt sur le revenu — barème progressif (simplifié, sans quotient familial)
+  not_modelled:
+    - Quotient familial, décote, plafonnement
+    - Prélèvements sociaux (CSG/CRDS)
+    - Prestations sociales (allocations familiales, RSA, APL, prime d'activité)
+    - Cotisations sociales

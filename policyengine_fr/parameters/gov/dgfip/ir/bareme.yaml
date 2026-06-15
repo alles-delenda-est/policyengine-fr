@@ -1,0 +1,33 @@
+description: Barème progressif de l'impôt sur le revenu (taux marginaux par tranche).
+metadata:
+  type: marginal_rate
+  threshold_unit: currency-EUR
+  rate_unit: /1
+  name: ir_bareme
+  label: Barème de l'impôt sur le revenu
+  reference:
+    - title: Service-Public.fr — Barème de l'impôt sur les revenus de 2024
+      href: https://www.service-public.fr/particuliers/vosdroits/F1419
+    - title: impots.gouv.fr — Tranches et taux d'imposition
+      href: https://www.impots.gouv.fr/particulier/calcul-de-limpot-sur-le-revenu
+brackets:
+  - threshold:
+      2024-01-01: 0
+    rate:
+      2024-01-01: 0.0
+  - threshold:
+      2024-01-01: 11_294
+    rate:
+      2024-01-01: 0.11
+  - threshold:
+      2024-01-01: 28_797
+    rate:
+      2024-01-01: 0.30
+  - threshold:
+      2024-01-01: 82_341
+    rate:
+      2024-01-01: 0.41
+  - threshold:
+      2024-01-01: 177_106
+    rate:
+      2024-01-01: 0.45

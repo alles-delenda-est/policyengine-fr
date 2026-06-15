@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+*.h5
+.coverage
+docs/_build/
+.DS_Store
+.venv/
+
+# Local Claude Code state
+.claude/
