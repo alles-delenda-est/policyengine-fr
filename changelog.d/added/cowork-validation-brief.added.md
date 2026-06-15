@@ -1,0 +1,1 @@
+- Add CoWork validation task brief: independent-oracle validation spec against the official DGFiP/CAF simulators.
