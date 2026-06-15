@@ -43,7 +43,7 @@ Idempotent: re-running a half-done increment is safe (branch + tests gate it).
 - [x] 4. `plafonnement_quotient_familial` — cap the advantage of extra half-parts
 - [x] 5. `decote` — low-income reduction (séparé vs couple)
 - [x] 6. `impot_revenu` — `max(0, impot_brut after plafonnement − décote)`
-- [ ] 7. `csg` / `crds` — on employment income, 98.25% base. `gov/urssaf/...`
+- [x] 7. `csg` / `crds` — on employment income, 98.25% base. `gov/urssaf/...`
 - [ ] 8. `allocations_familiales` — on `famille`; base by #children, 3-tranche modulation, age majoration. `gov/cnaf/prestations/af/...`
 - [ ] 9. `revenu_disponible` — headline aggregate
 - [ ] 10. Integration tests — whole-household end-to-end scenarios

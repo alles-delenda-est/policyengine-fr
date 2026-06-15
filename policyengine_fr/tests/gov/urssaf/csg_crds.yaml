@@ -1,0 +1,42 @@
+# CSG et CRDS sur les revenus d'activité salariée (revenus 2024).
+# Assiette = 98,25 % du salaire brut (abattement de 1,75 %).
+# CSG déductible 6,8 % ; CSG imposable 2,4 % ; CSG totale 9,2 % ; CRDS 0,5 %.
+- name: Salaire brut 30 000 € — CSG et CRDS
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 30_000
+  output:
+    # assiette = 30 000 × 0,9825 = 29 475
+    assiette_csg_crds_salaire: 29_475
+    # 29 475 × 0,068
+    csg_deductible: 2_004.30
+    # 29 475 × 0,024
+    csg_imposable: 707.40
+    # 29 475 × 0,092
+    csg: 2_711.70
+    # 29 475 × 0,005
+    crds: 147.375
+
+- name: Salaire brut 50 000 € — CSG et CRDS
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 50_000
+  output:
+    # assiette = 50 000 × 0,9825 = 49 125
+    assiette_csg_crds_salaire: 49_125
+    csg_deductible: 3_340.50
+    csg_imposable: 1_179.00
+    csg: 4_519.50
+    crds: 245.625
+
+- name: Salaire brut nul — aucune CSG ni CRDS
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 0
+  output:
+    assiette_csg_crds_salaire: 0
+    csg: 0
+    crds: 0

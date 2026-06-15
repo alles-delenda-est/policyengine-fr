@@ -1,0 +1,11 @@
+description: Taux de la CSG non déductible (imposable) de l'impôt sur le revenu, applicable aux revenus d'activité.
+values:
+  2018-01-01: 0.024
+metadata:
+  unit: /1
+  label: Taux de la CSG imposable (revenus d'activité)
+  reference:
+    - title: Article L136-8 du Code de la sécurité sociale (taux de la CSG)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000041604370
+    - title: URSSAF — CSG et CRDS (taux applicables aux revenus d'activité)
+      href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/csg-crds.html
