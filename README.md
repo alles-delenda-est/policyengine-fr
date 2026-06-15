@@ -34,16 +34,26 @@ make format   # ruff format + check (run before committing)
 make test     # run the YAML test suite via the core test runner
 
 # Run a single test file:
-policyengine-core test -c policyengine_fr policyengine_fr/tests/gov/dgfip/ir/impot_revenu_bareme.yaml
+policyengine-core test -c policyengine_fr policyengine_fr/tests/gov/dgfip/ir/impot_revenu.yaml
 ```
 
 ## Current status
 
-First vertical slice only: the progressive income-tax barème
-(`impot_revenu_bareme`) applied to a foyer fiscal's `revenu_net_imposable`,
-using the 2024 brackets. It is intentionally simplified — no quotient familial,
-décote, or plafonnement yet (see the variable's docstring). The point so far is
-to prove the parameter → variable → test pipeline end-to-end.
+**Disposable-income MVP (revenus 2024, métropole).** From a household's gross
+salary, the model computes the full chain end-to-end:
+
+- **Impôt sur le revenu** — `revenu_net_imposable` (10 % abattement) →
+  `nombre_parts` (quotient familial) → `impot_brut` (progressive barème per
+  part) → plafonnement du quotient familial → décote → `impot_revenu` net.
+- **Prélèvements sociaux** — `csg` (déductible + imposable) and `crds` on salary
+  (assiette of 98,25 % of gross).
+- **Prestations** — `allocations_familiales` on the famille (base by number of
+  children, income modulation, age majoration).
+- **Headline** — `revenu_disponible` on the ménage aggregates the above.
+
+See [`policyengine_fr/modelled_policies.yaml`](policyengine_fr/modelled_policies.yaml)
+for the exact modelled / not-modelled boundary. Out of scope for the MVP: other
+social contributions, capital and non-salary income, and most benefits.
 
 ## License
 

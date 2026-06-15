@@ -1,0 +1,1 @@
+Finalisation du MVP « revenu disponible » (revenus 2024) : mise à jour de la documentation (`CLAUDE.md`, `README.md`, `docs/index.md`) et de `modelled_policies.yaml` pour refléter la chaîne complète impôt sur le revenu → CSG/CRDS → allocations familiales → revenu disponible.
