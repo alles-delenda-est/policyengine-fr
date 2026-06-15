@@ -1,0 +1,63 @@
+name: Claude statute review
+
+# Independent reviewer-agent gate (see docs/reviewer-agent-gate.md).
+# Dormant until you set repo variable ENABLE_CLAUDE_REVIEW=true and add the
+# ANTHROPIC_API_KEY secret — so it never shows a red X before it is configured.
+# Advisory by default: it posts a review comment and does NOT block auto-merge.
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled]
+    paths:
+      - "policyengine_fr/variables/**"
+      - "policyengine_fr/parameters/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  statute-review:
+    # Only runs once explicitly enabled (and the secret is in place).
+    if: ${{ vars.ENABLE_CLAUDE_REVIEW == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Independent statute review
+        uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        with:
+          prompt: |
+            You are an INDEPENDENT reviewer of a French tax-benefit
+            microsimulation PR (policyengine-fr, on policyengine-core). You did
+            NOT write this code. Be adversarial: assume the author may have
+            misread the law. Review only the changed variables, parameters, and
+            tests against French statute. If the PolicyEngine plugin is
+            available, use its `program-reviewer` and `reference-validator`
+            skills.
+
+            Check, and report findings tied to specific articles/URLs:
+            1. Statute fidelity — does each formula match the cited CGI/CSS/arrêté
+               article? Is the `reference:` real, current and on-point?
+            2. Independent reference values — are test expected values traceable
+               to an INDEPENDENT source (openfisca-france parameters at
+               github.com/openfisca/openfisca-france, or the official simulator),
+               not merely re-derived from this same code? Hand-check at least one.
+            3. Silent scope-narrowing — any simplification (e.g. a means-test
+               using current-year income instead of base ressources N-2, a
+               benefit without its phase-out) must be explicit in the variable
+               docstring AND modelled_policies.yaml. Flag undocumented ones.
+            4. Entity & period — correct entity (individu/foyer_fiscal/famille/
+               menage) and definition_period (YEAR vs MONTH); correct cross-entity
+               aggregation (no double counting).
+            5. Edge cases — zero income, thresholds, single/couple/parent-isolé,
+               many children, age boundaries (14/18/20): are they tested?
+            6. Vectorisation & safety — numpy-safe, no divide-by-zero, no NaN.
+
+            End with a clear verdict line: `VERDICT: APPROVE` or
+            `VERDICT: REQUEST CHANGES`, then the prioritised findings. Post this as
+            a single PR review comment. Do not modify any files.
