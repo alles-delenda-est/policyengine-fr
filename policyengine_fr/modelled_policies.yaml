@@ -1,8 +1,16 @@
 core:
   modelled:
-    - Impôt sur le revenu — barème progressif (simplifié, sans quotient familial)
+    - Impôt sur le revenu — barème progressif par part de quotient familial
+    - Quotient familial — nombre de parts (déclarants + personnes à charge, majoration parent isolé)
+    - Plafonnement du quotient familial
+    - Décote
+    - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %)
+    - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
+    - Revenu disponible — agrégat de tête de l'MVP (revenus 2024)
   not_modelled:
-    - Quotient familial, décote, plafonnement
-    - Prélèvements sociaux (CSG/CRDS)
-    - Prestations sociales (allocations familiales, RSA, APL, prime d'activité)
-    - Cotisations sociales
+    - Réductions et crédits d'impôt
+    - Contribution exceptionnelle sur les hauts revenus
+    - Prélèvements sociaux sur les revenus du capital et de remplacement
+    - Cotisations sociales salariales (maladie, retraite, chômage…)
+    - Autres prestations sociales (RSA, APL, prime d'activité, ASF…)
+    - Revenus non salariés, pensions et revenus du capital

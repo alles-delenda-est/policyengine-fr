@@ -16,11 +16,15 @@ This repo (`PolicyEngineFR`) **is** the `policyengine-fr` package — a French
 tax-benefit microsimulation model that reuses PolicyEngine's existing
 UK/US/Canada stack. Seeded from `policyengine-canada`'s structure (2026-06-15).
 
-Current state: scaffolding in place + one working vertical slice — the
-progressive income-tax barème (`impot_revenu_bareme`) on the `foyer_fiscal`,
-2024 brackets, intentionally simplified (no quotient familial / décote /
-plafonnement yet — see the variable docstring). `make test` passes (5/5), ruff
-clean. A local `.venv/` exists (pip was bootstrapped via get-pip.py since the
+Current state: **Disposable-income MVP complete (revenus 2024, métropole).**
+The full chain is modelled end-to-end: `salaire_brut` → `revenu_net_imposable`
+(abattement 10 %) → `nombre_parts` (quotient familial) → `impot_brut` (barème par
+part) → plafonnement du quotient familial → décote → `impot_revenu` net; plus
+CSG/CRDS on salary (assiette 98,25 %) and `allocations_familiales` on the
+famille; aggregated into `revenu_disponible` on the ménage. Whole-household
+integration scenarios pass. `make test` passes (46/46), ruff clean. See
+`policyengine_fr/modelled_policies.yaml` for the modelled / not-modelled
+boundary. A local `.venv/` exists (pip was bootstrapped via get-pip.py since the
 system has no pip); activate it with `. .venv/bin/activate`.
 
 ## The one thing to internalise
