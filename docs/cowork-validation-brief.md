@@ -16,7 +16,7 @@ government's own simulators).
 
 | Output | Official oracle | URL |
 |--------|-----------------|-----|
-| `impot_revenu` (income tax) — **highest priority** | DGFiP "Simulateur de l'impôt sur le revenu" (modèle **complet** or simplifié), revenus **2024** | https://www.impots.gouv.fr/simulateurs (open the income-tax simulator, "revenus 2024") |
+| `impot_revenu` (income tax) — **highest priority** | DGFiP "Simulateur de l'impôt sur le revenu", modèle **simplifié**, revenus **2024** | https://simulateur-ir-ifi.impots.gouv.fr/calcul_impot/2025/simplifie/index.htm |
 | `allocations_familiales` | CAF "Mes aides" estimateur / mesdroitssociaux.gouv.fr | https://www.caf.fr → estimateur ; https://www.mesdroitssociaux.gouv.fr |
 | `csg` / `crds` | Mechanically exact (9.2% / 0.5% × 98.25% of salaire_brut) — low priority; any payslip simulator confirms | — |
 
@@ -97,6 +97,79 @@ Then: a one-paragraph summary highlighting the largest divergences and a
 hypothesis for each (e.g. "décote off by ~€30 for single filers → check seuil").
 For any confirmed divergence, open a GitHub issue titled
 `oracle divergence: <output> for <profile>` with the numbers and the oracle URL.
+
+## Runbook — exact steps for 3 representative profiles (do these first)
+
+Oracle: **DGFiP simulateur, modèle simplifié, revenus 2024** —
+https://simulateur-ir-ifi.impots.gouv.fr/calcul_impot/2025/simplifie/index.htm
+
+**General flow (same for every profile):**
+1. Open the URL; accept the intro/disclaimer.
+2. **Situation** screen: set *Situation de famille* (Célibataire / Marié-Pacsé);
+   answer *Parent isolé* (case **T**) Oui/Non; enter *Nombre d'enfants à charge*.
+3. **Revenus** screen: under *Traitements et salaires*, enter case **1AJ** for
+   adult 1 and **1BJ** for adult 2. Enter our `salaire_brut` **as-is** — the
+   simulator applies the 10 % déduction itself (do not pre-deduct it).
+4. Validate → read **« Impôt sur le revenu net »** (the final figure, after décote
+   and plafonnement). That is the number to compare.
+
+These three cover the distinct field paths: a plain single filer, a parent isolé
+with a child, and a married couple with children. Tolerance: flag if
+`|official − model| > 5 €`.
+
+### Profile A — `single_30k` (célibataire, no children)
+| Field | Enter |
+|-------|-------|
+| Situation de famille | Célibataire |
+| Parent isolé (case T) | Non |
+| Nombre d'enfants à charge | 0 |
+| 1AJ (salaires adulte 1) | `30000` |
+| 1BJ | (blank) |
+
+→ Capture « Impôt sur le revenu net » = **______ €**
+**policyengine-fr → `impot_revenu` = 1 620,43 €.** Flag if |official − 1620.43| > 5.
+
+### Profile B — `single_parent_25k_1child` (parent isolé, 1 child)
+| Field | Enter |
+|-------|-------|
+| Situation de famille | Célibataire |
+| Parent isolé (case T) | **Oui** |
+| Nombre d'enfants à charge | 1 |
+| 1AJ | `25000` |
+
+→ Capture « Impôt sur le revenu net » = **______ €**
+**policyengine-fr → `impot_revenu` = 0,00 €** (2 parts — 1 + 0,5 enfant + 0,5
+parent isolé — so the quotient 22 500 / 2 = 11 250 sits just under the first
+barème threshold of 11 294). Flag if official > 5 €. *(This 0 is a strong, easy oracle
+check — if the simulator shows a positive tax, our parts/décote is wrong.)*
+
+### Profile C — `couple_60k_2children` (marié, 2 children, single earner)
+| Field | Enter |
+|-------|-------|
+| Situation de famille | Marié / Pacsé |
+| Parent isolé | Non |
+| Nombre d'enfants à charge | 2 |
+| 1AJ (salaires adulte 1) | `60000` |
+| 1BJ (salaires adulte 2) | `0` |
+
+→ Capture « Impôt sur le revenu net » = **______ €**
+**policyengine-fr → `impot_revenu` = 1 744,35 €.** Flag if |official − 1744.35| > 5.
+
+### Results template to fill in
+| profile | inputs | official IR | model IR | Δ | status |
+|---------|--------|-------------|----------|---|--------|
+| A single_30k | cél., 0 enf., 1AJ 30000 | ____ | 1 620,43 | ____ | ____ |
+| B single_parent_25k_1child | cél. isolé, 1 enf., 1AJ 25000 | ____ | 0,00 | ____ | ____ |
+| C couple_60k_2children | marié, 2 enf., 1AJ 60000, 1BJ 0 | ____ | 1 744,35 | ____ | ____ |
+
+If all three Δ ≤ 5 €, the income-tax core (barème + parts + plafonnement + décote)
+is validated against the government for these points — then extend to the full
+battery above. If any Δ > 5 €, that's a real bug: open a GitHub issue
+`oracle divergence: impot_revenu for <profile>` with the numbers and this URL.
+
+> AF note: the IR simulator does **not** output allocations familiales. Validate
+> `allocations_familiales` separately on the CAF estimateur, feeding it the same
+> household and income (mind the N‑2 caveat above).
 
 ## Why this matters
 

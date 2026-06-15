@@ -1,0 +1,1 @@
+- Add a runnable CoWork runbook: exact DGFiP simulator field-by-field steps for 3 representative profiles, with model expected values and a results template.
