@@ -1,0 +1,69 @@
+# Déduction forfaitaire de 10% — revenus 2024: taux 10%, plancher 504 €,
+# plafond 14 426 € par personne (Article 83-3° CGI ; décret 2024-496).
+- name: Salaire en plein abattement (10% entre plancher et plafond)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 30_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    salaire_imposable: 27_000
+    revenu_net_imposable: 27_000
+
+- name: Petit salaire - abattement au plancher (504 €)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 4_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    salaire_imposable: 3_496
+
+- name: Haut salaire - abattement au plafond (14 426 €)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 200_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    salaire_imposable: 185_574
+
+- name: Salaire nul - aucun abattement
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 0
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    salaire_imposable: 0
+
+- name: Couple - revenu net imposable du foyer = somme des deux salaires imposables
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 30_000
+      individu_2:
+        salaire_brut: 30_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1, individu_2]
+  output:
+    revenu_net_imposable: 54_000

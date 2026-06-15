@@ -1,0 +1,1 @@
+- Increment 1: derive `revenu_net_imposable` from `salaire_brut` via the 10% déduction forfaitaire (plancher/plafond 2024).
