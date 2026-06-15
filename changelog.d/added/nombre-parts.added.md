@@ -1,0 +1,1 @@
+- Increment 2: `nombre_parts` (quotient familial) with parent-isolé majoration.

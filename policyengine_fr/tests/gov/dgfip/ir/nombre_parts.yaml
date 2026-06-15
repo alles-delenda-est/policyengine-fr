@@ -1,0 +1,99 @@
+# Quotient familial — CGI art. 194-195. 1 part/déclarant; 0,5 part pour
+# chacune des 2 premières PAC, 1 part dès la 3e; +0,5 part parent isolé.
+- name: Célibataire sans personne à charge
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+  output:
+    nombre_parts: 1.0
+
+- name: Couple sans enfant
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      declarant_2: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1, declarant_2]
+  output:
+    nombre_parts: 2.0
+
+- name: Couple avec un enfant
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      declarant_2: {}
+      enfant_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1, declarant_2]
+        personnes_a_charge: [enfant_1]
+  output:
+    nombre_parts: 2.5
+
+- name: Couple avec deux enfants
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      declarant_2: {}
+      enfant_1: {}
+      enfant_2: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1, declarant_2]
+        personnes_a_charge: [enfant_1, enfant_2]
+  output:
+    nombre_parts: 3.0
+
+- name: Couple avec trois enfants (part entière dès le 3e)
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      declarant_2: {}
+      enfant_1: {}
+      enfant_2: {}
+      enfant_3: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1, declarant_2]
+        personnes_a_charge: [enfant_1, enfant_2, enfant_3]
+  output:
+    nombre_parts: 4.0
+
+- name: Parent isolé avec deux enfants (case T, +0,5 part)
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      enfant_1: {}
+      enfant_2: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+        personnes_a_charge: [enfant_1, enfant_2]
+        parent_isole: true
+  output:
+    nombre_parts: 2.5
+
+- name: Parent non isolé avec deux enfants (pas de majoration)
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      enfant_1: {}
+      enfant_2: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+        personnes_a_charge: [enfant_1, enfant_2]
+        parent_isole: false
+  output:
+    nombre_parts: 2.0
