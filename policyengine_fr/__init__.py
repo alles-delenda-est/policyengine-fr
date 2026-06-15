@@ -14,7 +14,7 @@ class CountryTaxBenefitSystem(TaxBenefitSystem):
     parameters_dir = COUNTRY_DIR / "parameters"
     auto_carry_over_input_variables = True
     basic_inputs = [
-        "revenu_net_imposable",
+        "salaire_brut",
     ]
 
     def __init__(self):
