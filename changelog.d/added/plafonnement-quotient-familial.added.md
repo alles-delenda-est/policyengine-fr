@@ -1,0 +1,1 @@
+Plafonnement du quotient familial (`plafonnement_quotient_familial`): cap on the income-tax advantage of half-parts beyond the base parts, with the higher case-T plafond for a single parent's first child (CGI art. 197-I-2).

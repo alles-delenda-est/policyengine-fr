@@ -1,0 +1,79 @@
+# Plafonnement du quotient familial (CGI art. 197-I-2), barème revenus 2023
+# (LF 2024) déjà présent dans le repo. Plafond général 1 759 € / demi-part,
+# plafond parent isolé (case T) 4 149 € pour la part entière du 1er enfant.
+- name: Célibataire sans enfant (1 part) — pas de plafonnement, égale impôt brut
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+        revenu_net_imposable: 50_000
+  output:
+    impot_brut: 8_286.23
+    plafonnement_quotient_familial: 8_286.23
+
+- name: Couple + 2 enfants (3 parts), RNI 60 000 — avantage QF sous le plafond
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      declarant_2: {}
+      enfant_1: {}
+      enfant_2: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1, declarant_2]
+        personnes_a_charge: [enfant_1, enfant_2]
+        revenu_net_imposable: 60_000
+  output:
+    nombre_parts: 3.0
+    impot_brut: 2_872.98
+    # avantage QF (1 699.48) < plafond (2 x 1 759 = 3 518) -> impôt brut inchangé
+    plafonnement_quotient_familial: 2_872.98
+
+- name: Couple + 2 enfants (3 parts), RNI 120 000 — plafonnement applicable
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      declarant_2: {}
+      enfant_1: {}
+      enfant_2: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1, declarant_2]
+        personnes_a_charge: [enfant_1, enfant_2]
+        revenu_net_imposable: 120_000
+  output:
+    nombre_parts: 3.0
+    # impôt brut = barème(40 000) x 3 = 15 858.69
+    impot_brut: 15_858.69
+    # impôt sans QF = barème(60 000) x 2 = 22 572.46 ; avantage max = 2 x 1 759
+    # plancher = 22 572.46 - 3 518 = 19 054.46 (> impôt brut) -> retenu
+    plafonnement_quotient_familial: 19_054.46
+
+- name: Parent isolé + 1 enfant (2 parts), RNI 60 000 — plafond majoré case T
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      declarant_1: {}
+      enfant_1: {}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+        personnes_a_charge: [enfant_1]
+        parent_isole: true
+        revenu_net_imposable: 60_000
+  output:
+    nombre_parts: 2.0
+    # impôt brut = barème(30 000) x 2 = 4 572.46
+    impot_brut: 4_572.46
+    # impôt sans QF = barème(60 000) x 1 = 11 286.23 ; avantage max = 4 149
+    # plancher = 11 286.23 - 4 149 = 7 137.23 (> impôt brut) -> retenu
+    plafonnement_quotient_familial: 7_137.23
