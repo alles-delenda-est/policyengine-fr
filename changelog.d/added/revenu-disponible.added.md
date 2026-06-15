@@ -1,0 +1,1 @@
+`revenu_disponible` sur le `menage` : agrégat de tête du MVP = salaire brut − impôt sur le revenu − CSG − CRDS + allocations familiales (annualisées), avec agrégation des composantes individu / foyer fiscal / famille au niveau du ménage.
