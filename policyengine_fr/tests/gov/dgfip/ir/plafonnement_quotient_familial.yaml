@@ -1,6 +1,6 @@
-# Plafonnement du quotient familial (CGI art. 197-I-2), barème revenus 2023
-# (LF 2024) déjà présent dans le repo. Plafond général 1 759 € / demi-part,
-# plafond parent isolé (case T) 4 149 € pour la part entière du 1er enfant.
+# Plafonnement du quotient familial (CGI art. 197-I-2), barème revenus 2024
+# (LF 2025). Plafond général 1 791 € / demi-part, plafond parent isolé
+# (case T) 4 224 € pour la part entière du 1er enfant.
 - name: Célibataire sans enfant (1 part) — pas de plafonnement, égale impôt brut
   absolute_error_margin: 0.01
   period: 2024
@@ -12,8 +12,8 @@
         declarants: [declarant_1]
         revenu_net_imposable: 50_000
   output:
-    impot_brut: 8_286.23
-    plafonnement_quotient_familial: 8_286.23
+    impot_brut: 8_165.48
+    plafonnement_quotient_familial: 8_165.48
 
 - name: Couple + 2 enfants (3 parts), RNI 60 000 — avantage QF sous le plafond
   absolute_error_margin: 0.01
@@ -31,9 +31,9 @@
         revenu_net_imposable: 60_000
   output:
     nombre_parts: 3.0
-    impot_brut: 2_872.98
-    # avantage QF (1 699.48) < plafond (2 x 1 759 = 3 518) -> impôt brut inchangé
-    plafonnement_quotient_familial: 2_872.98
+    impot_brut: 2_805.99
+    # avantage QF (1 524.97) < plafond (2 x 1 791 = 3 582) -> impôt brut inchangé
+    plafonnement_quotient_familial: 2_805.99
 
 - name: Couple + 2 enfants (3 parts), RNI 120 000 — plafonnement applicable
   absolute_error_margin: 0.01
@@ -51,11 +51,11 @@
         revenu_net_imposable: 120_000
   output:
     nombre_parts: 3.0
-    # impôt brut = barème(40 000) x 3 = 15 858.69
-    impot_brut: 15_858.69
-    # impôt sans QF = barème(60 000) x 2 = 22 572.46 ; avantage max = 2 x 1 759
-    # plancher = 22 572.46 - 3 518 = 19 054.46 (> impôt brut) -> retenu
-    plafonnement_quotient_familial: 19_054.46
+    # impôt brut = barème(40 000) x 3 = 15 496.44
+    impot_brut: 15_496.44
+    # impôt sans QF = barème(60 000) x 2 = 22 330.96 ; avantage max = 2 x 1 791
+    # plancher = 22 330.96 - 3 582 = 18 748.96 (> impôt brut) -> retenu
+    plafonnement_quotient_familial: 18_748.96
 
 - name: Parent isolé + 1 enfant (2 parts), RNI 60 000 — plafond majoré case T
   absolute_error_margin: 0.01
@@ -72,8 +72,8 @@
         revenu_net_imposable: 60_000
   output:
     nombre_parts: 2.0
-    # impôt brut = barème(30 000) x 2 = 4 572.46
-    impot_brut: 4_572.46
-    # impôt sans QF = barème(60 000) x 1 = 11 286.23 ; avantage max = 4 149
-    # plancher = 11 286.23 - 4 149 = 7 137.23 (> impôt brut) -> retenu
-    plafonnement_quotient_familial: 7_137.23
+    # impôt brut = barème(30 000) x 2 = 4 330.96
+    impot_brut: 4_330.96
+    # impôt sans QF = barème(60 000) x 1 = 11 165.48 ; avantage max = 4 224
+    # plancher = 11 165.48 - 4 224 = 6 941.48 (> impôt brut) -> retenu
+    plafonnement_quotient_familial: 6_941.48

@@ -8,26 +8,26 @@ metadata:
   reference:
     - title: Service-Public.fr — Barème de l'impôt sur les revenus de 2024
       href: https://www.service-public.fr/particuliers/vosdroits/F1419
-    - title: impots.gouv.fr — Tranches et taux d'imposition
-      href: https://www.impots.gouv.fr/particulier/calcul-de-limpot-sur-le-revenu
+    - title: Loi n° 2025-127 du 14 février 2025 de finances pour 2025, art. 2 (barème des revenus 2024, indexation +1,8 %)
+      href: https://www.impots.gouv.fr/www2/fichiers/documentation/brochure/ir_2025/pdf_som/nouveautes.pdf
 brackets:
   - threshold:
       2024-01-01: 0
     rate:
       2024-01-01: 0.0
   - threshold:
-      2024-01-01: 11_294
+      2024-01-01: 11_497
     rate:
       2024-01-01: 0.11
   - threshold:
-      2024-01-01: 28_797
+      2024-01-01: 29_315
     rate:
       2024-01-01: 0.30
   - threshold:
-      2024-01-01: 82_341
+      2024-01-01: 83_823
     rate:
       2024-01-01: 0.41
   - threshold:
-      2024-01-01: 177_106
+      2024-01-01: 180_294
     rate:
       2024-01-01: 0.45

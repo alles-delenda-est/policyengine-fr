@@ -1,6 +1,6 @@
 # Impôt sur le revenu net (CGI art. 197), revenus 2024.
 # impôt = max(0, impôt après plafonnement du QF − décote).
-# Barème : 11 294 (11 %) / 28 797 (30 %). Décote : seuil seul 889 €,
+# Barème : 11 497 (11 %) / 29 315 (30 %). Décote : seuil seul 889 €,
 # seuil couple 1 470 €, taux 0,4525.
 - name: Célibataire (1 part), RNI 16 000 — décote efface l'impôt
   absolute_error_margin: 0.01
@@ -13,9 +13,9 @@
         declarants: [declarant_1]
         revenu_net_imposable: 16_000
   output:
-    # impôt = 517.66 ; décote = 654.76 > impôt -> impôt net = 0
-    plafonnement_quotient_familial: 517.66
-    decote: 654.76
+    # impôt = (16 000 − 11 497) × 0,11 = 495.33 ; décote = 664.86 > impôt -> 0
+    plafonnement_quotient_familial: 495.33
+    decote: 664.86
     impot_revenu: 0
 
 - name: Célibataire (1 part), RNI 18 000 — décote partielle, impôt positif
@@ -29,12 +29,12 @@
         declarants: [declarant_1]
         revenu_net_imposable: 18_000
   output:
-    # impôt = (18 000 − 11 294) × 0,11 = 737.66
-    plafonnement_quotient_familial: 737.66
-    # décote = 889 − 0,4525 × 737.66 = 555.21
-    decote: 555.21
-    # impôt net = 737.66 − 555.21 = 182.45
-    impot_revenu: 182.45
+    # impôt = (18 000 − 11 497) × 0,11 = 715.33
+    plafonnement_quotient_familial: 715.33
+    # décote = 889 − 0,4525 × 715.33 = 565.31
+    decote: 565.31
+    # impôt net = 715.33 − 565.31 = 150.02
+    impot_revenu: 150.02
 
 - name: Célibataire (1 part), RNI 35 000 — pas de décote
   absolute_error_margin: 0.01
@@ -47,9 +47,9 @@
         declarants: [declarant_1]
         revenu_net_imposable: 35_000
   output:
-    # impôt = 3 786.23 ; décote = 0
+    # impôt = 3 665.48 ; décote = 0
     decote: 0
-    impot_revenu: 3_786.23
+    impot_revenu: 3_665.48
 
 - name: Couple (2 parts), RNI 80 000 — pas de décote
   absolute_error_margin: 0.01
@@ -63,6 +63,6 @@
         declarants: [declarant_1, declarant_2]
         revenu_net_imposable: 80_000
   output:
-    # impôt = ((40 000 − 11 294) × 0,11 + ... ) × 2 = 10 572.46 ; décote = 0
+    # impôt = barème(40 000) × 2 = 10 330.96 ; décote = 0
     decote: 0
-    impot_revenu: 10_572.46
+    impot_revenu: 10_330.96

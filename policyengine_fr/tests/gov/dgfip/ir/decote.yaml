@@ -1,7 +1,7 @@
-# Décote de l'impôt sur le revenu (CGI art. 197-I-4), revenus 2023 (LF 2024).
+# Décote de l'impôt sur le revenu (CGI art. 197-I-4), revenus 2024 (LF 2025).
 # Seuil personne seule 889 €, seuil couple 1 470 €, taux 0,4525.
 # décote = max(0, seuil − taux × impôt après plafonnement du QF).
-# Barème : 11 294 (11 %) / 28 797 (30 %).
+# Barème : 11 497 (11 %) / 29 315 (30 %).
 - name: Célibataire (1 part), RNI 16 000 — décote applicable
   absolute_error_margin: 0.01
   period: 2024
@@ -13,10 +13,10 @@
         declarants: [declarant_1]
         revenu_net_imposable: 16_000
   output:
-    # impôt = (16 000 − 11 294) × 0,11 = 517.66
-    plafonnement_quotient_familial: 517.66
-    # décote = 889 − 0,4525 × 517.66 = 654.76
-    decote: 654.76
+    # impôt = (16 000 − 11 497) × 0,11 = 495.33
+    plafonnement_quotient_familial: 495.33
+    # décote = 889 − 0,4525 × 495.33 = 664.86
+    decote: 664.86
 
 - name: Célibataire (1 part), RNI 35 000 — impôt trop élevé, décote nulle
   absolute_error_margin: 0.01
@@ -29,7 +29,7 @@
         declarants: [declarant_1]
         revenu_net_imposable: 35_000
   output:
-    # impôt = 3 786.23 ; 889 − 0,4525 × 3 786.23 < 0 -> décote = 0
+    # impôt = 3 665.48 ; 889 − 0,4525 × 3 665.48 < 0 -> décote = 0
     decote: 0
 
 - name: Couple (2 parts), RNI 30 000 — décote au seuil couple
@@ -44,10 +44,10 @@
         declarants: [declarant_1, declarant_2]
         revenu_net_imposable: 30_000
   output:
-    # impôt = ((15 000 − 11 294) × 0,11) × 2 = 815.32
-    plafonnement_quotient_familial: 815.32
-    # décote = 1 470 − 0,4525 × 815.32 = 1101.07
-    decote: 1_101.07
+    # impôt = ((15 000 − 11 497) × 0,11) × 2 = 770.66
+    plafonnement_quotient_familial: 770.66
+    # décote = 1 470 − 0,4525 × 770.66 = 1 121.28
+    decote: 1_121.28
 
 - name: Couple (2 parts), RNI 80 000 — impôt trop élevé, décote nulle
   absolute_error_margin: 0.01

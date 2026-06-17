@@ -9,32 +9,32 @@
   },
   "single_20k": {
     "revenu_net_imposable": 18000.0,
-    "impot_revenu": 182.45,
-    "revenu_disponible": 17911.5,
+    "impot_revenu": 150.02,
+    "revenu_disponible": 17943.93,
     "csg": 1807.8,
     "crds": 98.25,
     "allocations_familiales": 0.0
   },
   "single_30k": {
     "revenu_net_imposable": 27000.0,
-    "impot_revenu": 1620.43,
-    "revenu_disponible": 25520.5,
+    "impot_revenu": 1587.99,
+    "revenu_disponible": 25552.93,
     "csg": 2711.7,
     "crds": 147.38,
     "allocations_familiales": 0.0
   },
   "single_50k": {
     "revenu_net_imposable": 45000.0,
-    "impot_revenu": 6786.23,
-    "revenu_disponible": 38448.64,
+    "impot_revenu": 6665.48,
+    "revenu_disponible": 38569.39,
     "csg": 4519.5,
     "crds": 245.62,
     "allocations_familiales": 0.0
   },
   "single_120k": {
     "revenu_net_imposable": 108000.0,
-    "impot_revenu": 28508.72,
-    "revenu_disponible": 80054.98,
+    "impot_revenu": 28224.95,
+    "revenu_disponible": 80338.75,
     "csg": 10846.8,
     "crds": 589.5,
     "allocations_familiales": 0.0
@@ -57,32 +57,32 @@
   },
   "couple_60k_0child": {
     "revenu_net_imposable": 54000.0,
-    "impot_revenu": 3455.32,
-    "revenu_disponible": 50826.53,
+    "impot_revenu": 3410.66,
+    "revenu_disponible": 50871.19,
     "csg": 5423.4,
     "crds": 294.75,
     "allocations_familiales": 0.0
   },
   "couple_60k_2children": {
     "revenu_net_imposable": 54000.0,
-    "impot_revenu": 1744.35,
-    "revenu_disponible": 54308.94,
+    "impot_revenu": 1647.05,
+    "revenu_disponible": 54406.24,
     "csg": 5423.4,
     "crds": 294.75,
     "allocations_familiales": 1771.44
   },
   "couple_90k_3children": {
     "revenu_net_imposable": 81000.0,
-    "impot_revenu": 3940.64,
-    "revenu_disponible": 82408.95,
+    "impot_revenu": 3851.32,
+    "revenu_disponible": 82498.27,
     "csg": 8135.1,
     "crds": 442.12,
     "allocations_familiales": 4926.82
   },
   "couple_200k_3children": {
     "revenu_net_imposable": 180000.0,
-    "impot_revenu": 35221.44,
-    "revenu_disponible": 146949.77,
+    "impot_revenu": 34525.9,
+    "revenu_disponible": 147645.31,
     "csg": 18078.0,
     "crds": 982.5,
     "allocations_familiales": 1231.7
@@ -97,8 +97,8 @@
   },
   "dualearner_75k_2children": {
     "revenu_net_imposable": 67500.0,
-    "impot_revenu": 3697.98,
-    "revenu_disponible": 65925.77,
+    "impot_revenu": 3630.99,
+    "revenu_disponible": 65992.77,
     "csg": 6779.25,
     "crds": 368.44,
     "allocations_familiales": 1771.44
