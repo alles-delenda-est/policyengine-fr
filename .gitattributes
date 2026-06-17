@@ -1,0 +1,10 @@
+# Normalise line endings: keep LF in the repo on every platform so that
+# ruff format --check and the YAML test runner behave identically on
+# Linux/macOS/Windows clones.
+* text=auto eol=lf
+
+# Binary assets (never normalise/diff).
+*.h5 binary
+*.png binary
+*.jpg binary
+*.gif binary

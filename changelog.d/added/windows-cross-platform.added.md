@@ -1,0 +1,1 @@
+- Add `.gitattributes` (LF normalisation) and Windows setup notes to the README for cross-platform clones.
