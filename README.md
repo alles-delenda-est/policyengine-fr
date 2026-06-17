@@ -37,6 +37,30 @@ make test     # run the YAML test suite via the core test runner
 policyengine-core test -c policyengine_fr policyengine_fr/tests/gov/dgfip/ir/impot_revenu.yaml
 ```
 
+### On Windows
+
+Use Python 3.11 or 3.12 from [python.org](https://www.python.org/downloads/)
+(its installer includes `pip`). `make` is usually not available, so run the
+underlying commands directly (PowerShell or CMD):
+
+```powershell
+py -m venv .venv
+.venv\Scripts\activate
+pip install -e .[dev]
+
+# format + lint (what `make format` runs)
+ruff format .
+ruff check .
+
+# tests (what `make test` runs)
+policyengine-core test -c policyengine_fr policyengine_fr\tests
+pytest tests/ -q
+```
+
+The model itself is cross-platform (CI runs on Linux; PolicyEngine country
+packages also test on Windows). `.gitattributes` keeps line endings as LF so
+`ruff format --check` stays consistent across platforms.
+
 ## Current status
 
 **Disposable-income MVP (revenus 2024, métropole).** From a household's gross
