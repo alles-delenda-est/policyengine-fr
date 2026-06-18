@@ -15,6 +15,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  id-token: write   # required by claude-code-action to mint an OIDC token
 
 jobs:
   statute-review:
@@ -31,6 +32,9 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         with:
+          # API-key mode: use the built-in token for GitHub ops so the action
+          # does not depend on the OIDC/Claude-GitHub-App exchange.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             You are an INDEPENDENT reviewer of a French tax-benefit
             microsimulation PR (policyengine-fr, on policyengine-core). You did
