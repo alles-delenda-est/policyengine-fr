@@ -127,7 +127,7 @@ with a child, and a married couple with children. Tolerance: flag if
 | 1BJ | (blank) |
 
 → Capture « Impôt sur le revenu net » = **______ €**
-**policyengine-fr → `impot_revenu` = 1 620,43 €.** Flag if |official − 1620.43| > 5.
+**policyengine-fr → `impot_revenu` = 1 587,99 €.** Flag if |official − 1587.99| > 5.
 
 ### Profile B — `single_parent_25k_1child` (parent isolé, 1 child)
 | Field | Enter |
@@ -140,7 +140,7 @@ with a child, and a married couple with children. Tolerance: flag if
 → Capture « Impôt sur le revenu net » = **______ €**
 **policyengine-fr → `impot_revenu` = 0,00 €** (2 parts — 1 + 0,5 enfant + 0,5
 parent isolé — so the quotient 22 500 / 2 = 11 250 sits just under the first
-barème threshold of 11 294). Flag if official > 5 €. *(This 0 is a strong, easy oracle
+barème threshold of 11 497). Flag if official > 5 €. *(This 0 is a strong, easy oracle
 check — if the simulator shows a positive tax, our parts/décote is wrong.)*
 
 ### Profile C — `couple_60k_2children` (marié, 2 children, single earner)
@@ -153,14 +153,14 @@ check — if the simulator shows a positive tax, our parts/décote is wrong.)*
 | 1BJ (salaires adulte 2) | `0` |
 
 → Capture « Impôt sur le revenu net » = **______ €**
-**policyengine-fr → `impot_revenu` = 1 744,35 €.** Flag if |official − 1744.35| > 5.
+**policyengine-fr → `impot_revenu` = 1 647,05 €.** Flag if |official − 1647.05| > 5.
 
 ### Results template to fill in
 | profile | inputs | official IR | model IR | Δ | status |
 |---------|--------|-------------|----------|---|--------|
-| A single_30k | cél., 0 enf., 1AJ 30000 | ____ | 1 620,43 | ____ | ____ |
+| A single_30k | cél., 0 enf., 1AJ 30000 | ____ | 1 587,99 | ____ | ____ |
 | B single_parent_25k_1child | cél. isolé, 1 enf., 1AJ 25000 | ____ | 0,00 | ____ | ____ |
-| C couple_60k_2children | marié, 2 enf., 1AJ 60000, 1BJ 0 | ____ | 1 744,35 | ____ | ____ |
+| C couple_60k_2children | marié, 2 enf., 1AJ 60000, 1BJ 0 | ____ | 1 647,05 | ____ | ____ |
 
 If all three Δ ≤ 5 €, the income-tax core (barème + parts + plafonnement + décote)
 is validated against the government for these points — then extend to the full

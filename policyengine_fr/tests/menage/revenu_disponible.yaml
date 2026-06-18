@@ -2,7 +2,7 @@
 # revenu_disponible = salaire_brut − impot_revenu − csg − crds
 #                     + allocations_familiales (annualisées).
 # Valeurs de référence = combinaison arithmétique des composantes déjà
-# testées unitairement (barème 11 294 @ 11 % / 28 797 @ 30 % / 82 341 @ 41 %,
+# testées unitairement (barème 11 497 @ 11 % / 29 315 @ 30 % / 83 823 @ 41 %,
 # décote seuils 889 / 1 470 au taux 0,4525, CSG 9,2 % et CRDS 0,5 % sur
 # 98,25 % du brut, BMAF 445,93 puis 466,44 au 1er avril 2024).
 
@@ -23,10 +23,11 @@
       menage_1:
         personnes_de_reference: [declarant_1]
   output:
-    # salaire imposable = 27 000 ; impôt brut = 1 727.66 ; décote = 107.23 ;
-    # impôt net = 1 620.43 ; CSG = 2 711.70 ; CRDS = 147.375 ; AF = 0.
-    # 30 000 − 1 620.426 − 2 711.70 − 147.375 = 25 520.50
-    revenu_disponible: 25_520.50
+    # salaire imposable = 27 000 ; impôt brut = 1 705.33 ; décote = 117.34 ;
+    # impôt net = 1 587.99 ; CSG = 2 711.70 ; CRDS = 147.375 ; AF = 0.
+    # 30 000 − 1 587.99 − 2 711.70 − 147.375 = 25 552.93
+    # (confirmé par le simulateur officiel impots.gouv.fr : impôt net 1 588 €)
+    revenu_disponible: 25_552.93
 
 - name: Couple deux enfants (8 et 10 ans), salaire brut 60 000 — AF à taux plein
   absolute_error_margin: 0.01
@@ -54,12 +55,11 @@
         conjoints: [parent_2]
         enfants: [enfant_1, enfant_2]
   output:
-    # RNI = 54 000 ; 3 parts ; impôt brut = 2 212.98 (pas de plafonnement) ;
-    # décote couple = 468.63 ; impôt net = 1 744.35 ;
-    # CSG = 5 423.40 ; CRDS = 294.75 ;
-    # AF annuelles = 3 × (445,93×0,32) + 9 × (466,44×0,32) = 1 771.44 (taux plein).
-    # 60 000 − 1 744.353 − 5 423.40 − 294.75 + 1 771.44 = 54 308.94
-    revenu_disponible: 54_308.94
+    # RNI = 54 000 ; 3 parts ; impôt brut = 2 145.99 (pas de plafonnement) ;
+    # décote couple = 498.94 ; impôt net = 1 647.05 ;
+    # CSG = 5 423.40 ; CRDS = 294.75 ; AF taux plein = 1 771.44.
+    # 60 000 − 1 647.05 − 5 423.40 − 294.75 + 1 771.44 = 54 406.24
+    revenu_disponible: 54_406.24
 
 - name: Célibataire haut revenu sans enfant, salaire brut 150 000
   absolute_error_margin: 0.01
@@ -79,7 +79,7 @@
         personnes_de_reference: [declarant_1]
   output:
     # salaire imposable = 135 574 (abattement plafonné à 14 426) ; 1 part ;
-    # impôt = 17 503×0,11 + 53 544×0,30 + 53 233×0,41 = 39 814.06 ;
+    # impôt = 17 818×0,11 + 54 508×0,30 + 51 751×0,41 = 39 530.29 ;
     # CSG = 13 558.50 ; CRDS = 736.875 ; AF = 0.
-    # 150 000 − 39 814.06 − 13 558.50 − 736.875 = 95 890.565
-    revenu_disponible: 95_890.565
+    # 150 000 − 39 530.29 − 13 558.50 − 736.875 = 96 174.34
+    revenu_disponible: 96_174.34

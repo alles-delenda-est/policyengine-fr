@@ -1,4 +1,5 @@
-# Impôt brut = barème(rni / parts) * parts, barème revenus 2024.
+# Impôt brut = barème(rni / parts) * parts, barème revenus 2024
+# (11 497 @ 11 % / 29 315 @ 30 % / 83 823 @ 41 % / 180 294 @ 45 %).
 # Avant plafonnement du quotient familial et décote.
 - name: Célibataire (1 part), RNI 30 000
   absolute_error_margin: 0.01
@@ -12,7 +13,7 @@
         revenu_net_imposable: 30_000
   output:
     nombre_parts: 1.0
-    impot_brut: 2_286.23
+    impot_brut: 2_165.48
 
 - name: Célibataire (1 part), RNI 50 000
   absolute_error_margin: 0.01
@@ -25,7 +26,7 @@
         declarants: [declarant_1]
         revenu_net_imposable: 50_000
   output:
-    impot_brut: 8_286.23
+    impot_brut: 8_165.48
 
 - name: Célibataire (1 part), RNI 100 000
   absolute_error_margin: 0.01
@@ -38,7 +39,7 @@
         declarants: [declarant_1]
         revenu_net_imposable: 100_000
   output:
-    impot_brut: 25_228.72
+    impot_brut: 24_944.949
 
 - name: Couple (2 parts), RNI 60 000 = barème(30 000) x 2
   absolute_error_margin: 0.01
@@ -53,7 +54,7 @@
         revenu_net_imposable: 60_000
   output:
     nombre_parts: 2.0
-    impot_brut: 4_572.46
+    impot_brut: 4_330.96
 
 - name: Couple avec 2 enfants (3 parts), RNI 60 000 = barème(20 000) x 3
   absolute_error_margin: 0.01
@@ -71,7 +72,7 @@
         revenu_net_imposable: 60_000
   output:
     nombre_parts: 3.0
-    impot_brut: 2_872.98
+    impot_brut: 2_805.99
 
 - name: Revenu nul - aucun impôt
   absolute_error_margin: 0.01
