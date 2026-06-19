@@ -172,8 +172,12 @@
     familles:
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3]}
   output:
-    # 3 enfants, aucun >= 14 -> 445,93 × (0,32 + 0,41) = 325,5289
-    allocations_familiales: 325.5289
+    # 3 enfants, tous < 20 (le cadet de 19 ans ouvre encore droit).
+    # base 445,93 × (0,32 + 0,41) = 325,5289 ;
+    # l'enfant de 19 ans (>= 14) ouvre droit à la majoration d'âge, sans
+    # exclusion d'aîné car la famille a 3 enfants : + 445,93 × 0,16 = 71,3488.
+    # total 396,8777 (à comparer au cas de l'enfant de 20 ans, exclu).
+    allocations_familiales: 396.8777
 
 - name: Majoration d'âge exactement à 14 ans (3 enfants, pas d'exclusion d'aîné)
   absolute_error_margin: 0.01
