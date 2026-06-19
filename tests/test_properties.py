@@ -94,3 +94,96 @@ def test_outputs_finite(income, kids):
         assert math.isfinite(val)
     af = float(sim.calculate_add("allocations_familiales", Y).sum())
     assert math.isfinite(af)
+
+
+# ---------------------------------------------------------------------------
+# Deterministic-grid invariants (no Hypothesis — fixed income × child grid)
+# ---------------------------------------------------------------------------
+
+_INCOME_GRID = [0, 20_000, 80_000, 120_000, 200_000]
+_CHILD_COUNTS = [0, 1, 2, 3, 4]
+# Monthly period for AF: avoids upstream policyengine-core storage bug with
+# YEAR-level inputs on non-January months.
+_AF_PERIOD = "2024-01"
+_CSG_PERIOD = "2024"  # annual
+
+
+def test_af_non_negative():
+    """allocations_familiales >= 0 for all (income, n_children) grid points."""
+    for n_children in _CHILD_COUNTS:
+        child_ages = [8] * n_children
+        for income in _INCOME_GRID:
+            sim = build_household([income, 0], child_ages)
+            af = float(sim.calculate("allocations_familiales", _AF_PERIOD).sum())
+            assert af >= -0.01, (
+                f"AF negative ({af:.4f}) at income={income}, {n_children} children"
+            )
+
+
+def test_af_zero_below_two_children():
+    """allocations_familiales == 0 whenever the family has fewer than 2 children."""
+    for n_children in [0, 1]:
+        child_ages = [8] * n_children
+        for income in _INCOME_GRID:
+            sim = build_household([income, 0], child_ages)
+            af = float(sim.calculate("allocations_familiales", _AF_PERIOD).sum())
+            assert af <= 0.01, (
+                f"AF non-zero ({af:.4f}) with only {n_children} child(ren), income={income}"
+            )
+
+
+def test_af_monotonic_non_increasing_in_resources():
+    """For couple + 2 children (aged 8 and 10), AF weakly decreases as income rises.
+
+    The income steps span the modulation thresholds:
+    taux plein -> demi -> quart -> potentially zero.
+    """
+    income_steps = [20_000, 80_000, 110_000, 130_000]
+    child_ages = [8, 10]
+    epsilon = 0.01
+    prev_af = None
+    for income in income_steps:
+        sim = build_household([income, 0], child_ages)
+        af = float(sim.calculate("allocations_familiales", _AF_PERIOD).sum())
+        if prev_af is not None:
+            assert af <= prev_af + epsilon, (
+                f"AF not non-increasing: {af:.4f} > {prev_af:.4f} "
+                f"when income rose to {income}"
+            )
+        prev_af = af
+
+
+def test_csg_identity():
+    """csg == csg_deductible + csg_imposable (arithmetic identity) across income grid.
+
+    Tolerance is 0.01 (matching suite-wide absolute_error_margin) rather than
+    the theoretical 1e-6 because PolicyEngine uses float32 arrays: computing
+    assiette*0.068, assiette*0.024, and assiette*0.092 independently introduces
+    independent float32 rounding that exceeds 1e-6 at values in the thousands.
+    The identity itself is correct; 0.01 captures any real deviation far above
+    float32 noise.
+    """
+    for income in _INCOME_GRID:
+        sim = build_household([income], [])
+        csg = float(sim.calculate("csg", _CSG_PERIOD).sum())
+        csg_ded = float(sim.calculate("csg_deductible", _CSG_PERIOD).sum())
+        csg_imp = float(sim.calculate("csg_imposable", _CSG_PERIOD).sum())
+        assert math.isclose(csg, csg_ded + csg_imp, abs_tol=0.01), (
+            f"CSG identity broken at income={income}: "
+            f"csg={csg:.6f}, ded+imp={csg_ded + csg_imp:.6f}"
+        )
+
+
+def test_assiette_identity():
+    """assiette_csg_crds_salaire == salaire_brut * 0.9825 across income grid.
+
+    Tolerance is 0.01 for the same float32 reason as test_csg_identity.
+    """
+    for income in _INCOME_GRID:
+        sim = build_household([income], [])
+        assiette = float(sim.calculate("assiette_csg_crds_salaire", _CSG_PERIOD).sum())
+        expected = income * 0.9825
+        assert math.isclose(assiette, expected, abs_tol=0.01), (
+            f"Assiette identity broken at income={income}: "
+            f"got {assiette:.6f}, expected {expected:.6f}"
+        )
