@@ -123,3 +123,143 @@
         enfants: [enfant_1]
   output:
     allocations_familiales: 0
+
+- name: Couple, deux enfants, avril 2024 (BMAF revalorisée à 466,44 €)
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    # Note: salaire_brut omis volontairement — un bug policyengine-core
+    # (get_known_periods split incorrecte) plante quand une variable YEAR est
+    # fournie pour un test de période non-janvier. Ressources = 0 => taux plein,
+    # ce qui ne change pas l'objet du test (vérifier la BMAF du 1er avril).
+    individus:
+      parent_1: {}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
+  output:
+    # 466,44 × 0,32 = 149,2608 (revalorisation du 1er avril)
+    allocations_familiales: 149.2608
+
+- name: Enfant de 20 ans exclu (la limite est stricte < 20)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 30_000}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+      enfant_3: {age: 20}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3]}
+  output:
+    # l'aîné de 20 ans n'ouvre plus droit -> 2 enfants -> 445,93 × 0,32
+    allocations_familiales: 142.6976
+
+- name: Enfant de 19 ans encore à charge (limite non atteinte)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 30_000}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+      enfant_3: {age: 19}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3]}
+  output:
+    # 3 enfants, aucun >= 14 -> 445,93 × (0,32 + 0,41) = 325,5289
+    allocations_familiales: 325.5289
+
+- name: Majoration d'âge exactement à 14 ans (3 enfants, pas d'exclusion d'aîné)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 30_000}
+      parent_2: {}
+      enfant_1: {age: 5}
+      enfant_2: {age: 8}
+      enfant_3: {age: 14}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3]}
+  output:
+    # base 325,5289 + majoration 445,93 × 0,16 × 1 = 71,3488 -> 396,8777
+    allocations_familiales: 396.8777
+
+- name: Nouveau-né (âge 0) compte comme enfant à charge
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 30_000}
+      parent_2: {}
+      enfant_1: {age: 0}
+      enfant_2: {age: 3}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
+  output:
+    allocations_familiales: 142.6976
+
+- name: Ressources juste sous le plafond 1 (taux plein)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 83_000}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
+  output:
+    allocations_familiales: 142.6976
+
+- name: Ressources juste au-dessus du plafond 1 (tranche 2, demi-montant)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 83_500}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
+  output:
+    allocations_familiales: 71.3488
+
+- name: Ressources juste au-dessus du plafond 2 (tranche 3, quart de montant)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 111_100}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
+  output:
+    allocations_familiales: 35.6744
+
+- name: Quatre enfants à charge, ressources sous plafond (base 1,14 BMAF)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_brut: 30_000}
+      parent_2: {}
+      enfant_1: {age: 2}
+      enfant_2: {age: 6}
+      enfant_3: {age: 9}
+      enfant_4: {age: 11}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3, enfant_4]}
+  output:
+    # base 445,93 × (0,32 + 0,41 × 2) = 445,93 × 1,14 = 508,3602 ; aucune majoration d'âge
+    allocations_familiales: 508.3602
