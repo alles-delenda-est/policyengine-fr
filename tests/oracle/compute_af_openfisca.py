@@ -8,8 +8,25 @@ oracle the cowork-validation-brief lists alongside the official simulators.
 
 This script is NOT part of the pytest suite: openfisca-france cannot share the
 project's environment (it pins an older numpy and is incompatible with
-policyengine-core in the same interpreter). Run it in a throwaway venv and paste
-the results into the fixture's ``official`` fields.
+policyengine-core in the same interpreter). It runs in a dedicated, separate
+virtual environment named ``.venv-of312``.
+
+The ``.venv-of312`` environment
+-------------------------------
+``.venv-of312`` is a throwaway Python 3.12 virtual environment used *only* to run
+this openfisca-france oracle. It exists because:
+
+- openfisca-france and policyengine-core **cannot coexist** in one interpreter
+  (conflicting dependencies), so the oracle must live outside the project ``.venv``;
+- openfisca-core 44.x **breaks on numpy >= 2.5** (a generic-ndarray metaclass
+  clash), so numpy is pinned to 2.1.3 — note this is a numpy issue, not a Python
+  version issue.
+
+It is created **in the repo's parent directory** (``PolicyEngineFR/.venv-of312``),
+i.e. *outside* the git repository, so it is never committed and never interferes
+with the project ``.venv``. It is disposable: delete it any time and recreate it
+with the two commands below. Keeping it around just saves the ~30 s reinstall when
+you next refresh the AF oracle.
 
 Reproduce (Windows, from the repo's parent dir)::
 
@@ -17,8 +34,8 @@ Reproduce (Windows, from the repo's parent dir)::
     uv pip install --python .venv-of312 openfisca-france "numpy==2.1.3"
     .venv-of312/Scripts/python.exe policyengine-fr/tests/oracle/compute_af_openfisca.py
 
-(numpy is pinned to 2.1.3 because openfisca-core 44.x clashes with numpy >= 2.5's
-generic-ndarray metaclass.)
+(``uv`` itself is installed with ``python -m pip install uv``; it fetches a
+standalone, user-local CPython 3.12 — no system Python change required.)
 
 Fairness note: policyengine-fr's MVP uses *current-year* salaire_imposable as a
 proxy for the legal base-ressources N-2. To compare like with like, this script

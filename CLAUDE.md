@@ -27,6 +27,15 @@ integration scenarios pass. `make test` passes (46/46), ruff clean. See
 boundary. A local `.venv/` exists (pip was bootstrapped via get-pip.py since the
 system has no pip); activate it with `. .venv/bin/activate`.
 
+A second, **separate** virtual environment `.venv-of312` may exist **in the
+repo's parent directory** (`PolicyEngineFR/.venv-of312`, i.e. outside this git
+repo so it is never committed). It is a throwaway Python 3.12 env used *only* to
+run the independent **openfisca-france** AF oracle (`tests/oracle/compute_af_openfisca.py`):
+openfisca-france cannot share the project `.venv` (it conflicts with
+policyengine-core and needs `numpy==2.1.3`), so it lives in its own interpreter.
+It is disposable — delete and recreate it anytime; see the script's docstring for
+the exact `uv` commands. Do not add it to the project `.venv` or commit it.
+
 ## The one thing to internalise
 
 PolicyEngine is a **layered stack, not a monolith**:
