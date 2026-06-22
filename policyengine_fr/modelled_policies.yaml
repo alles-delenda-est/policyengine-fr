@@ -14,3 +14,15 @@ core:
     - Cotisations sociales salariales (maladie, retraite, chômage…)
     - Autres prestations sociales (RSA, APL, prime d'activité, ASF…)
     - Revenus non salariés, pensions et revenus du capital
+  simplifications:
+    # Explicit scope-narrowings: modelled, but with a documented departure from
+    # the exact statute. Surfaced here so the reviewer-agent gate's
+    # "silent scope-narrowing" check can find them.
+    - >-
+      Allocations familiales — modulation des ressources : le modèle utilise la
+      somme des salaires imposables de l'année courante (N) en lieu et place de
+      la base ressources N-2 réelle (revenu net catégoriel de l'année N-2,
+      art. R532-3 CSS). Les deux coïncident pour un revenu stable ; elles
+      divergent pour tout ménage dont le revenu a changé d'une année sur l'autre.
+      Métropole uniquement ; garde alternée, forfait des 20 ans et plancher de
+      versement non modélisés.
