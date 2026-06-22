@@ -174,6 +174,16 @@ def test_csg_identity():
         )
 
 
+def test_asf_in_revenu_disponible_single_parent():
+    # Single parent, 1 child, no income: revenu_disponible == annual ASF.
+    from tests.helpers import build_household
+
+    sim = build_household([0], [8])
+    rd = float(sim.calculate("revenu_disponible", "2024").sum())
+    # 3×188,18246 (jan-mars) + 9×196,83768 (avr-déc) = 2336.0407...
+    assert abs(rd - 2336.04) < 0.5
+
+
 def test_assiette_identity():
     """assiette_csg_crds_salaire == salaire_brut * 0.9825 across income grid.
 

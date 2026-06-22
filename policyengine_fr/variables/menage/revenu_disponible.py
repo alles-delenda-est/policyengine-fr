@@ -11,10 +11,11 @@ class revenu_disponible(Variable):
         "Pour le périmètre modélisé, on part du revenu d'activité brut, on "
         "retranche les prélèvements modélisés (impôt sur le revenu net, CSG et "
         "CRDS sur les salaires) et on ajoute les prestations familiales "
-        "modélisées (allocations familiales annualisées):\n\n"
+        "modélisées (allocations familiales et ASF annualisées):\n\n"
         "    revenu_disponible = salaire_brut\n"
         "        − impot_revenu − csg − crds\n"
-        "        + allocations_familiales\n\n"
+        "        + allocations_familiales\n"
+        "        + allocation_soutien_familial\n\n"
         "Définition et limites du périmètre MVP:\n"
         "- Le seul revenu d'activité est le `salaire_brut` (revenus du capital, "
         "pensions et revenus non salariés hors champ).\n"
@@ -22,8 +23,11 @@ class revenu_disponible(Variable):
         "et la CRDS; les autres cotisations sociales salariales (maladie, "
         "retraite, chômage…) ne sont pas modélisées, donc le « net » ici ne "
         "neutralise que la CSG/CRDS.\n"
-        "- La seule prestation modélisée est l'allocation familiale; les "
+        "- Les prestations modélisées sont les allocations familiales et "
+        "l'allocation de soutien familial (familles monoparentales); les "
         "allocations mensuelles sont annualisées (somme des douze mois).\n"
+        "- L'allocation de soutien familial (familles monoparentales) est "
+        "ajoutée, annualisée comme les AF.\n"
         "- Agrégation inter-entités: les composantes vivent sur des entités "
         "différentes (individu pour le salaire/CSG/CRDS, foyer fiscal pour "
         "l'impôt, famille pour les allocations); chacune est ramenée au ménage "
@@ -56,4 +60,18 @@ class revenu_disponible(Variable):
         membres_famille = menage.members.famille.sum(ones)
         allocations_familiales = menage.sum(allocations_groupe / membres_famille)
 
-        return salaire_brut - impot_revenu - csg - crds + allocations_familiales
+        # Allocation de soutien familial: mensuelle, annualisée via ADD,
+        # répartie sur les membres de la famille comme les AF.
+        asf_groupe = menage.members.famille(
+            "allocation_soutien_familial", period, options=[ADD]
+        )
+        allocation_soutien_familial = menage.sum(asf_groupe / membres_famille)
+
+        return (
+            salaire_brut
+            - impot_revenu
+            - csg
+            - crds
+            + allocations_familiales
+            + allocation_soutien_familial
+        )
