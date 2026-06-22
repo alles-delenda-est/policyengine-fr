@@ -226,6 +226,41 @@ the computed annual value and `captured_on` to today's date (ISO 8601). The
 `test_oracle.py` harness will then automatically run these as live assertions
 (tolerance 12 €) instead of skipping them.
 
+## Government AF spot-check (mesdroitssociaux.gouv.fr) — captured 2026-06-22
+
+The DGFiP income-tax simulator does not output allocations familiales, so AF was
+also cross-checked against the **government's own benefits engine** at
+mesdroitssociaux.gouv.fr (the official interministerial "Simuler mes aides"
+questionnaire — there is no quick AF-only calculator). This is a third,
+fully independent anchor on top of openfisca-france.
+
+**Caveat — read first:** the estimateur computes *today's* entitlement, so it
+uses the **2026 BMAF**, whereas the model is revenus-2024 (BMAF 445,93 → 466,44).
+Euro amounts therefore differ by the BMAF year; the meaningful check is the
+**per-BMAF coefficient** (= AF ÷ BMAF) and the **modulation tier**. The site
+rounds displayed amounts to the nearest 10 €.
+
+| household | 2024 income | govt AF/mo | implied coef | model coef | structure validated |
+|-----------|-------------|-----------|--------------|------------|---------------------|
+| couple, 2 enf. (one ≥14) | 54 k (low) | 150 € | 0.32 | 0.32 | 2-child base; **no** majoration (eldest-of-two exclusion) |
+| couple, 3 enf. (one ≥14) | ~0 | 430 € | 0.89 | 0.89 | 3-child base 0.73 + majoration 0.16 |
+| couple, 3 enf. (one ≥14) | 180 k (high) | 110 € | 0.2225 | 0.2225 | quarter-rate modulation (= 0.89 ÷ 4) |
+| couple, 4 enf. (one ≥14) | 36 k (low) | 620 € | 1.30 | 1.30 | 4-child base 1.14 (= 0.32 + 2×0.41) + majoration 0.16 |
+
+All four amounts are internally consistent with a single **BMAF ≈ 478 €** (2026):
+478 × {0.32, 0.89, 0.2225, 1.30} = {153, 425, 106, 621} → displayed
+{150, 430, 110, 620}. Every coefficient the model uses is reproduced by the
+government engine — confirming the base rates, the +0.41-per-extra-child
+increment, the age majoration, the eldest-of-two exclusion, and the income
+modulation (taux plein at low income, quarter rate at high income).
+
+**Operational note for re-capture:** in this simulator the AF modulation is
+driven by the **per-person "Total de l'année 2024"** salary field, *not* the
+foyer "Revenu fiscal de référence 2024" field. With income entered only in the
+RFR field, AF stays at taux plein even at 180 k (the 430 € row above was first
+observed this way, then corrected to 110 € once the per-person 2024 total was
+filled). Always enter the N-2 income per person.
+
 ## Why this matters
 
 The in-repo `make test` proves the model is **internally consistent and
