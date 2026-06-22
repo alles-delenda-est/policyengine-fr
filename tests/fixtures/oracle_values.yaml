@@ -1,0 +1,30 @@
+# Independent-oracle reference values: model output vs the French government's
+# own online simulators. `official` stays null until captured by driving the
+# simulator (browser / CoWork); `model` is the live policyengine-fr output at
+# scaffold time. The comparison test skips any row whose `official` is null, so
+# this never produces a false green.
+meta:
+  ir_oracle: "DGFiP simulateur de l'impôt, modèle simplifié, revenus 2024"
+  ir_url: "https://simulateur-ir-ifi.impots.gouv.fr/calcul_impot/2025/simplifie/index.htm"
+  af_oracle: "CAF / mesdroitssociaux.gouv.fr estimateur"
+  af_url: "https://www.mesdroitssociaux.gouv.fr"
+  tolerances: {impot_revenu: 5.0, allocations_familiales: 12.0}
+  notes: >
+    impot_revenu compared directly (annual, €). allocations_familiales compares
+    the model's annual total to 12× the CAF monthly estimate; expect noise from
+    the BMAF 1-April revalorisation and the MVP base-ressources N-2 simplification
+    (model uses current-year salaire_imposable). AF rows are secondary.
+households:
+  - {id: single_20k,                 variable: impot_revenu,          inputs: {situation: celibataire, parent_isole: false, salaires: [20000],        enfants: []},          period: "2024",    model: 150.02,    official: null, captured_on: null}
+  - {id: single_30k,                 variable: impot_revenu,          inputs: {situation: celibataire, parent_isole: false, salaires: [30000],        enfants: []},          period: "2024",    model: 1587.99,   official: null, captured_on: null}
+  - {id: single_50k,                 variable: impot_revenu,          inputs: {situation: celibataire, parent_isole: false, salaires: [50000],        enfants: []},          period: "2024",    model: 6665.48,   official: null, captured_on: null}
+  - {id: single_120k,                variable: impot_revenu,          inputs: {situation: celibataire, parent_isole: false, salaires: [120000],       enfants: []},          period: "2024",    model: 28224.95,  official: null, captured_on: null}
+  - {id: single_parent_25k_1child,   variable: impot_revenu,          inputs: {situation: celibataire, parent_isole: true,  salaires: [25000],        enfants: [8]},         period: "2024",    model: 0.0,       official: null, captured_on: null}
+  - {id: couple_60k_0child,          variable: impot_revenu,          inputs: {situation: maries,      parent_isole: false, salaires: [60000, 0],     enfants: []},          period: "2024",    model: 3410.66,   official: null, captured_on: null}
+  - {id: couple_60k_2children,       variable: impot_revenu,          inputs: {situation: maries,      parent_isole: false, salaires: [60000, 0],     enfants: [10, 16]},    period: "2024",    model: 1647.05,   official: null, captured_on: null}
+  - {id: couple_90k_3children,       variable: impot_revenu,          inputs: {situation: maries,      parent_isole: false, salaires: [50000, 40000], enfants: [3, 8, 15]},  period: "2024",    model: 3851.32,   official: null, captured_on: null}
+  - {id: couple_200k_3children,      variable: impot_revenu,          inputs: {situation: maries,      parent_isole: false, salaires: [120000, 80000],enfants: [5, 9, 15]},  period: "2024",    model: 34525.90,  official: null, captured_on: null}
+  - {id: couple_40k_4children,       variable: impot_revenu,          inputs: {situation: maries,      parent_isole: false, salaires: [40000, 0],     enfants: [2, 6, 11, 15]}, period: "2024", model: 0.0,      official: null, captured_on: null}
+  - {id: couple_60k_2children_af,    variable: allocations_familiales, inputs: {situation: maries,     parent_isole: false, salaires: [60000, 0],     enfants: [10, 16]},    period: "2024",    model: 1771.44,   official: null, captured_on: null}
+  - {id: couple_90k_3children_af,    variable: allocations_familiales, inputs: {situation: maries,     parent_isole: false, salaires: [50000, 40000], enfants: [3, 8, 15]},  period: "2024",    model: 4926.82,   official: null, captured_on: null}
+  - {id: couple_40k_4children_af,    variable: allocations_familiales, inputs: {situation: maries,     parent_isole: false, salaires: [40000, 0],     enfants: [2, 6, 11, 15]}, period: "2024", model: 7196.48,  official: null, captured_on: null}

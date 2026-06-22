@@ -171,6 +171,61 @@ battery above. If any Δ > 5 €, that's a real bug: open a GitHub issue
 > `allocations_familiales` separately on the CAF estimateur, feeding it the same
 > household and income (mind the N‑2 caveat above).
 
+## AF capture runbook (CAF / mesdroitssociaux estimateur)
+
+Oracle: **CAF "Mes aides" estimateur** —
+https://www.mesdroitssociaux.gouv.fr
+
+This runbook covers the three AF profiles in `tests/fixtures/oracle_values.yaml`
+(the `*_af` rows). Complete this after the IR battery above.
+
+**General flow (same for every AF profile):**
+1. Open the URL and start the estimateur ("Tester mes droits" or similar entry
+   point); you may need to answer a short questionnaire to reach the family
+   benefits section.
+2. **Situation familiale:** select *Marié / Pacsé* or *Célibataire* as stated in
+   the profile.
+3. **Enfants:** enter the number of children and each child's age as given in
+   the profile (ages matter for the AF majorations de l'enfant de 14 ans et +).
+4. **Ressources:** enter the household's **annual salaire brut** from the
+   `salaires` field of the profile as the reference income. The estimateur may
+   ask for net or brut — use the amount shown in the fixture; if it asks for
+   *revenus nets*, divide by 1.2285 (the standard gross-to-net conversion) as an
+   approximation, or check the site's help text. Note the **base-ressources N‑2
+   caveat** documented above: the model uses current-year income as a
+   simplification; for the oracle, feed the same income for the reference year so
+   the two are directly comparable.
+5. Read the **monthly** *allocations familiales* figure from the results page.
+   Multiply by **12** to get the annual amount and enter that into the row's
+   `official` field. Record today's date in `captured_on`.
+
+**Profiles to capture:**
+
+| id | situation | children (ages) | salaires (annual) |
+|----|-----------|-----------------|-------------------|
+| `couple_60k_2children_af` | Marié / Pacsé | 2 (10, 16) | 60 000 € (adult 1) + 0 € (adult 2) |
+| `couple_90k_3children_af` | Marié / Pacsé | 3 (3, 8, 15) | 50 000 € (adult 1) + 40 000 € (adult 2) |
+| `couple_40k_4children_af` | Marié / Pacsé | 4 (2, 6, 11, 15) | 40 000 € (adult 1) + 0 € (adult 2) |
+
+**Tolerance:** flag if `|official − model| > 12 €` on the annual figure (≈ 1 €/month).
+This tolerance is looser than IR because of two known sources of noise:
+- The BMAF (base mensuelle des allocations familiales) is revalorised each
+  1 April, so the annual total depends on which month you query.
+- The model's base-ressources N‑2 simplification (uses current-year income).
+
+**Results template — fill in after capture:**
+
+| profile | inputs | official AF (annual = 12×monthly) | model AF | Δ | status |
+|---------|--------|-----------------------------------|----------|---|--------|
+| couple_60k_2children_af | marié, 2 enf. (10,16), sal. 60k+0 | ____ | 1 771,44 | ____ | ____ |
+| couple_90k_3children_af | marié, 3 enf. (3,8,15), sal. 50k+40k | ____ | 4 926,82 | ____ | ____ |
+| couple_40k_4children_af | marié, 4 enf. (2,6,11,15), sal. 40k+0 | ____ | 7 196,48 | ____ | ____ |
+
+Once captured, update `tests/fixtures/oracle_values.yaml` — set `official` to
+the computed annual value and `captured_on` to today's date (ISO 8601). The
+`test_oracle.py` harness will then automatically run these as live assertions
+(tolerance 12 €) instead of skipping them.
+
 ## Why this matters
 
 The in-repo `make test` proves the model is **internally consistent and
