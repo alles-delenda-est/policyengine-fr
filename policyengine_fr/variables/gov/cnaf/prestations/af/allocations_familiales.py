@@ -16,10 +16,12 @@ class allocations_familiales(Variable):
         "(taux plein, moitié ou quart) en fonction de deux plafonds croissant "
         "avec le nombre d'enfants.\n\n"
         "Simplifications MVP: les ressources prises en compte sont la somme des "
-        "salaires imposables de l'année courante des membres de la famille (à "
-        "la place de la base ressources N-2 réelle); métropole uniquement; "
-        "garde alternée, forfait des 20 ans et plancher de versement non "
-        "modélisés."
+        "salaires imposables de l'année courante (N) des membres de la famille, "
+        "en lieu et place de la base ressources N-2 réelle (revenu net "
+        "catégoriel de l'année N-2, art. R532-3 CSS). Les deux coïncident pour "
+        "un revenu stable mais divergent pour tout ménage dont le revenu a "
+        "changé d'une année sur l'autre. Métropole uniquement; garde alternée, "
+        "forfait des 20 ans et plancher de versement non modélisés."
     )
     definition_period = MONTH
     reference = "https://www.service-public.fr/particuliers/vosdroits/F13213"
