@@ -112,9 +112,9 @@
     plafonnement_quotient_familial: 1_430.66
     decote: 241.63                       # 889 − 0,4525 × 1 430,66
     impot_revenu: 1_189.03
-    # un seul enfant: pas d'allocations familiales
-    # 40 000 − 1 189,03 − CSG 3 615,60 − CRDS 196,50 + AF 0
-    revenu_disponible: 34_998.87
+    # un seul enfant: pas d'allocations familiales; ASF taux simple (1 enfant)
+    # 40 000 − 1 189,03 − CSG 3 615,60 − CRDS 196,50 + AF 0 + ASF ≈ 2 336,08
+    revenu_disponible: 37_334.953
 
 - name: Couple, trois enfants (8, 10, 12 ans), salaire brut 120 000 — plafonnement QF
   absolute_error_margin: 0.01

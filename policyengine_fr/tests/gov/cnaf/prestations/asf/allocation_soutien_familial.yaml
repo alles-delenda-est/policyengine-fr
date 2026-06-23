@@ -1,0 +1,91 @@
+# Allocation de soutien familial (ASF), taux simple — CSS art. L523-1 s., R523-7.
+# Taux simple = 0,422 BMAF par enfant éligible ; famille à parent unique ;
+# pas de condition de ressources. BMAF 445,93 € (jan-mars 2024) puis 466,44 €.
+- name: Parent unique, un enfant, janvier 2024 (BMAF 445,93)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {}
+      enfant_1: {age: 8}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1]
+  output:
+    # 0,422 × 445,93 = 188,18246
+    allocation_soutien_familial: 188.18246
+
+- name: Parent unique, un enfant, avril 2024 (BMAF revalorisée 466,44)
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      parent_1: {}
+      enfant_1: {age: 8}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1]
+  output:
+    # 0,422 × 466,44 = 196,83768
+    allocation_soutien_familial: 196.83768
+
+- name: Parent unique, deux enfants, avril 2024 (versée dès le premier enfant)
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      parent_1: {}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1, enfant_2]
+  output:
+    # 2 × 0,422 × 466,44 = 393,67536
+    allocation_soutien_familial: 393.67536
+
+- name: Couple (deux parents), deux enfants — pas d'ASF à taux simple
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      parent_1: {}
+      parent_2: {}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2]
+  output:
+    allocation_soutien_familial: 0
+
+- name: Parent unique sans enfant à charge — aucune ASF
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      parent_1: {}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: []
+  output:
+    allocation_soutien_familial: 0
+
+- name: Parent unique, enfant de 20 ans (au-delà de la limite) — aucune ASF
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      parent_1: {}
+      enfant_1: {age: 20}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1]
+  output:
+    allocation_soutien_familial: 0

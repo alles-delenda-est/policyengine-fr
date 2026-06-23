@@ -1,0 +1,11 @@
+description: Montant de l'allocation de soutien familial (ASF) à taux simple, exprimé en proportion de la BMAF, pour un enfant privé du soutien d'un seul de ses parents (orphelin d'un parent ou assimilé).
+values:
+  2022-11-01: 0.422
+metadata:
+  unit: /1
+  label: Taux ASF orphelin d'un parent (en BMAF)
+  reference:
+    - title: Article R523-7 du Code de la sécurité sociale
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046498993
+    - title: Décret n° 2022-1370 du 27/10/2022 (art. 1)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000046497145
