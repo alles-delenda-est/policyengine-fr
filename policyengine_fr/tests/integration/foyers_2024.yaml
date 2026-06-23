@@ -116,6 +116,33 @@
     # 40 000 − 1 189,03 − CSG 3 615,60 − CRDS 196,50 + AF 0 + ASF ≈ 2 336,08
     revenu_disponible: 37_334.953
 
+- name: Célibataire, salaire brut 30 000, verse 6 000 de pension alimentaire
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      declarant_1:
+        salaire_brut: 30_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+        pensions_alimentaires_versees: 6_000
+    familles:
+      famille_1:
+        parents: [declarant_1]
+    menages:
+      menage_1:
+        personnes_de_reference: [declarant_1]
+  output:
+    revenu_net_imposable: 21_000        # 27 000 − 6 000 déduction
+    nombre_parts: 1
+    impot_brut: 1_045.33                 # (21 000 − 11 497) × 11 %
+    plafonnement_quotient_familial: 1_045.33
+    decote: 415.99                       # 889 − 0,4525 × 1 045,33
+    impot_revenu: 629.34
+    # 30 000 − 629,34 − CSG 2 711,70 − CRDS 147,375 − pension 6 000
+    revenu_disponible: 20_511.58
+
 - name: Couple, trois enfants (8, 10, 12 ans), salaire brut 120 000 — plafonnement QF
   absolute_error_margin: 0.01
   period: 2024

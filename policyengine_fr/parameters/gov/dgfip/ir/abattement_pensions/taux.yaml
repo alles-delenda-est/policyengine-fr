@@ -1,0 +1,11 @@
+description: Taux de l'abattement de 10% sur les pensions, retraites et rentes (dont pensions alimentaires perçues).
+values:
+  2023-01-01: 0.10
+metadata:
+  unit: /1
+  label: Taux de l'abattement de 10% sur les pensions
+  reference:
+    - title: Article 158, 5, a du Code général des impôts
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000041464766
+    - title: Service-Public.fr — Déclarer les pensions de retraite (abattement de 10%)
+      href: https://www.service-public.gouv.fr/particuliers/vosdroits/F415
