@@ -6,18 +6,27 @@ core:
     - Décote
     - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %)
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
+    - Allocation de soutien familial (ASF) — taux simple, famille monoparentale
     - Revenu disponible — agrégat de tête de l'MVP (revenus 2024)
   not_modelled:
     - Réductions et crédits d'impôt
     - Contribution exceptionnelle sur les hauts revenus
     - Prélèvements sociaux sur les revenus du capital et de remplacement
     - Cotisations sociales salariales (maladie, retraite, chômage…)
-    - Autres prestations sociales (RSA, APL, prime d'activité, ASF…)
+    - Autres prestations sociales (RSA, APL, prime d'activité…)
     - Revenus non salariés, pensions et revenus du capital
   simplifications:
     # Explicit scope-narrowings: modelled, but with a documented departure from
     # the exact statute. Surfaced here so the reviewer-agent gate's
     # "silent scope-narrowing" check can find them.
+    - >-
+      Allocation de soutien familial — le droit est inféré du seul fait que la
+      famille n'a qu'un parent (proxy MVP). Taux simple uniquement (0,422 BMAF) ;
+      le taux majoré « orphelin de deux parents », l'ASF différentielle et le
+      recouvrement sur parent défaillant ne sont pas modélisés. Faute d'input
+      pension alimentaire, l'ASF pleine est versée à toute famille monoparentale
+      (sur-estimation possible) ; un parent défaillant au sein d'un couple n'ouvre
+      pas droit dans le modèle (sous-estimation). Métropole uniquement.
     - >-
       Allocations familiales — modulation des ressources : le modèle utilise la
       somme des salaires imposables de l'année courante (N) en lieu et place de
