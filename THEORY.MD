@@ -33,8 +33,8 @@ regardless of exact values. These catch whole classes of bugs:
 - `test_csg_identity` / `test_assiette_identity`: arithmetic identities in CSG/CRDS formulas.
 
 **Independent oracle validation** completes the triangle: against openfisca-france
-(v175.0.45), policyengine-fr ASF gives 2336.04 EUR/year vs oracle 2336.09.
-Delta +0.05 EUR, well within the 12 EUR tolerance. This proves correctness against
+(v175.0.45), policyengine-fr ASF gives 2336.09 EUR/year vs oracle 2336.09.
+Δ ≈ 0.00 EUR, well within the 12 EUR tolerance. This proves correctness against
 an independent codebase, not just against the statute.
 
 ## Strategy

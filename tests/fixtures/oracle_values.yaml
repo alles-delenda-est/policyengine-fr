@@ -18,7 +18,7 @@
 #
 # The 1 allocation_soutien_familial row was captured 2026-06-22 from
 # openfisca-france (v175.0.45) via compute_asf_annual([8]). openfisca returned
-# 2336.09 vs model 2336.04 (Δ +0.05, tolerance €12). Row passes cleanly.
+# 2336.09 vs model 2336.09 (Δ ≈ 0.00, tolerance €12). Row passes cleanly.
 meta:
   ir_oracle: "DGFiP simulateur de l'impôt, modèle simplifié, revenus 2024"
   ir_url: "https://simulateur-ir-ifi.impots.gouv.fr/calcul_impot/2025/simplifie/index.htm"
@@ -44,4 +44,4 @@ households:
   - {id: couple_60k_2children_af,    variable: allocations_familiales, inputs: {situation: maries,     parent_isole: false, salaires: [60000, 0],     enfants: [10, 16]},    period: "2024",    model: 1771.44,   official: 1771.44, captured_on: "2026-06-22"}
   - {id: couple_90k_3children_af,    variable: allocations_familiales, inputs: {situation: maries,     parent_isole: false, salaires: [50000, 40000], enfants: [3, 8, 15]},  period: "2024",    model: 4926.82,   official: 4926.81, captured_on: "2026-06-22"}
   - {id: couple_40k_4children_af,    variable: allocations_familiales, inputs: {situation: maries,     parent_isole: false, salaires: [40000, 0],     enfants: [2, 6, 11, 15]}, period: "2024", model: 7196.48,  official: 7196.46, captured_on: "2026-06-22"}
-  - {id: single_parent_1child_asf,  variable: allocation_soutien_familial, inputs: {situation: celibataire, parent_isole: true, salaires: [0], enfants: [8]}, period: "2024", model: 2336.04, official: 2336.09, captured_on: "2026-06-22"}
+  - {id: single_parent_1child_asf,  variable: allocation_soutien_familial, inputs: {situation: celibataire, parent_isole: true, salaires: [0], enfants: [8]}, period: "2024", model: 2336.09, official: 2336.09, captured_on: "2026-06-22"}

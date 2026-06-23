@@ -26,8 +26,6 @@ class revenu_disponible(Variable):
         "- Les prestations modélisées sont les allocations familiales et "
         "l'allocation de soutien familial (familles monoparentales); les "
         "allocations mensuelles sont annualisées (somme des douze mois).\n"
-        "- L'allocation de soutien familial (familles monoparentales) est "
-        "ajoutée, annualisée comme les AF.\n"
         "- Agrégation inter-entités: les composantes vivent sur des entités "
         "différentes (individu pour le salaire/CSG/CRDS, foyer fiscal pour "
         "l'impôt, famille pour les allocations); chacune est ramenée au ménage "

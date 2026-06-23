@@ -302,8 +302,8 @@ def test_asf_in_revenu_disponible_single_parent():
     from tests.helpers import build_household
     sim = build_household([0], [8])
     rd = float(sim.calculate("revenu_disponible", "2024").sum())
-    # 3×188,18246 (jan-mars) + 9×196,83768 (avr-déc) = 2336.0407...
-    assert abs(rd - 2336.04) < 0.5
+    # 3×188,18246 (jan-mars) + 9×196,83768 (avr-déc) = 2336.0865...
+    assert abs(rd - 2336.09) < 0.1
 ```
 
 Run: `.venv/Scripts/python.exe -m pytest tests/test_properties.py::test_asf_in_revenu_disponible_single_parent -v`
@@ -508,7 +508,7 @@ Add to the `__main__` block:
 Run (from the repo's parent dir):
 `../.venv-of312/Scripts/python.exe policyengine-fr/tests/oracle/compute_af_openfisca.py`
 Expected: prints an `asf_annual` figure. Cross-check against the model:
-3×188,18246 + 9×196,83768 = **2336,04 €** (single parent, 1 child age 8, 2024).
+3×188,18246 + 9×196,83768 = **2336,09 €** (single parent, 1 child age 8, 2024).
 
 - [ ] **Step 3: Add the oracle row**
 
@@ -516,7 +516,7 @@ In `tests/fixtures/oracle_values.yaml`, append (use the captured openfisca figur
 `official`; if the guard above triggered, set `official: null`):
 
 ```yaml
-  - {id: single_parent_1child_asf, variable: allocation_soutien_familial, inputs: {situation: celibataire, parent_isole: true, salaires: [0], enfants: [8]}, period: "2024", model: 2336.04, official: <captured>, captured_on: "2026-06-22"}
+  - {id: single_parent_1child_asf, variable: allocation_soutien_familial, inputs: {situation: celibataire, parent_isole: true, salaires: [0], enfants: [8]}, period: "2024", model: 2336.09, official: <captured>, captured_on: "2026-06-22"}
 ```
 
 Add `allocation_soutien_familial` to the `tolerances` map in `meta` (e.g. `12.0`).
