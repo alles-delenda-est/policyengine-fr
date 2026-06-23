@@ -48,3 +48,11 @@ core:
       (CGI art. 158, 5, a) : le plancher est appliqué par bénéficiaire (borné à
       sa propre pension) puis le total est plafonné au niveau du foyer fiscal,
       ce qui approche la règle légale de répartition exacte du plafond.
+    - >-
+      Abattement de 10 % sur les pensions — le plancher (par bénéficiaire) et le
+      plafond (par foyer fiscal) sont, dans la loi, communs à l'ensemble des
+      pensions (retraites, rentes et pensions alimentaires). Le modèle ne couvre
+      aujourd'hui que les pensions alimentaires perçues, donc l'abattement est
+      calculé sur cette seule assiette. Lorsque les pensions de retraite seront
+      modélisées, cet abattement devra être fusionné avec elles pour partager un
+      unique plancher/plafond, sous peine d'accorder l'abattement deux fois.

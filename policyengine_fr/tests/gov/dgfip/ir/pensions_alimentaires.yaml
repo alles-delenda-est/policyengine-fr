@@ -2,7 +2,7 @@
 # Versées: charge déductible du revenu global (CGI art. 156, II, 2°).
 # Perçues: imposables après abattement de 10% sur les pensions
 #   (CGI art. 158, 5, a ; revenus 2024: plancher 450 €/bénéficiaire,
-#    plafond 4 321 €/foyer).
+#    plafond 4 399 €/foyer).
 
 # ── Pensions alimentaires versées (déduction) ───────────────────────────────
 
@@ -78,7 +78,7 @@
     # plancher 450 borné à la pension elle-même (300) → base 0
     pensions_alimentaires_imposables: 0
 
-- name: Grosse pension perçue — abattement au plafond du foyer (4 321 €)
+- name: Grosse pension perçue — abattement au plafond du foyer (4 399 €)
   absolute_error_margin: 0.01
   period: 2024
   input:
@@ -89,8 +89,8 @@
       foyer_1:
         declarants: [individu_1]
   output:
-    # 10% de 60 000 = 6 000 > plafond 4 321 → abattement 4 321
-    pensions_alimentaires_imposables: 55_679
+    # 10% de 60 000 = 6 000 > plafond 4 399 → abattement 4 399
+    pensions_alimentaires_imposables: 55_601
 
 - name: Deux bénéficiaires — plancher par personne, plafond au foyer
   absolute_error_margin: 0.01
