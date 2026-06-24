@@ -12,13 +12,15 @@ class revenu_disponible(Variable):
         "retranche les prélèvements modélisés (impôt sur le revenu net, CSG et "
         "CRDS sur les salaires) et on ajoute les prestations familiales "
         "modélisées (allocations familiales et ASF annualisées):\n\n"
-        "    revenu_disponible = salaire_brut\n"
-        "        − impot_revenu − csg − crds\n"
+        "    revenu_disponible = salaire_brut + pensions_alimentaires_percues\n"
+        "        − impot_revenu − csg − crds − pensions_alimentaires_versees\n"
         "        + allocations_familiales\n"
         "        + allocation_soutien_familial\n\n"
         "Définition et limites du périmètre MVP:\n"
-        "- Le seul revenu d'activité est le `salaire_brut` (revenus du capital, "
-        "pensions et revenus non salariés hors champ).\n"
+        "- Le seul revenu d'activité est le `salaire_brut` (revenus du capital "
+        "et revenus non salariés hors champ); les pensions alimentaires perçues "
+        "sont toutefois comptées comme un revenu et celles versées comme une "
+        "charge.\n"
         "- Les seuls prélèvements sociaux modélisés sur le salaire sont la CSG "
         "et la CRDS; les autres cotisations sociales salariales (maladie, "
         "retraite, chômage…) ne sont pas modélisées, donc le « net » ici ne "
@@ -38,6 +40,9 @@ class revenu_disponible(Variable):
     def formula(menage, period, parameters):
         # Composantes au niveau de l'individu: somme directe sur le ménage.
         salaire_brut = menage.sum(menage.members("salaire_brut", period))
+        pensions_percues = menage.sum(
+            menage.members("pensions_alimentaires_percues", period)
+        )
         csg = menage.sum(menage.members("csg", period))
         crds = menage.sum(menage.members("crds", period))
 
@@ -50,6 +55,11 @@ class revenu_disponible(Variable):
         impot_revenu_groupe = menage.members.foyer_fiscal("impot_revenu", period)
         membres_foyer = menage.members.foyer_fiscal.sum(ones)
         impot_revenu = menage.sum(impot_revenu_groupe / membres_foyer)
+
+        pensions_versees_groupe = menage.members.foyer_fiscal(
+            "pensions_alimentaires_versees", period
+        )
+        pensions_versees = menage.sum(pensions_versees_groupe / membres_foyer)
 
         # Allocations familiales: variable mensuelle, annualisée via ADD.
         allocations_groupe = menage.members.famille(
@@ -67,9 +77,11 @@ class revenu_disponible(Variable):
 
         return (
             salaire_brut
+            + pensions_percues
             - impot_revenu
             - csg
             - crds
+            - pensions_versees
             + allocations_familiales
             + allocation_soutien_familial
         )

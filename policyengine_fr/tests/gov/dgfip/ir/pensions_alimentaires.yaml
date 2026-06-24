@@ -1,0 +1,142 @@
+# Pensions alimentaires — revenus 2024.
+# Versées: charge déductible du revenu global (CGI art. 156, II, 2°).
+# Perçues: imposables après abattement de 10% sur les pensions
+#   (CGI art. 158, 5, a ; revenus 2024: plancher 450 €/bénéficiaire,
+#    plafond 4 399 €/foyer).
+
+# ── Pensions alimentaires versées (déduction) ───────────────────────────────
+
+- name: Pension versée — déduite du revenu net imposable
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 30_000          # salaire imposable 27 000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        pensions_alimentaires_versees: 6_000
+  output:
+    revenu_net_imposable: 21_000      # 27 000 − 6 000
+
+- name: Pension versée supérieure au revenu — base bornée à zéro
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 10_000          # salaire imposable 9 000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        pensions_alimentaires_versees: 15_000
+  output:
+    revenu_net_imposable: 0
+
+# ── Pensions alimentaires perçues (abattement de 10%) ───────────────────────
+
+- name: Pension perçue — abattement au taux plein (10%)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        pensions_alimentaires_percues: 10_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    pensions_alimentaires_imposables: 9_000   # 10 000 − 10%
+    revenu_net_imposable: 9_000
+
+- name: Petite pension perçue — abattement au plancher (450 €)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        pensions_alimentaires_percues: 3_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    # 10% de 3 000 = 300 < plancher 450 → abattement 450
+    pensions_alimentaires_imposables: 2_550
+
+- name: Pension perçue inférieure au plancher — abattement borné à la pension
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        pensions_alimentaires_percues: 300
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    # plancher 450 borné à la pension elle-même (300) → base 0
+    pensions_alimentaires_imposables: 0
+
+- name: Grosse pension perçue — abattement au plafond du foyer (4 399 €)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        pensions_alimentaires_percues: 60_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    # 10% de 60 000 = 6 000 > plafond 4 399 → abattement 4 399
+    pensions_alimentaires_imposables: 55_601
+
+- name: Deux bénéficiaires — plancher par personne, plafond au foyer
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        pensions_alimentaires_percues: 2_000
+      individu_2:
+        pensions_alimentaires_percues: 2_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1, individu_2]
+  output:
+    # chacun: 10% de 2 000 = 200 < plancher 450 → 450 ; total abattement 900
+    pensions_alimentaires_imposables: 3_100   # 4 000 − 900
+
+# ── Combiné (versées + perçues) ─────────────────────────────────────────────
+
+- name: Foyer percevant et versant des pensions alimentaires
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 40_000          # salaire imposable 36 000
+        pensions_alimentaires_percues: 10_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+        pensions_alimentaires_versees: 5_000
+  output:
+    pensions_alimentaires_imposables: 9_000   # 10 000 − 10%
+    # 36 000 + 9 000 − 5 000
+    revenu_net_imposable: 40_000
+
+- name: Aucune pension — base inchangée
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      individu_1:
+        salaire_brut: 30_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [individu_1]
+  output:
+    pensions_alimentaires_imposables: 0
+    revenu_net_imposable: 27_000

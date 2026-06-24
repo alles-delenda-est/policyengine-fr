@@ -7,6 +7,7 @@ core:
     - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %)
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
     - Allocation de soutien familial (ASF) — taux simple, famille monoparentale
+    - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement de 10 % (perçues)
     - Revenu disponible — agrégat de tête de l'MVP (revenus 2024)
   not_modelled:
     - Réductions et crédits d'impôt
@@ -14,7 +15,7 @@ core:
     - Prélèvements sociaux sur les revenus du capital et de remplacement
     - Cotisations sociales salariales (maladie, retraite, chômage…)
     - Autres prestations sociales (RSA, APL, prime d'activité…)
-    - Revenus non salariés, pensions et revenus du capital
+    - Revenus non salariés, pensions de retraite et revenus du capital (hors pensions alimentaires perçues)
   simplifications:
     # Explicit scope-narrowings: modelled, but with a documented departure from
     # the exact statute. Surfaced here so the reviewer-agent gate's
@@ -35,3 +36,23 @@ core:
       divergent pour tout ménage dont le revenu a changé d'une année sur l'autre.
       Métropole uniquement ; garde alternée, forfait des 20 ans et plancher de
       versement non modélisés.
+    - >-
+      Pensions alimentaires versées — le montant saisi est pris comme déjà
+      déductible : le plafond de déduction par enfant majeur (CGI art. 156, II,
+      2°) et les conditions d'éligibilité (décision de justice, état de besoin)
+      ne sont pas appliqués par le modèle, à l'image de openfisca-france qui
+      retient les montants déclarés. La base imposable est par ailleurs bornée
+      à zéro (les déficits reportables ne sont pas modélisés).
+    - >-
+      Pensions alimentaires perçues — abattement de 10 % sur les pensions
+      (CGI art. 158, 5, a) : le plancher est appliqué par bénéficiaire (borné à
+      sa propre pension) puis le total est plafonné au niveau du foyer fiscal,
+      ce qui approche la règle légale de répartition exacte du plafond.
+    - >-
+      Abattement de 10 % sur les pensions — le plancher (par bénéficiaire) et le
+      plafond (par foyer fiscal) sont, dans la loi, communs à l'ensemble des
+      pensions (retraites, rentes et pensions alimentaires). Le modèle ne couvre
+      aujourd'hui que les pensions alimentaires perçues, donc l'abattement est
+      calculé sur cette seule assiette. Lorsque les pensions de retraite seront
+      modélisées, cet abattement devra être fusionné avec elles pour partager un
+      unique plancher/plafond, sous peine d'accorder l'abattement deux fois.
