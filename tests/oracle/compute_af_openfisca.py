@@ -115,8 +115,38 @@ def compute_asf_annual(child_ages, year=2024):
     return sum(float(sim.calculate("asf", f"{year}-{m:02d}")[0]) for m in range(1, 13))
 
 
+def compute_asf_differentielle_annual(child_ages, pension_annuelle, year=2024):
+    """Annual openfisca-france `asf` for a single parent receiving a pension.
+
+    Models a single-parent famille with the given children and a partial
+    annual pension alimentaire, returning the total annual ASF (which
+    openfisca-france computes as ASF différentielle = ASF taux-plein − pension).
+    """
+    months = {f"{year}-{m:02d}": pension_annuelle / 12 for m in range(1, 13)}
+    individus = {"parent1": {"pensions_alimentaires_percues": months}}
+    enfants = []
+    for j, age in enumerate(child_ages):
+        cid = f"enfant{j + 1}"
+        enfants.append(cid)
+        individus[cid] = {"date_naissance": {"ETERNITY": f"{year - age}-06-01"}}
+    situation = {
+        "individus": individus,
+        "familles": {"fam": {"parents": ["parent1"], "enfants": enfants}},
+        "foyers_fiscaux": {
+            "ff": {"declarants": ["parent1"], "personnes_a_charge": enfants}
+        },
+        "menages": {"men": {"personne_de_reference": ["parent1"], "enfants": enfants}},
+    }
+    sim = SimulationBuilder().build_from_entities(tbs, situation)
+    return sum(float(sim.calculate("asf", f"{year}-{m:02d}")[0]) for m in range(1, 13))
+
+
 if __name__ == "__main__":
     for name, salaires, child_ages in BATTERY:
         annual = compute_af_annual(salaires, child_ages)
         print(f"{name:<24} af_annual={annual:.2f}")
     print(f"{'single_parent_1child':<24} asf_annual={compute_asf_annual([8]):.2f}")
+    print(
+        f"{'single_parent_1child_pension':<28} "
+        f"asf_diff={compute_asf_differentielle_annual([8], 1_200):.2f}"
+    )
