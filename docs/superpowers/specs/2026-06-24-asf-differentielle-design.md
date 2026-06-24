@@ -84,22 +84,34 @@ pension + max(ASF_pleine − pension, 0) = max(ASF_pleine, pension)
 `revenu_disponible` is the same quantity netted inside ASF. `revenu_disponible`
 itself is not edited.
 
+Note the netting is applied **per month** (ASF is a MONTH variable, annualised via
+`ADD`), so the annual aggregate is `Σ_month max(ASF_pleine_month − pension/12, 0)`,
+not `max(Σ ASF_pleine, Σ pension)`. The two differ only in the narrow band where the
+monthly pension straddles the ASF floor across the 1-April BMAF revalorisation; the
+per-month behaviour is the more faithful one (the CAF assesses ASF monthly).
+
 ## 4. Tests
 
 ### Unit (`tests/gov/cnaf/prestations/asf/allocation_soutien_familial.yaml`)
 
-All period 2024-04, where ASF/child = 0,422 × 466,44 = 196,83768.
+The new pension cases use **period 2024-01** (ASF/child = 0,422 × 445,93 =
+188,18246), not April: setting the YEAR `pensions_alimentaires_percues` input on a
+February-or-later monthly test period crashes the policyengine-core test loader
+(`ValueError: Expected a period; got: 'year'`); January is safe. (The pre-existing
+no-pension cases already pin the April BMAF revalorisation, so April coverage is not
+lost.)
 
-| Case | Pension (annual €) | Expected ASF/mo |
+| Case | Pension (annual €) | Expected ASF/mo (2024-01) |
 |---|---|---|
-| 1 parent, 1 child, **no pension** (regression — deceased/unknown) | 0 | 196,83768 |
-| 1 parent, 1 child, **partial** | 1 200 (100/mo) | 96,83768 |
+| 1 parent, 1 child, **partial** | 1 200 (100/mo) | 88,18246 |
 | 1 parent, 1 child, **≥ ASF** | 3 600 (300/mo) | 0 |
-| 1 parent, **2 children**, partial | 2 400 (200/mo) | 193,67536 |
+| 1 parent, **2 children**, partial | 2 400 (200/mo) | 176,36492 |
 | **Couple**, pension present | 2 400 | 0 |
 
-The existing no-pension cases stay green (the netting is a no-op when pension = 0),
-so they double as regressions.
+The pre-existing no-pension cases stay green (the netting is a no-op when
+pension = 0), so they double as regressions covering the deceased/unknown-parent
+case. Property tests (below) cover the April BMAF (2024-04, ASF/child 196,83768) via
+the Python `Simulation` API, which handles YEAR inputs at any month.
 
 ### Property (`tests/test_properties.py`)
 
