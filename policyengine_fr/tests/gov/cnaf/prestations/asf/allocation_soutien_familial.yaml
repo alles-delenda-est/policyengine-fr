@@ -89,3 +89,69 @@
         enfants: [enfant_1]
   output:
     allocation_soutien_familial: 0
+
+# ── ASF différentielle : la pension alimentaire perçue est défalquée ──────────
+# (CSS art. L523-1, L581-2). Période 2024-01 : BMAF 445,93 → ASF/enfant 188,18246.
+# NB : l'input pension (variable annuelle) impose une période de janvier ; les
+# autres mois déclenchent un bug du chargeur de tests policyengine-core.
+- name: Parent unique, un enfant, pension partielle (1 200 €/an) — complément différentiel
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {pensions_alimentaires_percues: 1_200}
+      enfant_1: {age: 8}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1]
+  output:
+    # 188,18246 − (1 200 / 12 = 100) = 88,18246
+    allocation_soutien_familial: 88.18246
+
+- name: Parent unique, un enfant, pension ≥ ASF (3 600 €/an) — aucune ASF
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {pensions_alimentaires_percues: 3_600}
+      enfant_1: {age: 8}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1]
+  output:
+    # 188,18246 − 300 < 0 → borné à 0
+    allocation_soutien_familial: 0
+
+- name: Parent unique, deux enfants, pension partielle (2 400 €/an) — total famille
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {pensions_alimentaires_percues: 2_400}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1:
+        parents: [parent_1]
+        enfants: [enfant_1, enfant_2]
+  output:
+    # 2 × 188,18246 = 376,36492 ; − (2 400 / 12 = 200) = 176,36492
+    allocation_soutien_familial: 176.36492
+
+- name: Couple avec pension perçue — toujours aucune ASF (éligibilité inchangée)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {pensions_alimentaires_percues: 2_400}
+      parent_2: {}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2]
+  output:
+    allocation_soutien_familial: 0
