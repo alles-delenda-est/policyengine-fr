@@ -15,10 +15,13 @@ class allocation_soutien_familial(Variable):
         "famille n'a qu'un parent.\n\n"
         "Limitations MVP (départs explicites du droit, voir modelled_policies.yaml):\n"
         "- Taux majoré « orphelin de deux parents » non modélisé (un seul taux).\n"
-        "- ASF différentielle / recouvrement non modélisés : faute d'input "
-        "pension alimentaire, le modèle verse l'ASF pleine à toute famille "
-        "monoparentale, même si une pension alimentaire est déjà perçue "
-        "(sur-estimation possible).\n"
+        "- ASF versée en complément différentiel : la pension alimentaire perçue "
+        "(pensions_alimentaires_percues, ramenée au mois) est défalquée de l'ASF "
+        "pleine, bornée à zéro ; pension nulle → ASF pleine. Comparaison au niveau "
+        "de la famille (et non enfant par enfant) ; la pension saisie est supposée "
+        "être une pension pour enfant (une prestation compensatoire ne doit pas y "
+        "figurer). Recouvrement de l'avance sur le parent débiteur non modélisé "
+        "(transfert CAF↔débiteur, sans effet sur la famille).\n"
         "- Le cas d'un parent défaillant au sein d'un couple (ouvrant droit à "
         "l'ASF) n'est pas capté par le proxy « parent unique » (sous-estimation).\n"
         "- Métropole uniquement ; pas de partage en garde alternée."
@@ -40,5 +43,19 @@ class allocation_soutien_familial(Variable):
         # Proxy MVP du droit: la famille n'a qu'un seul parent.
         parent_unique = famille.nb_persons(Famille.PARENT) == 1
 
-        montant = bmaf * asf.taux_orphelin_un_parent * nb_enfants
+        asf_pleine = bmaf * asf.taux_orphelin_un_parent * nb_enfants
+
+        # Complément différentiel (CSS art. L523-1, L581-2) : la pension
+        # alimentaire perçue par la famille, ramenée au mois, est défalquée de
+        # l'ASF pleine ; le résultat est borné à zéro. La base annuelle de la
+        # pension est lue via period.this_year, comme la modulation AF lit ses
+        # ressources. Pension nulle → ASF pleine (cas de l'allocation non
+        # recouvrable, parent décédé/inconnu).
+        pension_mensuelle = (
+            famille.sum(
+                famille.members("pensions_alimentaires_percues", period.this_year)
+            )
+            / 12
+        )
+        montant = max_(asf_pleine - pension_mensuelle, 0)
         return where(parent_unique, montant, 0)

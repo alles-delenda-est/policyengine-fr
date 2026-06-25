@@ -231,3 +231,34 @@ def test_asf_scales_with_eligible_children():
         .sum()
     )
     assert abs(two - 2 * one) < 0.01
+
+
+def test_asf_non_increasing_in_pension():
+    # A received pension reduces ASF euro-for-euro until it reaches zero.
+    base = float(
+        build_household([0], [8])
+        .calculate("allocation_soutien_familial", "2024-04")
+        .sum()
+    )
+    with_pension = float(
+        build_household([0], [8], adult_pensions=[1_200])
+        .calculate("allocation_soutien_familial", "2024-04")
+        .sum()
+    )
+    assert with_pension <= base
+    # 196.83768 − (1200/12 = 100) = 96.83768
+    assert abs(with_pension - 96.83768) < 0.01
+
+
+def test_asf_floor_guarantee():
+    # For an eligible single parent, ASF tops the pension up to the ASF floor:
+    # ASF_versée + min(pension/12, ASF_pleine) == ASF_pleine.
+    asf_pleine = 196.83768  # 0.422 × 466.44 (2024-04), 1 child
+    for annual_pension in [0, 600, 1_200, 2_400, 3_600]:
+        asf = float(
+            build_household([0], [8], adult_pensions=[annual_pension])
+            .calculate("allocation_soutien_familial", "2024-04")
+            .sum()
+        )
+        topup = min(annual_pension / 12, asf_pleine)
+        assert abs(asf + topup - asf_pleine) < 0.02

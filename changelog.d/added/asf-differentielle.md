@@ -1,0 +1,1 @@
+ASF is now paid as a différentiel: any pension alimentaire received is netted off the allocation de soutien familial, closing the previous over-count for single-parent families already receiving support.

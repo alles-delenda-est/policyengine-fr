@@ -1,93 +1,105 @@
-# Theory: Hardening the policyengine-fr Test Suite + ASF Feature
+# Theory: Building policyengine-fr — From MVP to Accurate Benefit Modelling
 
 ## Problem
 
 The French tax-benefit model (`policyengine-fr`) has a working MVP covering the
-full disposable-income chain (salaire → IR → CSG/CRDS → AF → revenu_disponible),
-but the test suite had been primarily composed of self-authored unit tests that
-verify known reference values. Self-authored tests have a structural blindspot:
-they cannot catch sign errors, missing monotonicity, or broken invariants that
-the author didn't think to assert — they only prove "the model produces the same
-number I wrote down."
+full disposable-income chain (salaire → IR → CSG/CRDS → AF → ASF →
+revenu_disponible), but MVP models inevitably carry explicit simplifications that
+over- or under-estimate for real households. The structural challenge is: how do
+you extend from "roughly right for a canonical household" to "correct for the
+range of household types that actually use the model"?
 
-The ASF (Allocation de soutien familial) feature was added as the first new
-benefit after the MVP, providing a concrete testbed for the hardened testing
-strategy and setting the pattern for future benefits.
+The ASF (Allocation de soutien familial) is the testbed for this extension
+strategy. Its MVP approximation — pay full ASF to any single-parent famille —
+systematically over-estimates for the significant subset of single parents who
+already receive a pension alimentaire from the absent parent. The French statute
+(CSS art. L523-1, L581-2) is explicit: ASF is a guarantee mechanism, not an
+unconditional transfer. If the famille receives a pension, ASF fills only the
+gap. The MVP ignored this because `pensions_alimentaires_percues` was not
+connected into the ASF formula.
 
 ## Operating Theory
 
-Two complementary test strategies are in play:
+PolicyEngine's architecture makes the fix clean: `pensions_alimentaires_percues`
+already exists as an Individu/YEAR input (created for the deductibility side of
+pension modelling in IR). The ASF formula reads Famille-level aggregates via
+`famille.sum(famille.members(...))`, and divides by 12 to convert annual →
+monthly. The netting is `max_(asf_pleine − pension_mensuelle, 0)` — floored at
+zero because ASF is a guarantee, not a subsidy that can go negative.
 
-**YAML unit tests** (run by `policyengine-core test`) verify specific numeric
-outputs against known reference values derived from the statute. These are
-excellent for regression prevention and for documenting the model's expected
-behaviour at particular points.
+The key constraint the formula must honour: when pension is zero (parent
+deceased, unknown, or pension unrecoverable), the result must equal full ASF. The
+`max_(..., 0)` floor handles this transparently — zero pension → full ASF, no
+special case needed.
 
-**Pytest property invariants** (deterministic grid, no fuzzing library) assert
-structural properties that must hold across a grid of incomes and child counts
-regardless of exact values. These catch whole classes of bugs:
-- `test_af_non_negative` / `test_af_zero_below_two_children`: legal eligibility rules.
-- `test_af_monotonic_non_increasing_in_resources`: AF modulation property.
-- `test_asf_non_negative`, `test_asf_zero_for_couple`, `test_asf_scales_with_eligible_children`: ASF eligibility and scaling.
-- `test_asf_in_revenu_disponible_single_parent`: wiring into the aggregate.
-- `test_csg_identity` / `test_assiette_identity`: arithmetic identities in CSG/CRDS formulas.
-
-**Independent oracle validation** completes the triangle: against openfisca-france
-(v175.0.45), policyengine-fr ASF gives 2336.09 EUR/year vs oracle 2336.09.
-Δ ≈ 0.00 EUR, well within the 12 EUR tolerance. This proves correctness against
-an independent codebase, not just against the statute.
+The test period constraint (all pension-input cases must use 2024-01, not other
+months in 2024) is a policyengine-core loader limitation: when a YEAR-typed
+variable is set in a test case, the loader resolves it against `period.this_year`
+of the test's period. For monthly periods other than January, the year period
+does not start at the same point as the monthly period in the loader's internal
+calendar, triggering a `ValueError: Expected a period; got: 'year'`. January is
+safe because `period.this_year` for 2024-01 resolves unambiguously to 2024.
 
 ## Strategy
 
-The overall sequencing was:
-1. Lock down reference-value tests first (parameter + variable YAML tests).
-2. Overlay property/invariant tests that catch structural failures without
-   duplicating the numeric checks.
-3. Validate against an independent oracle (openfisca-france) to rule out
-   shared author blindspots.
-4. Wire into the revenu_disponible aggregate so household calculations are correct.
-5. Document the modelled/not-modelled boundary precisely in modelled_policies.yaml.
+The overall development sequence:
+1. **Lock down reference-value tests** (parameter + variable YAML tests) before
+   extending the formula — regression prevention.
+2. **TDD for each extension**: add failing cases first, confirm RED, implement,
+   confirm GREEN. This proves the new cases actually test something.
+3. **Property/invariant tests** (pytest grid) catch structural failures — e.g.,
+   monotonicity, non-negativity — that reference tests might miss.
+4. **Independent oracle validation** (openfisca-france) rules out shared-author
+   blindspots: if both codebases agree, the statute interpretation is likely
+   correct.
+5. **Document the modelled/not-modelled boundary precisely** in
+   `modelled_policies.yaml` — each simplification should be a named, explicit
+   decision, not a silent gap.
 
-This keeps the two test layers independent: YAML tests fail when numbers are wrong,
-property tests fail when laws or arithmetic are violated. A future change that
-accidentally breaks a monotonicity property will be caught even if it doesn't
-change any reference value that was explicitly tested.
+The ASF différentielle completes the first realistic extension: eligibility is
+unchanged (still single-parent proxy), but the amount now correctly reflects the
+net benefit rather than the gross guarantee.
 
 ## Key Discoveries
 
-**Float32 precision and identity tests**: The initial specification asked for
-`abs_tol=1e-6` on the CSG arithmetic identity. This failed because PolicyEngine
-uses numpy float32 arrays; independent rounding accumulates to ~3e-5. The identity
-is mathematically correct; the tolerance must be set to 0.01. Any "identity" test
-in this codebase must be calibrated to float32 noise (~1e-4 relative), not
-machine-epsilon.
+**Float32 precision**: PolicyEngine uses numpy float32. Identity tests must use
+tolerance ~0.01, not machine-epsilon. Any test asserting an arithmetic equality
+must be calibrated to float32 noise.
 
-**AF monotonicity holds**: The modulation property (AF weakly decreasing as
-income rises across the plafond thresholds) passed cleanly across the grid. This
-confirms the modulation formula is correctly wired up.
+**AF monotonicity holds**: The modulation property (AF weakly decreasing in
+income across plafond thresholds) passed cleanly on a deterministic grid. The
+formula is directionally correct; the exact threshold values remain a validation
+task.
 
-**ASF oracle confirmed**: openfisca-france eligibility triggered cleanly with a bare
-single-parent famille — no special flags required, confirming the policyengine-fr
-implementation is correct against an independent codebase. The oracle row is live
-in `oracle_values.yaml`.
+**ASF oracle confirmed**: openfisca-france (v175.0.45) agrees with policyengine-fr
+on full ASF (taux simple) for a bare single-parent famille. Δ ≈ 0.00 EUR. The
+oracle row is live in `oracle_values.yaml`.
 
-**Integration test update required**: When ASF was wired into revenu_disponible,
-the foyers_2024.yaml integration test for the single-parent case needed updating
-(34 998.87 → 37 334.95, the difference being the ASF amount ≈ 2 336 EUR/year).
-This is the expected pattern: integration tests assert the full aggregate, so they
-must be updated whenever a new benefit is added to revenu_disponible.
+**Integration test update required when a new benefit is wired in**: When ASF
+joined revenu_disponible, the foyers_2024.yaml integration test updated from
+34 998.87 → 37 334.95 (Δ ≈ 2 336 EUR/year = the ASF amount). This is the
+expected pattern and signals correct wiring, not a bug.
+
+**ASF différentielle (Task 1) now modelled**: The pension netting formula
+`max_(asf_pleine − pension/12, 0)` was validated against four explicit cases
+(partial pension, pension ≥ ASF → zero, two-child famille, couple with pension →
+zero). RED → GREEN confirmed via TDD. 77/77 full suite passes. The previous
+over-estimation for pension-receiving single parents is eliminated.
 
 ## Open Questions
 
-- Whether the AF modulation thresholds themselves (the plafonds) are correctly
-  parameterised for 2024 remains a validation task. The monotonicity test proves
-  the logic is directionally correct, not that the exact thresholds are right.
-- CSG rates are currently modelled as flat (9.2 % total) on salary. The statute
-  also provides reduced rates (3.8 % / 6.2 %) for low earners on pension income;
-  out of scope for the current MVP.
-- The revenu_disponible aggregate now covers AF + ASF; extending it further
-  (e.g. prime d'activité, APL) will follow the same membres_famille pattern.
-- ASF scope limitations are documented in modelled_policies.yaml: taux majoré
-  (orphelin de deux parents), ASF différentielle, and recouvrement sur parent
-  défaillant are not modelled. The single-parent proxy may over-estimate for
-  households where the absent parent pays pension alimentaire.
+- Whether the AF modulation thresholds (plafonds) are correctly parameterised for
+  2024 remains a validation task. Monotonicity is confirmed; the exact values are not.
+- CSG rates are modelled flat (9.2 % on salary). Reduced rates for low earners on
+  pension income (3.8 % / 6.2 %) are out of scope.
+- revenu_disponible covers AF + ASF. Next extensions (prime d'activité, APL) will
+  follow the same `membres_famille` aggregation pattern.
+- ASF taux majoré (orphelin de deux parents) remains unmodelled (one rate only).
+- The ASF différentielle comparison is at famille level, not child by child. This
+  is a simplification: the statute compares per-child, but the input
+  `pensions_alimentaires_percues` is a single annual total. Multi-child households
+  where pensions differ per child cannot be represented without restructuring the
+  input. Documented in the variable docstring.
+- Recouvrement (CAF advancing ASF then recovering from the absent parent) is not
+  modelled — it is a CAF↔débiteur transfer with no net effect on the famille's
+  income, so it is correctly excluded.

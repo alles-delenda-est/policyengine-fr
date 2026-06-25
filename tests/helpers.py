@@ -23,13 +23,19 @@ def build_household(
     parent_isole: bool = False,
     adult_age: int = 40,
     year: int = YEAR,
+    adult_pensions: list[float] | None = None,
 ) -> Simulation:
     """Build a single-household Simulation.
 
     adult_incomes: gross annual salary (salaire_brut) for each adult (1 or 2).
     child_ages: age of each dependent child (placed as enfant/personne à charge).
+    adult_pensions: optional annual pension alimentaire received per adult;
+        if provided must have the same length as adult_incomes.
     """
     assert 1 <= len(adult_incomes) <= 2, "1 or 2 adults"
+    assert adult_pensions is None or len(adult_pensions) == len(adult_incomes), (
+        "adult_pensions must match adult_incomes length"
+    )
     y = str(year)
     individus: dict = {}
     adults: list[str] = []
@@ -38,6 +44,8 @@ def build_household(
         pid = f"adulte_{i + 1}"
         adults.append(pid)
         individus[pid] = {"salaire_brut": {y: income}, "age": {y: adult_age}}
+        if adult_pensions is not None:
+            individus[pid]["pensions_alimentaires_percues"] = {y: adult_pensions[i]}
     for j, age in enumerate(child_ages):
         cid = f"enfant_{j + 1}"
         kids.append(cid)

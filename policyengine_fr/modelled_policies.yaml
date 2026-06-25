@@ -6,7 +6,7 @@ core:
     - Décote
     - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %)
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
-    - Allocation de soutien familial (ASF) — taux simple, famille monoparentale
+    - Allocation de soutien familial (ASF) — taux simple, en complément différentiel de la pension alimentaire perçue (famille monoparentale)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement de 10 % (perçues)
     - Revenu disponible — agrégat de tête de l'MVP (revenus 2024)
   not_modelled:
@@ -22,12 +22,16 @@ core:
     # "silent scope-narrowing" check can find them.
     - >-
       Allocation de soutien familial — le droit est inféré du seul fait que la
-      famille n'a qu'un parent (proxy MVP). Taux simple uniquement (0,422 BMAF) ;
-      le taux majoré « orphelin de deux parents », l'ASF différentielle et le
-      recouvrement sur parent défaillant ne sont pas modélisés. Faute d'input
-      pension alimentaire, l'ASF pleine est versée à toute famille monoparentale
-      (sur-estimation possible) ; un parent défaillant au sein d'un couple n'ouvre
-      pas droit dans le modèle (sous-estimation). Métropole uniquement.
+      famille n'a qu'un parent (proxy MVP). L'ASF est versée en complément
+      différentiel : la pension alimentaire perçue (ramenée au mois) est
+      défalquée de l'ASF pleine (taux simple 0,422 BMAF), bornée à zéro. La
+      comparaison est faite au niveau de la famille et non enfant par enfant ;
+      la pension saisie est supposée être une pension pour enfant (une prestation
+      compensatoire ne doit pas y figurer). Non modélisés : le taux majoré
+      « orphelin de deux parents », le recouvrement de l'avance sur le parent
+      débiteur (transfert CAF↔débiteur sans effet sur la famille), et le cas d'un
+      parent défaillant au sein d'un couple (sous-estimation, l'éligibilité reste
+      « parent unique »). Métropole uniquement.
     - >-
       Allocations familiales — modulation des ressources : le modèle utilise la
       somme des salaires imposables de l'année courante (N) en lieu et place de
