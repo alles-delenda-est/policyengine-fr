@@ -6,7 +6,7 @@
 > readers. Keep the two in sync — when a policy is added or a simplification
 > changes, update both.
 >
-> **State as of 2026-06-25** (main @ ASF différentielle, PR #24). Scope:
+> **State as of 2026-07-08** (post-review disclosure pass). Scope:
 > **revenus 2024, métropole**, a single tax year.
 
 ## One-line summary
@@ -73,22 +73,47 @@ authoritative list with legal references lives under `simplifications:` in
 1. **`salaire_brut → net` is NOT a full payslip.** Only CSG/CRDS come off salary.
    The other employee contributions (health, retraite, chômage, AGIRC-ARRCO
    complémentaire) are **not** deducted — so "net" here is not take-home pay.
-2. **AF income test uses a proxy.** The modulation uses current-year (N) salary
+   Worse, the single salary input is read under **two different conventions**:
+   the income-tax chain treats it as *declared* salary (1AJ — the convention the
+   DGFiP-oracle validation used), while the CSG/CRDS formulas treat it as *gross*
+   salary (1,75 % assiette abatement). The two differ by ~20-25 % on a real
+   payslip. Entering declared salary gives an exact IR and an under-estimated
+   CSG/CRDS; `revenu_disponible` mixes both.
+2. **CSG déductible is computed but not deducted.** `csg_deductible` exists as a
+   levy, but the deduction from taxable income mandated by CGI art. 154
+   quinquies is not applied in `revenu_net_imposable`. Consistent with the
+   declared-salary reading of the input (a 1AJ amount is already net of
+   deductible CSG); to revisit if the input ever becomes true gross.
+3. **AF income test uses a proxy.** The modulation uses current-year (N) salary
    instead of the legal N-2 *base ressources* (revenu net catégoriel, art. R532-3
    CSS). Identical for stable incomes; diverges when income changed year-on-year.
-3. **ASF is family-total, not per-child**, and the pension input is assumed to be
+4. **AF modulation has hard cliffs.** The statutory *complément dégressif*
+   (CSS art. D521-1, al. 3) that tapers each threshold crossing is not modelled:
+   a family €1 over a plafond loses the full tranche (~€745/year at the first
+   threshold) instead of being smoothed. Amounts are exact away from the
+   thresholds; marginal rates right at them are overstated.
+5. **ASF is family-total, not per-child**, and the pension input is assumed to be
    child support — a *prestation compensatoire* (spousal support) entered there
    would wrongly suppress ASF. Taux majoré (orphelin de deux parents) and
    recouvrement (CAF↔débiteur) are not modelled.
-4. **Paid pensions alimentaires** are taken as already-deductible — the
+6. **Paid pensions alimentaires** are taken as already-deductible — the
    per-major-child deduction ceiling (CGI art. 156, II, 2°) and eligibility
    conditions are not enforced.
-5. **CSG is flat 9,2 %** on salary; reduced rates (3,8 % / 6,2 %) for low earners
+7. **CSG is flat 9,2 %** on salary; reduced rates (3,8 % / 6,2 %) for low earners
    and rates on replacement income are out of scope.
-6. **Shared 10 % pension abattement.** The floor/ceiling on the pension abattement
+8. **Shared 10 % pension abattement.** The floor/ceiling on the pension abattement
    are, in law, common to *all* pensions (retraites incluses). The model applies
    them to pensions alimentaires alone; when retirement pensions are added the
    abattement must be merged to share one floor/ceiling, or it is granted twice.
+9. **Benefits are paid gross of CRDS.** AF and ASF are returned at their gross
+   amounts; the 0,5 % CRDS due on family benefits is never levied, so
+   `revenu_disponible` overstates benefit income by ~0,5 %. The AF age-14
+   majoration is also granted from the birthday month instead of the following
+   month (one extra month, once per child).
+10. **Widowed parents get single-declarant parts.** CGI art. 194 grants a
+    veuf/veuve with dependent children the base parts of a married couple
+    (e.g. 2,5 parts with one child); the model can only represent them as a
+    single declarant (1,5-2 parts), understating parts by 0,5-1.
 
 ---
 

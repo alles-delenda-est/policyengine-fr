@@ -71,8 +71,13 @@ salary, the model computes the full chain end-to-end:
   part) → plafonnement du quotient familial → décote → `impot_revenu` net.
 - **Prélèvements sociaux** — `csg` (déductible + imposable) and `crds` on salary
   (assiette of 98,25 % of gross).
+- **Pensions alimentaires** — paid pensions deducted from global income;
+  received pensions taxed after the 10 % abattement (floor per beneficiary,
+  ceiling per foyer fiscal).
 - **Prestations** — `allocations_familiales` on the famille (base by number of
-  children, income modulation, age majoration).
+  children, income modulation, age majoration) and `allocation_soutien_familial`
+  (ASF taux simple, paid as a complément différentiel for single-parent
+  familles).
 - **Headline** — `revenu_disponible` on the ménage aggregates the above.
 
 See [`policyengine_fr/modelled_policies.yaml`](policyengine_fr/modelled_policies.yaml)

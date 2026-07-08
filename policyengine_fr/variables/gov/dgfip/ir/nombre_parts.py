@@ -10,7 +10,11 @@ class nombre_parts(Variable):
         "déclarant; une demi-part pour chacune des deux premières personnes à "
         "charge, une part entière à partir de la troisième; majoration d'une "
         "demi-part pour parent isolé (case T). Hors champ pour l'instant: "
-        "majorations invalidité, anciens combattants, garde alternée, etc."
+        "majorations invalidité, anciens combattants, garde alternée, et le "
+        "cas du veuf/de la veuve avec personne à charge (CGI art. 194 lui "
+        "accorde les mêmes parts de base qu'un couple marié, p. ex. 2,5 parts "
+        "pour un enfant; le modèle ne peut le représenter que comme déclarant "
+        "seul, soit 0,5 à 1 part de moins)."
     )
     definition_period = YEAR
     reference = "https://www.service-public.gouv.fr/particuliers/vosdroits/F2705"

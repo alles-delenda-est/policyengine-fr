@@ -20,11 +20,14 @@ Current state: **Disposable-income MVP complete (revenus 2024, métropole).**
 The full chain is modelled end-to-end: `salaire_brut` → `revenu_net_imposable`
 (abattement 10 %) → `nombre_parts` (quotient familial) → `impot_brut` (barème par
 part) → plafonnement du quotient familial → décote → `impot_revenu` net; plus
-CSG/CRDS on salary (assiette 98,25 %) and `allocations_familiales` on the
-famille; aggregated into `revenu_disponible` on the ménage. Whole-household
-integration scenarios pass. `make test` passes (46/46), ruff clean. See
+CSG/CRDS on salary (assiette 98,25 %), pensions alimentaires (versées deducted,
+perçues taxed after the 10 % abattement), `allocations_familiales` and
+`allocation_soutien_familial` (ASF différentielle) on the famille; aggregated
+into `revenu_disponible` on the ménage. Whole-household integration scenarios
+pass. `make test` passes (77 YAML tests + 37 pytest), ruff clean. See
 `policyengine_fr/modelled_policies.yaml` for the modelled / not-modelled
-boundary. A local `.venv/` exists (pip was bootstrapped via get-pip.py since the
+boundary (and its `simplifications:` list for every named departure from the
+statute). A local `.venv/` exists (pip was bootstrapped via get-pip.py since the
 system has no pip); activate it with `. .venv/bin/activate`.
 
 A second, **separate** virtual environment `.venv-of312` may exist **in the
