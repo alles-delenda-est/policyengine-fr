@@ -1,4 +1,4 @@
-description: Plafond annuel de ressources n°1 des allocations familiales (montant de base, pour deux enfants à charge ; majoré par enfant supplémentaire). En deçà, les AF sont versées à taux plein.
+description: Plafond annuel de ressources n°1 des allocations familiales — montant de base hors enfants, auquel s'ajoute la majoration par enfant à charge pour chaque enfant (le plafond publié pour deux enfants vaut base + 2 × majoration, soit 74 966 € en 2024). En deçà, les AF sont versées à taux plein.
 values:
   2023-01-01: 59_330
   2024-01-01: 62_474

@@ -53,6 +53,49 @@ core:
       sa propre pension) puis le total est plafonné au niveau du foyer fiscal,
       ce qui approche la règle légale de répartition exacte du plafond.
     - >-
+      Convention d'entrée du salaire — la variable d'entrée `salaire_brut` est
+      lue comme le salaire DÉCLARÉ (case 1AJ, net de cotisations sociales et de
+      CSG déductible) par la chaîne impôt sur le revenu — c'est la convention
+      sous laquelle le modèle reproduit le simulateur DGFiP à l'euro près —
+      mais comme un salaire BRUT par les formules CSG/CRDS (abattement
+      d'assiette de 1,75 %, art. L136-2 CSS). Les deux lectures diffèrent
+      d'environ 20-25 % sur une fiche de paie réelle. En saisissant le salaire
+      déclaré, l'IR est exact et la CSG/CRDS est calculée sur une base
+      sous-estimée; `revenu_disponible` soustrait les deux du même montant et
+      n'est donc le revenu disponible exact d'aucun ménage réel sous l'une ou
+      l'autre lecture. À trancher avant toute prestation sous condition de
+      ressources (voir la feuille de route).
+    - >-
+      CSG déductible non déduite de la base imposable — `csg_deductible`
+      (6,8 % sur 98,25 % du salaire) est calculée comme prélèvement, mais la
+      déductibilité prévue par le CGI art. 154 quinquies n'est pas appliquée
+      dans `revenu_net_imposable`. Cohérent avec la lecture « salaire déclaré »
+      de l'entrée (un montant 1AJ est déjà net de CSG déductible), incohérent
+      sous la lecture « brut ». Si la convention brut est retenue un jour, la
+      déduction devra être ajoutée et l'oracle DGFiP re-capturé.
+    - >-
+      Allocations familiales — complément dégressif non modélisé : la
+      modulation applique les taux plein/moitié/quart en marche d'escalier aux
+      deux plafonds, sans le complément dégressif (CSS art. D521-1, al. 3) qui
+      lisse chaque franchissement. Les montants sont exacts loin des seuils;
+      les taux marginaux au voisinage immédiat des plafonds sont surestimés
+      (perte en falaise d'environ 745 €/an au premier seuil au lieu d'un
+      lissage).
+    - >-
+      Prestations familiales versées brutes de CRDS — les AF et l'ASF sont
+      comptées pour leur montant brut; la CRDS de 0,5 % due sur les
+      prestations familiales n'est pas prélevée dans `revenu_disponible`
+      (surestimation d'environ 0,5 % du montant des prestations). La
+      majoration pour âge des AF est par ailleurs accordée dès le mois du
+      quatorzième anniversaire au lieu du mois suivant (un mois de trop, une
+      seule fois par enfant).
+    - >-
+      Quotient familial — cas du veuf/de la veuve avec personne à charge non
+      représentable : le CGI art. 194 lui accorde les parts de base d'un couple
+      marié (p. ex. 2,5 parts avec un enfant); le modèle ne peut le saisir que
+      comme déclarant seul (1,5 part, ou 2 avec la majoration parent isolé),
+      soit 0,5 à 1 part de moins.
+    - >-
       Abattement de 10 % sur les pensions — le plancher (par bénéficiaire) et le
       plafond (par foyer fiscal) sont, dans la loi, communs à l'ensemble des
       pensions (retraites, rentes et pensions alimentaires). Le modèle ne couvre

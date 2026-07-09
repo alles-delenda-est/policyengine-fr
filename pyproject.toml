@@ -34,7 +34,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/PolicyEngine/policyengine-fr"
+Homepage = "https://github.com/alles-delenda-est/policyengine-fr"
 
 [build-system]
 requires = ["hatchling"]

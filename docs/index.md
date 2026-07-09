@@ -11,7 +11,9 @@ the following chain (métropole, tax year 2024):
 
 | Step | Variable | Entity |
 | --- | --- | --- |
-| Net taxable salary (10 % abattement) | `revenu_net_imposable` | `foyer_fiscal` |
+| Taxable salary (10 % abattement) | `salaire_imposable` | `individu` |
+| Taxable pensions alimentaires received (10 % abattement) | `pensions_alimentaires_imposables` | `foyer_fiscal` |
+| Net taxable income (salaries + pensions received − pensions paid) | `revenu_net_imposable` | `foyer_fiscal` |
 | Number of parts (quotient familial) | `nombre_parts` | `foyer_fiscal` |
 | Gross income tax (barème per part) | `impot_brut` | `foyer_fiscal` |
 | Family-quotient capping | `plafonnement_quotient_familial` | `foyer_fiscal` |
@@ -19,10 +21,12 @@ the following chain (métropole, tax year 2024):
 | Net income tax | `impot_revenu` | `foyer_fiscal` |
 | CSG / CRDS on salary (assiette 98,25 %) | `csg`, `crds` | `individu` |
 | Family allowances | `allocations_familiales` | `famille` |
+| Family support allowance (differential) | `allocation_soutien_familial` | `famille` |
 | **Disposable income (headline)** | **`revenu_disponible`** | `menage` |
 
-`revenu_disponible = salaire_brut − impot_revenu − csg − crds +
-allocations_familiales`.
+`revenu_disponible = salaire_brut + pensions_alimentaires_percues −
+impot_revenu − csg − crds − pensions_alimentaires_versees +
+allocations_familiales + allocation_soutien_familial`.
 
 See `policyengine_fr/modelled_policies.yaml` for the exact modelled /
 not-modelled boundary. Every parameter is dated YAML with an official `reference`

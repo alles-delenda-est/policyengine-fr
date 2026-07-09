@@ -21,7 +21,14 @@ class allocations_familiales(Variable):
         "catégoriel de l'année N-2, art. R532-3 CSS). Les deux coïncident pour "
         "un revenu stable mais divergent pour tout ménage dont le revenu a "
         "changé d'une année sur l'autre. Métropole uniquement; garde alternée, "
-        "forfait des 20 ans et plancher de versement non modélisés."
+        "forfait des 20 ans et plancher de versement non modélisés. Le "
+        "complément dégressif (CSS art. D521-1, al. 3) qui lisse le passage "
+        "d'une tranche à l'autre n'est pas modélisé: le modèle applique des "
+        "seuils en marche d'escalier, donc les taux marginaux au voisinage "
+        "immédiat des plafonds sont surestimés. La majoration pour âge est "
+        "accordée dès le mois du quatorzième anniversaire, alors que le droit "
+        "ne s'ouvre qu'à compter du mois suivant (un mois de majoration de "
+        "trop par enfant, une seule fois)."
     )
     definition_period = MONTH
     reference = "https://www.service-public.fr/particuliers/vosdroits/F13213"
