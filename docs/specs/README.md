@@ -10,6 +10,11 @@ are drafts for the maintainer, not committed roadmap.
 | 0002 | [Revenu de solidarité active (RSA)](0002-rsa.md) | P1 | 0001 | Draft |
 | 0003 | [Enable the statute-review CI gate](0003-enable-statute-review-gate.md) | P1 | — | Draft |
 
+**Design & strategic decisions** (the non-code choices around these specs) live
+in [STRATEGY.md](STRATEGY.md): upstreaming with PolicyEngine, the release cut,
+the benefit-roadmap ordering, feedback surface, doc-currency automation, and
+dependency/lint posture.
+
 **Sequencing.** 0001 first (it invalidates any oracle captured after it, and
 every means-tested benefit depends on a coherent resource base). 0003 can land
 in parallel (config-only) and will help review 0002. 0002 last.
