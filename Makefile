@@ -8,6 +8,9 @@ format:
 	ruff format .
 	ruff check .
 
+check-docs:
+	python bin/check_doc_currency.py
+
 install:
 	pip install -e .[dev]
 

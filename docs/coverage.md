@@ -4,7 +4,10 @@
 > That YAML is the machine-readable modelled / not-modelled boundary (and the
 > reviewer-gate's source of truth); this document is the narrative version for
 > readers. Keep the two in sync — when a policy is added or a simplification
-> changes, update both.
+> changes, update both. **A CI check (`make check-docs`,
+> `bin/check_doc_currency.py`) fails the build if the simplification counts here
+> and in the YAML diverge, or if the test-count headline in `CLAUDE.md` no longer
+> matches the collected tests.**
 >
 > **State as of 2026-07-08** (post-review disclosure pass). Scope:
 > **revenus 2024, métropole**, a single tax year.

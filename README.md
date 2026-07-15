@@ -84,6 +84,21 @@ See [`policyengine_fr/modelled_policies.yaml`](policyengine_fr/modelled_policies
 for the exact modelled / not-modelled boundary. Out of scope for the MVP: other
 social contributions, capital and non-salary income, and most benefits.
 
+## Found an error?
+
+The model's credibility rests on **named simplifications validated against the
+official simulators** — so counter-examples are welcome and treated as
+first-class input. If a household's result disagrees with the DGFiP
+([simulateur IR](https://www.impots.gouv.fr/simulateur-ir-ir)) or CAF
+([caf.fr](https://www.caf.fr)) for **revenus 2024, métropole**, please
+[open a model-error report](../../issues/new?template=model-error.yaml).
+
+Include the household inputs, the **expected** figure with its **official
+source**, and the value the model produced. Before filing, check
+[`docs/coverage.md`](docs/coverage.md) — the discrepancy may be a
+**documented simplification** (e.g. the salary-input convention, or the missing
+employee social contributions) rather than a bug.
+
 ## License
 
 Distributed under the AGPL License, consistent with the PolicyEngine ecosystem.
