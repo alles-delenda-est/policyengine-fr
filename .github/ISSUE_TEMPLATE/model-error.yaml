@@ -1,0 +1,72 @@
+name: Model error report
+description: Report a household whose result disagrees with the official DGFiP/CAF simulator.
+title: "[model-error]: "
+labels: ["model-error"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping validate the model. This project's credibility rests on
+        **named simplifications checked against the official simulators**, so a
+        sourced counter-example is genuinely useful.
+
+        **Before filing:** please skim [`docs/coverage.md`](../blob/main/docs/coverage.md).
+        The discrepancy may be a **documented simplification** (e.g. the
+        salary-input convention, missing employee social contributions, or the AF
+        cliff) rather than a bug — those are known and listed there.
+
+        Scope of the current MVP: **revenus 2024, métropole**, salary and pensions
+        alimentaires only.
+  - type: textarea
+    id: household
+    attributes:
+      label: Household inputs
+      description: The full input household — enough to reproduce. Salaire brut, age(s), parent-isolé flag, number and ages of children, pensions alimentaires versées/perçues, etc.
+      placeholder: |
+        - Déclarants: 1 (parent isolé)
+        - Enfants: 2 (ages 8, 12)
+        - Salaire brut annuel: 30 000 €
+        - Pensions alimentaires perçues: 2 400 €/an
+      render: markdown
+    validations:
+      required: true
+  - type: input
+    id: variable
+    attributes:
+      label: Variable
+      description: Which computed variable is wrong?
+      placeholder: "impot_revenu / revenu_disponible / allocations_familiales / ..."
+    validations:
+      required: true
+  - type: input
+    id: expected
+    attributes:
+      label: Expected value
+      description: The correct figure, per the official source.
+      placeholder: "1 234 € / an"
+    validations:
+      required: true
+  - type: input
+    id: actual
+    attributes:
+      label: Value the model produced
+      placeholder: "1 456 € / an"
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Official source
+      description: Link (or precise reference) to the DGFiP/CAF simulator result or the statute establishing the expected value.
+      placeholder: "https://www.impots.gouv.fr/simulateur-ir-ir — or CGI art. …"
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: This is for **revenus 2024, métropole** (the MVP's scope).
+          required: true
+        - label: I checked `docs/coverage.md` and this is **not** already a documented simplification.
+          required: true
