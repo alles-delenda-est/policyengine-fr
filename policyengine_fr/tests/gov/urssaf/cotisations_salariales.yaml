@@ -1,0 +1,35 @@
+# Passage du salaire brut au salaire déclaré (case 1AJ), revenus 2024.
+# cotisations_salariales = brut × 0,1131 (taux effectif forfaitaire, hors CSG/CRDS).
+# salaire_declare = brut − cotisations_salariales − csg_deductible
+#   avec csg_deductible = brut × 0,9825 × 0,068.
+- name: Salaire brut 30 000 € — cotisations et salaire déclaré
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 30_000
+  output:
+    # 30 000 × 0,1131
+    cotisations_salariales: 3_393.00
+    # 30 000 × 0,9825 × 0,068
+    csg_deductible: 2_004.30
+    # 30 000 − 3 393 − 2 004,30
+    salaire_declare: 24_602.70
+
+- name: Salaire brut 50 000 € — cotisations et salaire déclaré
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 50_000
+  output:
+    cotisations_salariales: 5_655.00
+    csg_deductible: 3_340.50
+    salaire_declare: 41_004.50
+
+- name: Salaire brut nul — aucune cotisation, salaire déclaré nul
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 0
+  output:
+    cotisations_salariales: 0
+    salaire_declare: 0

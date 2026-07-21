@@ -64,6 +64,29 @@ def test_csg_crds_exact_and_non_negative(income):
 
 
 @SETTINGS
+@given(income=incomes)
+def test_payslip_identity(income):
+    # Spec 0001 §5.1: the brut → déclaré → net chain is coherent.
+    sim = build_household([income], [])
+    brut = sim.calculate("salaire_brut", Y).sum()
+    cotisations = sim.calculate("cotisations_salariales", Y).sum()
+    csg = sim.calculate("csg", Y).sum()
+    crds = sim.calculate("crds", Y).sum()
+    csg_deductible = sim.calculate("csg_deductible", Y).sum()
+    declare = sim.calculate("salaire_declare", Y).sum()
+
+    # salaire_declare = brut − cotisations − CSG déductible (deduction applied once).
+    assert math.isclose(
+        declare, max(brut - cotisations - csg_deductible, 0.0), abs_tol=0.5
+    )
+    # Take-home (net of the modelled wedge) is between 0 and gross, and below
+    # the declared salary is never above gross.
+    take_home = brut - cotisations - csg - crds
+    assert -0.01 <= take_home <= brut + 0.01
+    assert declare <= brut + 0.01
+
+
+@SETTINGS
 @given(income=incomes, kids=children)
 def test_quotient_familial_only_reduces_tax(income, kids):
     # At equal income, more parts (children) never raise the income tax.

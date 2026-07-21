@@ -9,11 +9,13 @@ class revenu_disponible(Variable):
     documentation = (
         "Revenu disponible annuel du ménage: l'agrégat de tête de l'MVP. "
         "Pour le périmètre modélisé, on part du revenu d'activité brut, on "
-        "retranche les prélèvements modélisés (impôt sur le revenu net, CSG et "
-        "CRDS sur les salaires) et on ajoute les prestations familiales "
-        "modélisées (allocations familiales et ASF annualisées):\n\n"
+        "retranche les prélèvements modélisés (cotisations sociales salariales, "
+        "CSG et CRDS sur les salaires, impôt sur le revenu net) et on ajoute les "
+        "prestations familiales modélisées (allocations familiales et ASF "
+        "annualisées):\n\n"
         "    revenu_disponible = salaire_brut + pensions_alimentaires_percues\n"
-        "        − impot_revenu − csg − crds − pensions_alimentaires_versees\n"
+        "        − cotisations_salariales − csg − crds\n"
+        "        − impot_revenu − pensions_alimentaires_versees\n"
         "        + allocations_familiales\n"
         "        + allocation_soutien_familial\n\n"
         "Définition et limites du périmètre MVP:\n"
@@ -21,10 +23,11 @@ class revenu_disponible(Variable):
         "et revenus non salariés hors champ); les pensions alimentaires perçues "
         "sont toutefois comptées comme un revenu et celles versées comme une "
         "charge.\n"
-        "- Les seuls prélèvements sociaux modélisés sur le salaire sont la CSG "
-        "et la CRDS; les autres cotisations sociales salariales (maladie, "
-        "retraite, chômage…) ne sont pas modélisées, donc le « net » ici ne "
-        "neutralise que la CSG/CRDS.\n"
+        "- Les cotisations sociales salariales sont approchées par un taux "
+        "effectif forfaitaire (voir `cotisations_salariales`), en plus de la "
+        "CSG/CRDS: `salaire_brut − cotisations_salariales − csg − crds` est donc "
+        "un salaire net approché (le « net » neutralise la cotisation "
+        "forfaitaire et la CSG/CRDS, à raffiner — docs/specs/0004).\n"
         "- Les prestations modélisées sont les allocations familiales et "
         "l'allocation de soutien familial (familles monoparentales); les "
         "allocations mensuelles sont annualisées (somme des douze mois). Elles "
@@ -45,6 +48,9 @@ class revenu_disponible(Variable):
         salaire_brut = menage.sum(menage.members("salaire_brut", period))
         pensions_percues = menage.sum(
             menage.members("pensions_alimentaires_percues", period)
+        )
+        cotisations_salariales = menage.sum(
+            menage.members("cotisations_salariales", period)
         )
         csg = menage.sum(menage.members("csg", period))
         crds = menage.sum(menage.members("crds", period))
@@ -81,6 +87,7 @@ class revenu_disponible(Variable):
         return (
             salaire_brut
             + pensions_percues
+            - cotisations_salariales
             - impot_revenu
             - csg
             - crds

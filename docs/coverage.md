@@ -12,11 +12,14 @@
 ## One-line summary
 
 This is a **disposable-income MVP for a wage-earning métropole household in
-2024**. It models income tax (IR) properly, CSG/CRDS on salary, and the two
-family benefits AF + ASF, aggregated into a household `revenu_disponible`. It is
-**not** yet a full payslip calculator (employee social contributions are missing)
-nor a means-tested-benefits engine (no RSA / prime d'activité / APL), and it only
-understands **salary** and **pensions alimentaires** as income.
+2024**. It models income tax (IR) properly, CSG/CRDS and a flat-rate employee
+cotisations layer on salary, and the two family benefits AF + ASF, aggregated
+into a household `revenu_disponible`. The salary input is **true gross**; a
+flat effective cotisations rate derives the declared salary (case 1AJ) the IR
+chain uses. It is **not** yet a full payslip calculator (the cotisations rate is
+a flat approximation, not a per-risk payslip) nor a means-tested-benefits engine
+(no RSA / prime d'activité / APL), and it only understands **salary** and
+**pensions alimentaires** as income.
 
 ---
 
@@ -26,7 +29,10 @@ understands **salary** and **pensions alimentaires** as income.
 
 The full chain from gross salary to net tax is modelled end-to-end:
 
-- **Salaire imposable** — gross salary less the 10 % professional-expenses
+- **Salaire déclaré (case 1AJ)** — gross salary less the flat-rate employee
+  cotisations and the deductible CSG (the CGI art. 154 quinquies deduction,
+  applied once here)
+- **Salaire imposable** — declared salary less the 10 % professional-expenses
   abattement (with floor and ceiling)
 - **Pensions alimentaires** — received pensions are taxable after a 10 %
   abattement (floor per beneficiary, ceiling per foyer fiscal); paid pensions are
@@ -41,6 +47,9 @@ The full chain from gross salary to net tax is modelled end-to-end:
 
 ### Social levies on salary (URSSAF)
 
+- **Cotisations salariales** — a single flat effective rate (≈ 11,31 % for 2024,
+  excl. CSG/CRDS) taking gross salary to declared salary; an MVP approximation
+  (no per-risk detail, no PASS ceilings, no cadre status, no low-wage relief)
 - **CSG** on activity income — assiette 98,25 %, split into deductible and
   imposable portions
 - **CRDS** on activity income
@@ -54,13 +63,13 @@ The full chain from gross salary to net tax is modelled end-to-end:
 
 ### Aggregate
 
-- **Revenu disponible** — the household top-line, combining net-of-tax income +
-  AF + ASF
+- **Revenu disponible** — the household top-line: gross salary less cotisations,
+  CSG/CRDS and net IR, plus AF + ASF
 
 ### Inputs accepted
 
-Salaire brut, age, parent-isolé flag, pensions alimentaires perçues, pensions
-alimentaires versées.
+Salaire brut (**true gross**), age, parent-isolé flag, pensions alimentaires
+perçues, pensions alimentaires versées.
 
 ---
 
@@ -70,50 +79,44 @@ These are modelled, but with a documented departure from the exact statute. (The
 authoritative list with legal references lives under `simplifications:` in
 `modelled_policies.yaml`.)
 
-1. **`salaire_brut → net` is NOT a full payslip.** Only CSG/CRDS come off salary.
-   The other employee contributions (health, retraite, chômage, AGIRC-ARRCO
-   complémentaire) are **not** deducted — so "net" here is not take-home pay.
-   Worse, the single salary input is read under **two different conventions**:
-   the income-tax chain treats it as *declared* salary (1AJ — the convention the
-   DGFiP-oracle validation used), while the CSG/CRDS formulas treat it as *gross*
-   salary (1,75 % assiette abatement). The two differ by ~20-25 % on a real
-   payslip. Entering declared salary gives an exact IR and an under-estimated
-   CSG/CRDS; `revenu_disponible` mixes both.
-2. **CSG déductible is computed but not deducted.** `csg_deductible` exists as a
-   levy, but the deduction from taxable income mandated by CGI art. 154
-   quinquies is not applied in `revenu_net_imposable`. Consistent with the
-   declared-salary reading of the input (a 1AJ amount is already net of
-   deductible CSG); to revisit if the input ever becomes true gross.
-3. **AF income test uses a proxy.** The modulation uses current-year (N) salary
+1. **Employee cotisations are a flat effective rate, not a payslip.** Gross
+   salary is taken to declared salary (case 1AJ) via a single flat rate
+   (≈ 11,31 % for 2024, excl. CSG/CRDS) plus the deductible CSG (applied once,
+   in `salaire_declare`). This resolves the former dual brut/déclaré convention
+   (IR now on declared, CSG/CRDS on 98,25 % of gross), but the flat rate ignores
+   per-risk detail, PASS ceilings, cadre status and low-wage (SMIC) relief — so
+   `salaire_brut − cotisations − CSG/CRDS` is an *approximate* net, not exact
+   take-home pay. To be refined (docs/specs/0004).
+2. **AF income test uses a proxy.** The modulation uses current-year (N) salary
    instead of the legal N-2 *base ressources* (revenu net catégoriel, art. R532-3
    CSS). Identical for stable incomes; diverges when income changed year-on-year.
-4. **AF modulation has hard cliffs.** The statutory *complément dégressif*
+3. **AF modulation has hard cliffs.** The statutory *complément dégressif*
    (CSS art. D521-1, al. 3) that tapers each threshold crossing is not modelled:
    a family €1 over a plafond loses the full tranche (~€745/year at the first
    threshold) instead of being smoothed. Amounts are exact away from the
    thresholds; marginal rates right at them are overstated.
-5. **ASF is family-total, not per-child**, and the pension input is assumed to be
+4. **ASF is family-total, not per-child**, and the pension input is assumed to be
    child support — a *prestation compensatoire* (spousal support) entered there
    would wrongly suppress ASF. Taux majoré (orphelin de deux parents) and
    recouvrement (CAF↔débiteur) are not modelled.
-6. **Paid pensions alimentaires** are taken as already-deductible — the
+5. **Paid pensions alimentaires** are taken as already-deductible — the
    per-major-child deduction ceiling (CGI art. 156, II, 2°) and eligibility
    conditions are not enforced.
-7. **CSG is flat 9,2 %** on salary; reduced rates (3,8 % / 6,2 %) for low earners
+6. **CSG is flat 9,2 %** on salary; reduced rates (3,8 % / 6,2 %) for low earners
    and rates on replacement income are out of scope.
-8. **Shared 10 % pension abattement.** The floor/ceiling on the pension abattement
+7. **Shared 10 % pension abattement.** The floor/ceiling on the pension abattement
    are, in law, common to *all* pensions (retraites incluses). The model applies
    them to pensions alimentaires alone; when retirement pensions are added the
    abattement must be merged to share one floor/ceiling, or it is granted twice.
-9. **Benefits are paid gross of CRDS.** AF and ASF are returned at their gross
+8. **Benefits are paid gross of CRDS.** AF and ASF are returned at their gross
    amounts; the 0,5 % CRDS due on family benefits is never levied, so
    `revenu_disponible` overstates benefit income by ~0,5 %. The AF age-14
    majoration is also granted from the birthday month instead of the following
    month (one extra month, once per child).
-10. **Widowed parents get single-declarant parts.** CGI art. 194 grants a
-    veuf/veuve with dependent children the base parts of a married couple
-    (e.g. 2,5 parts with one child); the model can only represent them as a
-    single declarant (1,5-2 parts), understating parts by 0,5-1.
+9. **Widowed parents get single-declarant parts.** CGI art. 194 grants a
+   veuf/veuve with dependent children the base parts of a married couple
+   (e.g. 2,5 parts with one child); the model can only represent them as a
+   single declarant (1,5-2 parts), understating parts by 0,5-1.
 
 ---
 
@@ -130,8 +133,9 @@ authoritative list with legal references lives under `simplifications:` in
 
 ### Social contributions
 
-- Cotisations sociales salariales — maladie, vieillesse, chômage, retraite
-  complémentaire (the bulk of the brut → net gap)
+- Cotisations sociales salariales **détaillées** — per-risk (maladie, vieillesse,
+  chômage, retraite complémentaire), PASS ceilings, cadre status and low-wage
+  (SMIC) relief. Only a single flat effective rate is modelled today (see ⚠️ #1)
 - Employer contributions (relevant only if modelling from super-brut)
 - CSG/CRDS on non-salary income (retirement pensions at reduced rates, capital,
   replacement income)

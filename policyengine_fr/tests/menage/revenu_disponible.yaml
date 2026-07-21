@@ -1,10 +1,12 @@
 # Revenu disponible du ménage (agrégat de tête du MVP), revenus 2024.
-# revenu_disponible = salaire_brut − impot_revenu − csg − crds
-#                     + allocations_familiales (annualisées).
-# Valeurs de référence = combinaison arithmétique des composantes déjà
-# testées unitairement (barème 11 497 @ 11 % / 29 315 @ 30 % / 83 823 @ 41 %,
-# décote seuils 889 / 1 470 au taux 0,4525, CSG 9,2 % et CRDS 0,5 % sur
-# 98,25 % du brut, BMAF 445,93 puis 466,44 au 1er avril 2024).
+# L'entrée `salaire_brut` est un salaire BRUT réel (spec 0001). Le modèle en
+# dérive le salaire déclaré (brut − cotisations salariales − CSG déductible),
+# base de l'IR, tandis que la CSG/CRDS reste assise sur 98,25 % du brut.
+#   revenu_disponible = salaire_brut − cotisations_salariales
+#                       − impot_revenu − csg − crds − pensions_versees
+#                       + allocations_familiales + ASF (annualisées).
+# cotisations_salariales = brut × 0,1131. csg_deductible = brut × 0,9825 × 0,068.
+# Ancrage DGFiP officiel (déclaré → IR) : voir tests/fixtures/oracle_values.yaml.
 
 - name: Célibataire sans enfant, salaire brut 30 000
   absolute_error_margin: 0.01
@@ -23,11 +25,10 @@
       menage_1:
         personnes_de_reference: [declarant_1]
   output:
-    # salaire imposable = 27 000 ; impôt brut = 1 705.33 ; décote = 117.34 ;
-    # impôt net = 1 587.99 ; CSG = 2 711.70 ; CRDS = 147.375 ; AF = 0.
-    # 30 000 − 1 587.99 − 2 711.70 − 147.375 = 25 552.93
-    # (confirmé par le simulateur officiel impots.gouv.fr : impôt net 1 588 €)
-    revenu_disponible: 25_552.93
+    # cotisations = 3 393 ; salaire déclaré = 24 602,70 ; imposable = 22 142,43 ;
+    # impôt net = 811,87 ; CSG = 2 711,70 ; CRDS = 147,375 ; AF = 0.
+    # 30 000 − 3 393 − 811,87 − 2 711,70 − 147,375 = 22 936,05
+    revenu_disponible: 22_936.05
 
 - name: Couple deux enfants (8 et 10 ans), salaire brut 60 000 — AF à taux plein
   absolute_error_margin: 0.01
@@ -55,11 +56,10 @@
         conjoints: [parent_2]
         enfants: [enfant_1, enfant_2]
   output:
-    # RNI = 54 000 ; 3 parts ; impôt brut = 2 145.99 (pas de plafonnement) ;
-    # décote couple = 498.94 ; impôt net = 1 647.05 ;
-    # CSG = 5 423.40 ; CRDS = 294.75 ; AF taux plein = 1 771.44.
-    # 60 000 − 1 647.05 − 5 423.40 − 294.75 + 1 771.44 = 54 406.24
-    revenu_disponible: 54_406.24
+    # cotisations = 6 786 ; RNI = 44 284,86 ; impôt net = 94,81 ;
+    # CSG = 5 423,40 ; CRDS = 294,75 ; AF taux plein = 1 771,44.
+    # 60 000 − 6 786 − 94,81 − 5 423,40 − 294,75 + 1 771,44 = 49 172,48
+    revenu_disponible: 49_172.48
 
 - name: Célibataire haut revenu sans enfant, salaire brut 150 000
   absolute_error_margin: 0.01
@@ -78,8 +78,7 @@
       menage_1:
         personnes_de_reference: [declarant_1]
   output:
-    # salaire imposable = 135 574 (abattement plafonné à 14 426) ; 1 part ;
-    # impôt = 17 818×0,11 + 54 508×0,30 + 51 751×0,41 = 39 530.29 ;
-    # CSG = 13 558.50 ; CRDS = 736.875 ; AF = 0.
-    # 150 000 − 39 530.29 − 13 558.50 − 736.875 = 96 174.34
-    revenu_disponible: 96_174.34
+    # cotisations = 16 965 ; RNI = 110 712,15 ; impôt net = 29 336,93 ;
+    # CSG = 13 558,50 ; CRDS = 736,875 ; AF = 0.
+    # 150 000 − 16 965 − 29 336,93 − 13 558,50 − 736,875 = 89 402,70
+    revenu_disponible: 89_402.70

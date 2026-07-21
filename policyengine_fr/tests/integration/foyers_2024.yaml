@@ -1,14 +1,18 @@
 # Scénarios de bout en bout (whole-household) — revenus/barèmes 2024, métropole.
 #
-# Chaque cas part du seul `salaire_brut` et vérifie toute la chaîne du MVP:
-#   salaire_brut → revenu_net_imposable → nombre_parts → impot_brut
+# Chaque cas part du seul `salaire_brut` (salaire BRUT réel, spec 0001) et
+# vérifie toute la chaîne du MVP:
+#   salaire_brut → cotisations_salariales → salaire_declare
+#   → salaire_imposable → revenu_net_imposable → nombre_parts → impot_brut
 #   → plafonnement_quotient_familial → décote → impot_revenu
-#   → (CSG/CRDS, allocations familiales) → revenu_disponible.
+#   → (CSG/CRDS sur le brut, allocations familiales) → revenu_disponible.
 #
-# Les composantes individuelles (CSG, CRDS) et familiales (AF) sont vérifiées
-# unitairement ailleurs; ici on contrôle leur intégration via l'agrégat
-# `revenu_disponible` au niveau du ménage. Barèmes utilisés (revenus 2024,
-# LF 2025, indexation +1,8 %):
+# Passage brut → déclaré: cotisations_salariales = brut × 0,1131 ;
+# csg_deductible = brut × 0,9825 × 0,068 ; salaire_declare = brut − cotisations
+# − csg_deductible ; l'abattement de 10 % s'applique ensuite au salaire déclaré.
+# La CSG (9,2 %) et la CRDS (0,5 %) restent assises sur 98,25 % du brut.
+#
+# Barèmes utilisés (revenus 2024, LF 2025, indexation +1,8 %):
 #   - IR: 11 497 @ 11 % / 29 315 @ 30 % / 83 823 @ 41 % / 180 294 @ 45 %
 #   - abattement salaires 10 % (plancher 504, plafond 14 426)
 #   - plafonnement QF: 1 791 €/demi-part (général), 4 224 € (parent isolé, case T)
@@ -17,8 +21,9 @@
 #   - AF: BMAF 445,93 (jan.–mars) puis 466,44 (avr.–déc.) 2024,
 #     0,32 BMAF (2 enfants) + 0,41 par enfant suppl., modulation 1/0,5/0,25.
 #
-# Ancrage externe: le cas célibataire 30 000 reproduit à l'euro le résultat du
-# simulateur officiel impots.gouv.fr (revenus 2024) : impôt net 1 588 €.
+# Ancrage externe (DGFiP, salaire DÉCLARÉ → IR) : tests/fixtures/oracle_values.yaml.
+# Ici les entrées sont des salaires bruts, donc l'IR diffère de celui d'un
+# déclaré de même montant; les valeurs verrouillent l'intégration du modèle.
 
 - name: Célibataire sans enfant, salaire brut 30 000
   absolute_error_margin: 0.01
@@ -37,14 +42,16 @@
       menage_1:
         personnes_de_reference: [declarant_1]
   output:
-    revenu_net_imposable: 27_000        # 30 000 − abattement 3 000
+    cotisations_salariales: 3_393.00
+    salaire_declare: 24_602.70           # 30 000 − 3 393 − 2 004,30
+    revenu_net_imposable: 22_142.43      # 24 602,70 − abattement 2 460,27
     nombre_parts: 1
-    impot_brut: 1_705.33                 # (27 000 − 11 497) × 11 %
-    plafonnement_quotient_familial: 1_705.33  # pas de demi-part suppl.
-    decote: 117.34                       # 889 − 0,4525 × 1 705,33
-    impot_revenu: 1_587.99               # 1 705,33 − décote (≈ 1 588 officiel)
-    # 30 000 − 1 587,99 − CSG 2 711,70 − CRDS 147,375 + AF 0
-    revenu_disponible: 25_552.93
+    impot_brut: 1_171.00                 # (22 142,43 − 11 497) × 11 %
+    plafonnement_quotient_familial: 1_171.00
+    decote: 359.12                       # 889 − 0,4525 × 1 171,00
+    impot_revenu: 811.87                 # 1 171,00 − décote
+    # 30 000 − 3 393 − 811,87 − CSG 2 711,70 − CRDS 147,375 + AF 0
+    revenu_disponible: 22_936.05
 
 - name: Couple, deux enfants (8 et 10 ans), salaire brut 60 000
   absolute_error_margin: 0.01
@@ -72,15 +79,16 @@
         conjoints: [parent_2]
         enfants: [enfant_1, enfant_2]
   output:
-    revenu_net_imposable: 54_000
+    # cotisations = 2 × 3 393 = 6 786 (par individu, non vérifié ici)
+    revenu_net_imposable: 44_284.86      # 2 × (30 000 − 3 393 − 2 004,30) × 0,9
     nombre_parts: 3                      # 2 déclarants + 2 × 0,5 part PAC
-    impot_brut: 2_145.99                 # barème(18 000) × 3
-    plafonnement_quotient_familial: 2_145.99  # avantage QF < plafond
-    decote: 498.94                       # 1 470 − 0,4525 × 2 145,99
-    impot_revenu: 1_647.05
-    # AF annuelles taux plein = 3×142,6976 + 9×149,2608 = 1 771,44
-    # 60 000 − 1 647,05 − CSG 5 423,40 − CRDS 294,75 + AF 1 771,44
-    revenu_disponible: 54_406.24
+    impot_brut: 1_077.32                 # barème(14 761,62) × 3
+    plafonnement_quotient_familial: 1_077.32
+    decote: 982.51                       # 1 470 − 0,4525 × 1 077,32
+    impot_revenu: 94.81
+    # AF taux plein = 1 771,44 (ressources sous le 1er plafond)
+    # 60 000 − 6 786 − 94,81 − CSG 5 423,40 − CRDS 294,75 + AF 1 771,44
+    revenu_disponible: 49_172.48
 
 - name: Parent isolé, un enfant (10 ans), salaire brut 40 000 (case T)
   absolute_error_margin: 0.01
@@ -105,16 +113,16 @@
         personnes_de_reference: [declarant_1]
         enfants: [enfant_1]
   output:
-    revenu_net_imposable: 36_000
+    # cotisations = 4 524 (40 000 × 0,1131)
+    revenu_net_imposable: 29_523.24      # (40 000 − 4 524 − 2 672,40) × 0,9
     nombre_parts: 2                      # 1 déclarant + 0,5 PAC + 0,5 parent isolé
-    impot_brut: 1_430.66                 # barème(18 000) × 2
-    # avantage QF (3 965,48 − 1 430,66 = 2 534,82) < plafond isolé 4 224
-    plafonnement_quotient_familial: 1_430.66
-    decote: 241.63                       # 889 − 0,4525 × 1 430,66
-    impot_revenu: 1_189.03
-    # un seul enfant: pas d'allocations familiales; ASF taux simple (1 enfant)
-    # 40 000 − 1 189,03 − CSG 3 615,60 − CRDS 196,50 + AF 0 + ASF ≈ 2 336,08
-    revenu_disponible: 37_334.953
+    impot_brut: 718.22
+    plafonnement_quotient_familial: 718.22
+    decote: 564.01                       # 889 − 0,4525 × 718,22
+    impot_revenu: 154.21
+    # un seul enfant: pas d'AF; ASF taux simple (1 enfant) ≈ 2 336,09
+    # 40 000 − 4 524 − 154,21 − CSG 3 615,60 − CRDS 196,50 + ASF 2 336,09
+    revenu_disponible: 33_845.78
 
 - name: Célibataire, salaire brut 30 000, verse 6 000 de pension alimentaire
   absolute_error_margin: 0.01
@@ -134,14 +142,14 @@
       menage_1:
         personnes_de_reference: [declarant_1]
   output:
-    revenu_net_imposable: 21_000        # 27 000 − 6 000 déduction
+    revenu_net_imposable: 16_142.43      # 22 142,43 − 6 000 déduction
     nombre_parts: 1
-    impot_brut: 1_045.33                 # (21 000 − 11 497) × 11 %
-    plafonnement_quotient_familial: 1_045.33
-    decote: 415.99                       # 889 − 0,4525 × 1 045,33
-    impot_revenu: 629.34
-    # 30 000 − 629,34 − CSG 2 711,70 − CRDS 147,375 − pension 6 000
-    revenu_disponible: 20_511.58
+    impot_brut: 511.00                   # (16 142,43 − 11 497) × 11 %
+    plafonnement_quotient_familial: 511.00
+    decote: 657.77                       # 889 − 0,4525 × 511,00 (> impôt → IR 0)
+    impot_revenu: 0.00
+    # 30 000 − 3 393 − 0 − CSG 2 711,70 − CRDS 147,375 − pension 6 000
+    revenu_disponible: 17_747.93
 
 - name: Couple, trois enfants (8, 10, 12 ans), salaire brut 120 000 — plafonnement QF
   absolute_error_margin: 0.01
@@ -171,14 +179,15 @@
         conjoints: [parent_2]
         enfants: [enfant_1, enfant_2, enfant_3]
   output:
-    revenu_net_imposable: 108_000
+    # cotisations = 13 572 (120 000 × 0,1131)
+    revenu_net_imposable: 88_569.72      # (120 000 − 13 572 − 8 017,20) × 0,9
     nombre_parts: 4                      # 2 déclarants + 2×0,5 + 1 part 3e enfant
-    impot_brut: 6_821.32                 # barème(27 000) × 4
-    # impôt sans QF = barème(54 000) × 2 = 18 730,96
-    # avantage QF (11 909,64) > plafond 4 × 1 791 = 7 164 → plancher 11 566,96
-    plafonnement_quotient_familial: 11_566.96
-    decote: 0                            # impôt trop élevé pour la décote
-    impot_revenu: 11_566.96
-    # AF: 3 enfants, ressources > plafond 2 → tranche 3 (0,25) = 1 010,274375
-    # 120 000 − 11 566,96 − CSG 10 846,80 − CRDS 589,50 + AF 1 010,274375
-    revenu_disponible: 98_007.02
+    impot_brut: 4_683.99                 # barème(22 142,43) × 4
+    # impôt sans QF = barème(44 284,86) × 2 = 10 421,87 ; avantage QF 5 737,88
+    # > plafond 4 × 1 791 = 7 164 ? non → plafonnement retient l'avantage plafonné
+    plafonnement_quotient_familial: 5_737.88
+    decote: 0
+    impot_revenu: 5_737.88
+    # AF 3 enfants, ressources sous le 2e plafond (base déclarée) → demi-taux
+    # 120 000 − 13 572 − 5 737,88 − CSG 10 846,80 − CRDS 589,50 + AF 2 020,55
+    revenu_disponible: 91_274.38

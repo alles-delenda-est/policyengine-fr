@@ -5,6 +5,7 @@ core:
     - Plafonnement du quotient familial
     - Décote
     - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %)
+    - Cotisations sociales salariales — taux effectif forfaitaire (passage du salaire brut au salaire déclaré, case 1AJ)
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
     - Allocation de soutien familial (ASF) — taux simple, en complément différentiel de la pension alimentaire perçue (famille monoparentale)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement de 10 % (perçues)
@@ -13,7 +14,7 @@ core:
     - Réductions et crédits d'impôt
     - Contribution exceptionnelle sur les hauts revenus
     - Prélèvements sociaux sur les revenus du capital et de remplacement
-    - Cotisations sociales salariales (maladie, retraite, chômage…)
+    - Cotisations sociales salariales détaillées (par risque, plafonds SS, statut cadre, allègements bas salaires) et cotisations patronales
     - Autres prestations sociales (RSA, APL, prime d'activité…)
     - Revenus non salariés, pensions de retraite et revenus du capital (hors pensions alimentaires perçues)
   simplifications:
@@ -53,26 +54,18 @@ core:
       sa propre pension) puis le total est plafonné au niveau du foyer fiscal,
       ce qui approche la règle légale de répartition exacte du plafond.
     - >-
-      Convention d'entrée du salaire — la variable d'entrée `salaire_brut` est
-      lue comme le salaire DÉCLARÉ (case 1AJ, net de cotisations sociales et de
-      CSG déductible) par la chaîne impôt sur le revenu — c'est la convention
-      sous laquelle le modèle reproduit le simulateur DGFiP à l'euro près —
-      mais comme un salaire BRUT par les formules CSG/CRDS (abattement
-      d'assiette de 1,75 %, art. L136-2 CSS). Les deux lectures diffèrent
-      d'environ 20-25 % sur une fiche de paie réelle. En saisissant le salaire
-      déclaré, l'IR est exact et la CSG/CRDS est calculée sur une base
-      sous-estimée; `revenu_disponible` soustrait les deux du même montant et
-      n'est donc le revenu disponible exact d'aucun ménage réel sous l'une ou
-      l'autre lecture. À trancher avant toute prestation sous condition de
-      ressources (voir la feuille de route).
-    - >-
-      CSG déductible non déduite de la base imposable — `csg_deductible`
-      (6,8 % sur 98,25 % du salaire) est calculée comme prélèvement, mais la
-      déductibilité prévue par le CGI art. 154 quinquies n'est pas appliquée
-      dans `revenu_net_imposable`. Cohérent avec la lecture « salaire déclaré »
-      de l'entrée (un montant 1AJ est déjà net de CSG déductible), incohérent
-      sous la lecture « brut ». Si la convention brut est retenue un jour, la
-      déduction devra être ajoutée et l'oracle DGFiP re-capturé.
+      Cotisations salariales à taux effectif forfaitaire (spec 0001) —
+      l'entrée `salaire_brut` est un salaire BRUT réel, converti en salaire
+      déclaré (case 1AJ) via un taux effectif plat de cotisations sociales
+      salariales (≈ 11,31 % pour 2024, hors CSG/CRDS ; paramètre
+      `gov.urssaf.cotisations_salariales.taux_effectif`) puis en retranchant la
+      CSG déductible (CGI art. 154 quinquies, appliquée une seule fois à cette
+      étape, dans `salaire_declare`). L'IR porte sur le salaire déclaré et la
+      CSG/CRDS sur 98,25 % du brut : l'ancienne double-convention brut/déclaré
+      est ainsi levée, et `revenu_disponible` retranche désormais les
+      cotisations. Le taux plat ne distingue ni le statut cadre, ni les plafonds
+      de la sécurité sociale, ni les allègements bas salaires (SMIC) — à
+      raffiner (docs/specs/0004).
     - >-
       Allocations familiales — complément dégressif non modélisé : la
       modulation applique les taux plein/moitié/quart en marche d'escalier aux

@@ -9,6 +9,15 @@
 # « Impôt sur le revenu net ». The simulator reports whole euros. Every row
 # matched the model to within €0.50 (tolerance €5).
 #
+# SALARY CONCEPT (spec 0001): the `salaires` below are DECLARED salaries (case
+# 1AJ) — the amounts entered into the DGFiP/openfisca simulators. Since spec
+# 0001 the model's public input `salaire_brut` is TRUE GROSS; the declared→IR
+# (and declared→AF/ASF) chains validated here are unchanged, so these rows still
+# hold when the declared amount is fed as `salaire_declare`. The new
+# gross→declared step (cotisations + CSG déductible) is validated separately by
+# the payslip-identity property test (tests/test_properties.py) — the DGFiP
+# simulator cannot oracle it, as it does not expose cotisations.
+#
 # The 3 allocations_familiales rows were captured 2026-06-22 from
 # openfisca-france (v175.0.45) — an independent French microsimulation codebase
 # — because the DGFiP IR simulator does not output AF. Reproducible via
