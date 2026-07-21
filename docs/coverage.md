@@ -13,13 +13,13 @@
 
 This is a **disposable-income MVP for a wage-earning métropole household in
 2024**. It models income tax (IR) properly, CSG/CRDS and a flat-rate employee
-cotisations layer on salary, and the two family benefits AF + ASF, aggregated
-into a household `revenu_disponible`. The salary input is **true gross**; a
-flat effective cotisations rate derives the declared salary (case 1AJ) the IR
-chain uses. It is **not** yet a full payslip calculator (the cotisations rate is
-a flat approximation, not a per-risk payslip) nor a means-tested-benefits engine
-(no RSA / prime d'activité / APL), and it only understands **salary** and
-**pensions alimentaires** as income.
+cotisations layer on salary, and the two family benefits AF + ASF, the **RSA socle** (the first means-tested benefit),
+aggregated into a household `revenu_disponible`. The salary input is **true
+gross**; a flat effective cotisations rate derives the declared salary (case
+1AJ) the IR chain uses. It is **not** yet a full payslip calculator (the
+cotisations rate is a flat approximation, not a per-risk payslip); the
+means-tested layer covers **RSA socle only** (no prime d'activité / APL), and it
+only understands **salary** and **pensions alimentaires** as income.
 
 ---
 
@@ -60,6 +60,14 @@ The full chain from gross salary to net tax is modelled end-to-end:
   age majoration
 - **Allocation de soutien familial (ASF)** — taux simple, paid as a *complément
   différentiel* (received pension alimentaire netted off), single-parent famille
+
+### Means-tested benefits (CNAF)
+
+- **RSA socle** — the differential minimum-income top-up:
+  `max(montant forfaitaire − forfait logement − base ressources, 0)`. Models the
+  equivalence scale (couple + per-child majorations, and the RSA *majoré* for a
+  single parent), the forfait logement, and a differential base ressources that
+  includes salary, pensions alimentaires, AF and ASF.
 
 ### Aggregate
 
@@ -117,6 +125,19 @@ authoritative list with legal references lives under `simplifications:` in
    veuf/veuve with dependent children the base parts of a married couple
    (e.g. 2,5 parts with one child); the model can only represent them as a
    single declarant (1,5-2 parts), understating parts by 0,5-1.
+10. **RSA base ressources is an annual/12 proxy.** The legal base is the average
+    of the 3 months before the claim (CASF art. R262-3); the model uses annual
+    modelled income ÷ 12. The resource perimeter is limited to what the MVP
+    models (salary, pensions alimentaires, AF, ASF); the 3-month activity-income
+    neutralisation (art. R262-7) is not applied.
+11. **RSA forfait logement is always applied.** Housing status is not modelled,
+    so the forfait logement (art. R262-9) is always deducted (assumes a housing
+    aid or free lodging). A renter with no housing aid would see RSA understated
+    by the forfait.
+12. **RSA is socle-only, isolement by proxy.** Only the RSA socle is modelled (no
+    prime d'activité, RSA jeune, intéressement, contrat d'engagement/sanctions).
+    RSA *majoré* (single parent) is triggered by the "one parent with a child"
+    proxy, and its duration limit (until the youngest turns 3) is not modelled.
 
 ---
 
@@ -142,7 +163,8 @@ authoritative list with legal references lives under `simplifications:` in
 
 ### Social benefits (the largest gap)
 
-- **RSA** — revenu de solidarité active
+- **RSA** — ✅ socle modelled (see above); still missing: prime d'activité,
+  RSA majoré duration, intéressement/cumul, the 3-month resource neutralisation
 - **Prime d'activité**
 - **Aides au logement** — APL / ALS / ALF
 - **Complément familial**

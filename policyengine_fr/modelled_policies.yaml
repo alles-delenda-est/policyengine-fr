@@ -9,13 +9,14 @@ core:
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
     - Allocation de soutien familial (ASF) — taux simple, en complément différentiel de la pension alimentaire perçue (famille monoparentale)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement de 10 % (perçues)
+    - Revenu de solidarité active (RSA) — socle : montant forfaitaire (échelle d'équivalence, RSA majoré parent isolé), forfait logement, base ressources différentielle
     - Revenu disponible — agrégat de tête de l'MVP (revenus 2024)
   not_modelled:
     - Réductions et crédits d'impôt
     - Contribution exceptionnelle sur les hauts revenus
     - Prélèvements sociaux sur les revenus du capital et de remplacement
     - Cotisations sociales salariales détaillées (par risque, plafonds SS, statut cadre, allègements bas salaires) et cotisations patronales
-    - Autres prestations sociales (RSA, APL, prime d'activité…)
+    - Autres prestations sociales (APL, prime d'activité, complément familial, PAJE, ARS, AAH, ASPA…)
     - Revenus non salariés, pensions de retraite et revenus du capital (hors pensions alimentaires perçues)
   simplifications:
     # Explicit scope-narrowings: modelled, but with a documented departure from
@@ -96,3 +97,25 @@ core:
       calculé sur cette seule assiette. Lorsque les pensions de retraite seront
       modélisées, cet abattement devra être fusionné avec elles pour partager un
       unique plancher/plafond, sous peine d'accorder l'abattement deux fois.
+    - >-
+      RSA — base ressources approchée (spec 0002) : la base légale est la
+      moyenne des ressources des 3 mois précédant la demande (CASF art. R262-3) ;
+      le modèle utilise le revenu annuel modélisé / 12 comme proxy mensuel (même
+      simplification que la base ressources des AF). Le périmètre des ressources
+      est réduit à ce que le MVP sait modéliser (salaires déclarés, pensions
+      alimentaires perçues, AF et ASF ; ni capital, ni revenus de remplacement,
+      ni autres prestations). L'abattement / la neutralisation des revenus
+      d'activité des 3 premiers mois (art. R262-7) n'est pas appliqué.
+    - >-
+      RSA — forfait logement appliqué systématiquement : le statut de logement
+      n'étant pas modélisé, le forfait logement (CASF art. R262-9) est toujours
+      déduit (hypothèse d'un foyer bénéficiant d'une aide au logement ou logé à
+      titre gratuit). Un locataire sans aide au logement verrait son RSA
+      sous-estimé du montant du forfait.
+    - >-
+      RSA — socle seul, isolement par proxy : seul le RSA socle est modélisé
+      (hors prime d'activité, RSA jeune, cumul intéressement, contrat
+      d'engagement et sanctions). Le RSA majoré (parent isolé) est déclenché par
+      le proxy « un seul parent avec enfant » (comme l'ASF) et sa durée (jusqu'aux
+      3 ans du plus jeune enfant, art. L262-9) n'est pas modélisée. Métropole
+      uniquement.

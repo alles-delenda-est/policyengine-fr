@@ -110,6 +110,27 @@ def test_allocations_familiales_eligibility(income, kids):
 
 
 @SETTINGS
+@given(income=incomes)
+def test_rsa_non_negative_and_decreasing_in_income(income):
+    # RSA (socle) is a differential top-up: never negative, and never rises
+    # with income (single adult, no children — clean base ressources).
+    low = build_household([income], []).calculate_add("rsa", Y).sum()
+    high = build_household([income + 3_000], []).calculate_add("rsa", Y).sum()
+    assert low >= -0.01
+    assert high <= low + 0.01
+
+
+def test_rsa_lifts_low_income_disposable_income():
+    # A zero-income single adult receives RSA, so disposable income is positive
+    # and equals the annualised RSA (no other income/benefit).
+    sim = build_household([0], [])
+    rsa = float(sim.calculate_add("rsa", Y).sum())
+    rdb = float(sim.calculate("revenu_disponible", Y).sum())
+    assert rsa > 0
+    assert math.isclose(rdb, rsa, abs_tol=0.5)
+
+
+@SETTINGS
 @given(income=incomes, kids=children)
 def test_outputs_finite(income, kids):
     sim = build_household([income, 0], kids)
@@ -199,11 +220,15 @@ def test_csg_identity():
 
 
 def test_asf_in_revenu_disponible_single_parent():
-    # Single parent, 1 child, no income: revenu_disponible == annual ASF.
+    # Single parent, 1 child, no income: revenu_disponible == annual ASF + RSA.
+    # (ASF ≈ 2336.09/yr; the parent also draws RSA majoré, whose base ressources
+    # include the ASF — so both flow into revenu_disponible.)
     sim = build_household([0], [8])
     rd = float(sim.calculate("revenu_disponible", "2024").sum())
-    # 3×188,18246 (jan-mars) + 9×196,83768 (avr-déc) = 2336.0865...
-    assert abs(rd - 2336.09) < 0.1
+    asf = float(sim.calculate_add("allocation_soutien_familial", "2024").sum())
+    rsa = float(sim.calculate_add("rsa", "2024").sum())
+    assert asf > 0 and rsa > 0
+    assert math.isclose(rd, asf + rsa, abs_tol=0.5)
 
 
 def test_assiette_identity():

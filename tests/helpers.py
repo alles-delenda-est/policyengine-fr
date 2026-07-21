@@ -75,7 +75,7 @@ def build_household(
 # Output variables and how to read them (allocations_familiales is monthly).
 ANNUAL_VARS = ["revenu_net_imposable", "impot_revenu", "revenu_disponible"]
 PER_PERSON_ANNUAL_VARS = ["csg", "crds"]
-MONTHLY_VARS = ["allocations_familiales", "allocation_soutien_familial"]
+MONTHLY_VARS = ["allocations_familiales", "allocation_soutien_familial", "rsa"]
 
 
 def totals(sim: Simulation, year: int = YEAR) -> dict[str, float]:

@@ -35,7 +35,7 @@ meta:
   ir_url: "https://simulateur-ir-ifi.impots.gouv.fr/calcul_impot/2025/simplifie/index.htm"
   af_oracle: "openfisca-france v175.0.45 (independent codebase); CAF estimateur as manual cross-check"
   af_url: "https://github.com/openfisca/openfisca-france"
-  tolerances: {impot_revenu: 5.0, allocations_familiales: 12.0, allocation_soutien_familial: 12.0}
+  tolerances: {impot_revenu: 5.0, allocations_familiales: 12.0, allocation_soutien_familial: 12.0, rsa: 12.0}
   notes: >
     impot_revenu compared directly (annual, €). allocations_familiales compares
     the model's annual total to 12× the CAF monthly estimate; expect noise from
@@ -57,3 +57,8 @@ households:
   - {id: couple_40k_4children_af,    variable: allocations_familiales, inputs: {situation: maries,     parent_isole: false, salaires: [40000, 0],     enfants: [2, 6, 11, 15]}, period: "2024", model: 7196.48,  official: 7196.46, captured_on: "2026-06-22"}
   - {id: single_parent_1child_asf,  variable: allocation_soutien_familial, inputs: {situation: celibataire, parent_isole: true, salaires: [0], enfants: [8]}, period: "2024", model: 2336.09, official: 2336.09, captured_on: "2026-06-22"}
   - {id: single_parent_1child_pension_asf, variable: allocation_soutien_familial, inputs: {situation: celibataire, parent_isole: true, salaires: [0], pensions: [1200], enfants: [8]}, period: "2024", model: 1136.09, official: 1136.09, captured_on: "2026-06-24"}
+  # RSA (socle) — official values NOT yet captured (CAF estimateur / openfisca-france);
+  # rows skip until `official` is filled. `salaires` are declared 1AJ (fed as salaire_declare).
+  - {id: single_0_rsa,               variable: rsa, inputs: {situation: celibataire, parent_isole: false, salaires: [0],       enfants: []},     period: "2024", model: 6639.28,  official: null, captured_on: null}
+  - {id: couple_0_2children_rsa,     variable: rsa, inputs: {situation: maries,      parent_isole: false, salaires: [0, 0],    enfants: [8, 10]}, period: "2024", model: 11831.54, official: null, captured_on: null}
+  - {id: single_parent_0_1child_rsa, variable: rsa, inputs: {situation: celibataire, parent_isole: true,  salaires: [0],       enfants: [8]},    period: "2024", model: 5541.42,  official: null, captured_on: null}

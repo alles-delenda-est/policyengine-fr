@@ -1,0 +1,128 @@
+# Revenu de solidarité active — socle (CASF art. L262-1 et s.), revenus 2024.
+# Montant forfaitaire 1 personne = 635,71 € au 1er avril 2024 (décret 2024-396).
+# Échelle: +0,5 (2e adulte), +0,3/enfant (rangs 1-2), +0,4/enfant (rang 3+).
+# Parent isolé (majoré): 1,28412 (parent + 1er enfant) + 0,42804/enfant suppl.
+# Forfait logement: 12 % du MF(1) / 16 % du MF(2) / 16,5 % du MF(3).
+# RSA = max(MF − forfait_logement − base_ressources, 0).
+
+# ── Montant forfaitaire (échelle d'équivalence) ─────────────────────────────
+- name: Montant forfaitaire — personne seule
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1: {age: 40}
+    familles:
+      fam: {parents: [p1]}
+  output:
+    rsa_montant_forfaitaire: 635.71
+    rsa_forfait_logement: 76.29          # 12 % × 635,71
+
+- name: Montant forfaitaire — couple sans enfant
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1: {age: 40}
+      p2: {age: 40}
+    familles:
+      fam: {parents: [p1, p2]}
+  output:
+    rsa_montant_forfaitaire: 953.57      # 635,71 × 1,5
+    rsa_forfait_logement: 152.57         # 16 % × 953,57
+
+- name: Montant forfaitaire — couple deux enfants
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1: {age: 40}
+      p2: {age: 40}
+      e1: {age: 8}
+      e2: {age: 10}
+    familles:
+      fam: {parents: [p1, p2], enfants: [e1, e2]}
+  output:
+    rsa_montant_forfaitaire: 1_334.99    # 635,71 × (1,5 + 0,3 + 0,3)
+
+- name: Montant forfaitaire — couple trois enfants (rang 3 à 0,4)
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1: {age: 40}
+      p2: {age: 40}
+      e1: {age: 8}
+      e2: {age: 10}
+      e3: {age: 12}
+    familles:
+      fam: {parents: [p1, p2], enfants: [e1, e2, e3]}
+  output:
+    rsa_montant_forfaitaire: 1_589.28    # 635,71 × (1,5 + 0,3 + 0,3 + 0,4)
+
+- name: Montant forfaitaire majoré — parent isolé un enfant
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1: {age: 30}
+      e1: {age: 2}
+    familles:
+      fam: {parents: [p1], enfants: [e1]}
+  output:
+    rsa_montant_forfaitaire: 816.33      # 635,71 × 1,28412
+
+- name: Montant forfaitaire majoré — parent isolé deux enfants
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1: {age: 30}
+      e1: {age: 2}
+      e2: {age: 5}
+    familles:
+      fam: {parents: [p1], enfants: [e1, e2]}
+  output:
+    rsa_montant_forfaitaire: 1_088.44    # 635,71 × (1,28412 + 0,42804)
+
+# ── Comportement différentiel (personne seule, sans enfant) ─────────────────
+- name: RSA différentiel — aucune ressource, RSA plein moins forfait logement
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1:
+        age: {2024: 40}
+        salaire_declare: {2024: 0}
+    familles:
+      fam: {parents: [p1]}
+  output:
+    rsa_base_ressources: 0
+    rsa: 559.42                          # 635,71 − 76,29
+
+- name: RSA différentiel — ressources à mi-chemin, RSA réduit de moitié
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1:
+        age: {2024: 40}
+        salaire_declare: {2024: 3_356.52}   # 279,71 €/mois
+    familles:
+      fam: {parents: [p1]}
+  output:
+    rsa_base_ressources: 279.71
+    rsa: 279.71                          # 559,42 − 279,71
+
+- name: RSA différentiel — ressources au-dessus du plafond, RSA nul
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      p1:
+        age: {2024: 40}
+        salaire_declare: {2024: 12_000}     # 1 000 €/mois > 559,42
+    familles:
+      fam: {parents: [p1]}
+  output:
+    rsa: 0

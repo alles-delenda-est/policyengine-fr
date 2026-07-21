@@ -17,7 +17,7 @@ class revenu_disponible(Variable):
         "        − cotisations_salariales − csg − crds\n"
         "        − impot_revenu − pensions_alimentaires_versees\n"
         "        + allocations_familiales\n"
-        "        + allocation_soutien_familial\n\n"
+        "        + allocation_soutien_familial + rsa\n\n"
         "Définition et limites du périmètre MVP:\n"
         "- Le seul revenu d'activité est le `salaire_brut` (revenus du capital "
         "et revenus non salariés hors champ); les pensions alimentaires perçues "
@@ -84,6 +84,11 @@ class revenu_disponible(Variable):
         )
         allocation_soutien_familial = menage.sum(asf_groupe / membres_famille)
 
+        # RSA (socle): variable famille mensuelle, annualisée via ADD. Placée
+        # après AF/ASF car celles-ci entrent dans sa base ressources.
+        rsa_groupe = menage.members.famille("rsa", period, options=[ADD])
+        rsa = menage.sum(rsa_groupe / membres_famille)
+
         return (
             salaire_brut
             + pensions_percues
@@ -94,4 +99,5 @@ class revenu_disponible(Variable):
             - pensions_versees
             + allocations_familiales
             + allocation_soutien_familial
+            + rsa
         )
