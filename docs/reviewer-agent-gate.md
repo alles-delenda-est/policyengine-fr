@@ -1,5 +1,12 @@
 # Reviewer-agent gate
 
+> **Status: ACTIVE (advisory)** — the `claude-review.yml` workflow is enabled
+> (`ENABLE_CLAUDE_REVIEW=true`, `ANTHROPIC_API_KEY` set) and runs on every PR
+> touching `variables/**` / `parameters/**`. It posts findings as a review
+> comment and does **not** block auto-merge. Revisit advisory-vs-blocking after
+> ~5 PRs of observed output (spec 0003 §3.4). To gate a specific hard/means-tested
+> PR, use the blocking mode below.
+
 An **independent reviewer** that inspects model PRs against French statute before
 they land. It exists to break the **self-validation loop** of the autonomous
 build: the build routine writes the implementation, its tests, *and* sources the
@@ -49,13 +56,18 @@ statute citation. (This mirrors the PolicyEngine plugin's `program-reviewer` and
 
 ## How to turn it on
 
-1. Add the repo secret **`ANTHROPIC_API_KEY`**
+**Done** — the gate is active (see the status banner). It was enabled by:
+
+1. Adding the repo secret **`ANTHROPIC_API_KEY`**
    (Settings → Secrets and variables → Actions → New repository secret).
-2. Set the repo variable **`ENABLE_CLAUDE_REVIEW`** = `true`
+2. Setting the repo variable **`ENABLE_CLAUDE_REVIEW`** = `true`
    (same screen → Variables tab). The workflow stays dormant until this is set, so
    it never shows a red ✗ before it's configured.
 3. **(Blocking)** To gate a specific PR, add the `needs-review` label and create it
    without auto-merge. To gate a whole class, see the routine integration below.
+
+To pause it, unset `ENABLE_CLAUDE_REVIEW` (or set it to anything other than
+`true`); the workflow returns to dormant without a red ✗.
 
 ## Integrating with the build routine (next scope expansion)
 
