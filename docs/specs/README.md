@@ -13,6 +13,7 @@ are drafts for the maintainer, not committed roadmap.
 | 0005 | [Retirement pensions + shared abattement merge](0005-retirement-pensions.md) | P2 | 0001, 0006 | Draft |
 | 0006 | [CSG reduced rates (replacement income)](0006-csg-reduced-rates.md) | P2 | 0001 | Draft |
 | 0007 | [Multi-year parameterisation](0007-multi-year.md) | P2 | — | Draft |
+| 0008 | [Employer cotisations + réduction générale](0008-employer-cotisations.md) | P2 | 0001, 0004 | Draft |
 
 **Design & strategic decisions** (the non-code choices around these specs) live
 in [STRATEGY.md](STRATEGY.md): upstreaming with PolicyEngine, the release cut,
@@ -24,7 +25,9 @@ dependency/lint posture.
 rate; **0006** (CSG bands) should precede or accompany **0005** (retirement
 pensions), which also resolves the shared-abattement double-count; **0007**
 (multi-year) is an independent enabler, best done after 0004/0006 stabilise the
-year-sensitive rates.
+year-sensitive rates; **0008** (employer cotisations + réduction générale) is an
+additive labour-cost layer, after 0004 (shares the PASS/per-risk pattern) and only
+when a coût-du-travail or reform question needs it.
 
 **Still not specced** (deferred as lower priority or non-code): the v0.2.0
 release/changelog cut, ASF majoré / garde alternée / DOM, prime d'activité, APL,
