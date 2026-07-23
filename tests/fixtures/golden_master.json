@@ -30,9 +30,9 @@
     "rsa": 0.0
   },
   "single_50k": {
-    "revenu_net_imposable": 36904.05,
-    "impot_revenu": 4236.7,
-    "revenu_disponible": 35343.18,
+    "revenu_net_imposable": 36942.95,
+    "impot_revenu": 4248.36,
+    "revenu_disponible": 35374.73,
     "csg": 4519.5,
     "crds": 245.62,
     "allocations_familiales": 0.0,
@@ -40,9 +40,9 @@
     "rsa": 0.0
   },
   "single_120k": {
-    "revenu_net_imposable": 88569.72,
-    "impot_revenu": 20258.54,
-    "revenu_disponible": 74733.16,
+    "revenu_net_imposable": 89358.31,
+    "impot_revenu": 20581.86,
+    "revenu_disponible": 75286.06,
     "csg": 10846.8,
     "crds": 589.5,
     "allocations_familiales": 0.0,
@@ -70,9 +70,9 @@
     "rsa": 0.0
   },
   "couple_60k_0child": {
-    "revenu_net_imposable": 44284.86,
-    "impot_revenu": 1931.75,
-    "revenu_disponible": 45564.1,
+    "revenu_net_imposable": 44430.86,
+    "impot_revenu": 1955.07,
+    "revenu_disponible": 45703.0,
     "csg": 5423.4,
     "crds": 294.75,
     "allocations_familiales": 0.0,
@@ -80,9 +80,9 @@
     "rsa": 0.0
   },
   "couple_60k_2children": {
-    "revenu_net_imposable": 44284.86,
-    "impot_revenu": 94.81,
-    "revenu_disponible": 49172.48,
+    "revenu_net_imposable": 44430.86,
+    "impot_revenu": 118.14,
+    "revenu_disponible": 49311.37,
     "csg": 5423.4,
     "crds": 294.75,
     "allocations_familiales": 1771.44,
@@ -90,9 +90,9 @@
     "rsa": 0.0
   },
   "couple_90k_3children": {
-    "revenu_net_imposable": 66427.3,
-    "impot_revenu": 1795.69,
-    "revenu_disponible": 74374.91,
+    "revenu_net_imposable": 66466.19,
+    "impot_revenu": 1801.9,
+    "revenu_disponible": 74411.91,
     "csg": 8135.1,
     "crds": 442.12,
     "allocations_familiales": 4926.82,
@@ -100,9 +100,9 @@
     "rsa": 0.0
   },
   "couple_200k_3children": {
-    "revenu_net_imposable": 147616.2,
-    "impot_revenu": 23451.82,
-    "revenu_disponible": 136099.39,
+    "revenu_net_imposable": 148765.0,
+    "impot_revenu": 23796.46,
+    "revenu_disponible": 137031.19,
     "csg": 18078.0,
     "crds": 982.5,
     "allocations_familiales": 1231.7,

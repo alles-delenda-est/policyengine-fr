@@ -56,10 +56,10 @@
         conjoints: [parent_2]
         enfants: [enfant_1, enfant_2]
   output:
-    # cotisations = 6 786 ; RNI = 44 284,86 ; impôt net = 94,81 ;
-    # CSG = 5 423,40 ; CRDS = 294,75 ; AF taux plein = 1 771,44.
-    # 60 000 − 6 786 − 94,81 − 5 423,40 − 294,75 + 1 771,44 = 49 172,48
-    revenu_disponible: 49_172.48
+    # cotisations = 6 623,78 (60 000 > PASS 46 368) ; RNI = 44 430,86 ;
+    # impôt net = 118,14 ; CSG = 5 423,40 ; CRDS = 294,75 ; AF = 1 771,44.
+    # 60 000 − 6 623,78 − 118,14 − 5 423,40 − 294,75 + 1 771,44 = 49 311,37
+    revenu_disponible: 49_311.37
 
 - name: Célibataire haut revenu sans enfant, salaire brut 150 000
   absolute_error_margin: 0.01
@@ -78,7 +78,7 @@
       menage_1:
         personnes_de_reference: [declarant_1]
   output:
-    # cotisations = 16 965 ; RNI = 110 712,15 ; impôt net = 29 336,93 ;
-    # CSG = 13 558,50 ; CRDS = 736,875 ; AF = 0.
-    # 150 000 − 16 965 − 29 336,93 − 13 558,50 − 736,875 = 89 402,70
-    revenu_disponible: 89_402.70
+    # cotisations = 15 731,78 (150 000 > PASS) ; RNI = 111 822,05 ;
+    # impôt net = 29 791,99 ; CSG = 13 558,50 ; CRDS = 736,875 ; AF = 0.
+    # 150 000 − 15 731,78 − 29 791,99 − 13 558,50 − 736,875 = 90 180,86
+    revenu_disponible: 90_180.86

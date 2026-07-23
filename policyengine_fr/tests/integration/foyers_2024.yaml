@@ -79,16 +79,17 @@
         conjoints: [parent_2]
         enfants: [enfant_1, enfant_2]
   output:
-    # cotisations = 2 × 3 393 = 6 786 (par individu, non vérifié ici)
-    revenu_net_imposable: 44_284.86      # 2 × (30 000 − 3 393 − 2 004,30) × 0,9
+    # cotisations = 6 623,78 (parent_1 à 60 000 > PASS 46 368 : vieillesse
+    # plafonnée limitée au PASS, T2 retraite/CEG au-delà)
+    revenu_net_imposable: 44_430.86
     nombre_parts: 3                      # 2 déclarants + 2 × 0,5 part PAC
-    impot_brut: 1_077.32                 # barème(14 761,62) × 3
-    plafonnement_quotient_familial: 1_077.32
-    decote: 982.51                       # 1 470 − 0,4525 × 1 077,32
-    impot_revenu: 94.81
+    impot_brut: 1_093.38
+    plafonnement_quotient_familial: 1_093.38
+    decote: 975.24
+    impot_revenu: 118.14
     # AF taux plein = 1 771,44 (ressources sous le 1er plafond)
-    # 60 000 − 6 786 − 94,81 − CSG 5 423,40 − CRDS 294,75 + AF 1 771,44
-    revenu_disponible: 49_172.48
+    # 60 000 − 6 623,78 − 118,14 − CSG 5 423,40 − CRDS 294,75 + AF 1 771,44
+    revenu_disponible: 49_311.37
 
 - name: Parent isolé, un enfant (10 ans), salaire brut 40 000 (case T)
   absolute_error_margin: 0.01
@@ -179,15 +180,15 @@
         conjoints: [parent_2]
         enfants: [enfant_1, enfant_2, enfant_3]
   output:
-    # cotisations = 13 572 (120 000 × 0,1131)
-    revenu_net_imposable: 88_569.72      # (120 000 − 13 572 − 8 017,20) × 0,9
+    # cotisations = 12 695,78 (120 000 > PASS : vieillesse plafonnée limitée au
+    # PASS, T2 retraite/CEG au-delà)
+    revenu_net_imposable: 89_358.31
     nombre_parts: 4                      # 2 déclarants + 2×0,5 + 1 part 3e enfant
-    impot_brut: 4_683.99                 # barème(22 142,43) × 4
-    # impôt sans QF = barème(44 284,86) × 2 = 10 421,87 ; avantage QF 5 737,88
-    # > plafond 4 × 1 791 = 7 164 ? non → plafonnement retient l'avantage plafonné
-    plafonnement_quotient_familial: 5_737.88
+    impot_brut: 4_770.73
+    # avantage QF plafonné (plancher retenu)
+    plafonnement_quotient_familial: 5_974.45
     decote: 0
-    impot_revenu: 5_737.88
+    impot_revenu: 5_974.45
     # AF 3 enfants, ressources sous le 2e plafond (base déclarée) → demi-taux
-    # 120 000 − 13 572 − 5 737,88 − CSG 10 846,80 − CRDS 589,50 + AF 2 020,55
-    revenu_disponible: 91_274.38
+    # 120 000 − 12 695,78 − 5 974,45 − CSG 10 846,80 − CRDS 589,50 + AF 2 020,55
+    revenu_disponible: 91_914.02

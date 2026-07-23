@@ -5,7 +5,7 @@ core:
     - Plafonnement du quotient familial
     - Décote
     - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %)
-    - Cotisations sociales salariales — taux effectif forfaitaire (passage du salaire brut au salaire déclaré, case 1AJ)
+    - Cotisations sociales salariales — par risque avec plafonds (tranches PASS), statut cadre (passage du salaire brut au salaire déclaré, case 1AJ)
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
     - Allocation de soutien familial (ASF) — taux simple, en complément différentiel de la pension alimentaire perçue (famille monoparentale)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement de 10 % (perçues)
@@ -55,18 +55,20 @@ core:
       sa propre pension) puis le total est plafonné au niveau du foyer fiscal,
       ce qui approche la règle légale de répartition exacte du plafond.
     - >-
-      Cotisations salariales à taux effectif forfaitaire (spec 0001) —
-      l'entrée `salaire_brut` est un salaire BRUT réel, converti en salaire
-      déclaré (case 1AJ) via un taux effectif plat de cotisations sociales
-      salariales (≈ 11,31 % pour 2024, hors CSG/CRDS ; paramètre
-      `gov.urssaf.cotisations_salariales.taux_effectif`) puis en retranchant la
-      CSG déductible (CGI art. 154 quinquies, appliquée une seule fois à cette
-      étape, dans `salaire_declare`). L'IR porte sur le salaire déclaré et la
-      CSG/CRDS sur 98,25 % du brut : l'ancienne double-convention brut/déclaré
-      est ainsi levée, et `revenu_disponible` retranche désormais les
-      cotisations. Le taux plat ne distingue ni le statut cadre, ni les plafonds
-      de la sécurité sociale, ni les allègements bas salaires (SMIC) — à
-      raffiner (docs/specs/0004).
+      Cotisations salariales par risque (specs 0001, 0004) — l'entrée
+      `salaire_brut` est un salaire BRUT réel, converti en salaire déclaré
+      (case 1AJ) en retranchant les cotisations salariales et la CSG déductible
+      (CGI art. 154 quinquies, appliquée une seule fois dans `salaire_declare`).
+      Les cotisations sont calculées par risque avec plafonds (vieillesse
+      plafonnée/déplafonnée, retraite complémentaire AGIRC-ARRCO T1/T2 et CEG,
+      tranches délimitées par le PASS ; CET et APEC pour les cadres via l'entrée
+      `cadre`). L'IR porte sur le salaire déclaré et la CSG/CRDS sur 98,25 % du
+      brut : l'ancienne double-convention brut/déclaré est levée et
+      `revenu_disponible` retranche les cotisations. Non modélisés : chômage et
+      maladie salariales (nuls depuis 2018, remplacés par la CSG), les
+      exonérations spécifiques (heures supplémentaires, apprentis, ZRR) et le
+      statut cadre lorsqu'il n'est pas fourni (défaut non cadre). Les allègements
+      bas salaires (réduction générale) sont côté employeur (docs/specs/0008).
     - >-
       Allocations familiales — complément dégressif non modélisé : la
       modulation applique les taux plein/moitié/quart en marche d'escalier aux

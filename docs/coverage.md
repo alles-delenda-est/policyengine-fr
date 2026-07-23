@@ -47,9 +47,9 @@ The full chain from gross salary to net tax is modelled end-to-end:
 
 ### Social levies on salary (URSSAF)
 
-- **Cotisations salariales** — a single flat effective rate (≈ 11,31 % for 2024,
-  excl. CSG/CRDS) taking gross salary to declared salary; an MVP approximation
-  (no per-risk detail, no PASS ceilings, no cadre status, no low-wage relief)
+- **Cotisations salariales** — per-risk (vieillesse plafonnée/déplafonnée,
+  AGIRC-ARRCO retraite + CEG T1/T2, and CET/APEC for cadres), with PASS-delimited
+  tranches, taking gross salary to declared salary
 - **CSG** on activity income — assiette 98,25 %, split into deductible and
   imposable portions
 - **CRDS** on activity income
@@ -87,14 +87,15 @@ These are modelled, but with a documented departure from the exact statute. (The
 authoritative list with legal references lives under `simplifications:` in
 `modelled_policies.yaml`.)
 
-1. **Employee cotisations are a flat effective rate, not a payslip.** Gross
-   salary is taken to declared salary (case 1AJ) via a single flat rate
-   (≈ 11,31 % for 2024, excl. CSG/CRDS) plus the deductible CSG (applied once,
-   in `salaire_declare`). This resolves the former dual brut/déclaré convention
-   (IR now on declared, CSG/CRDS on 98,25 % of gross), but the flat rate ignores
-   per-risk detail, PASS ceilings, cadre status and low-wage (SMIC) relief — so
-   `salaire_brut − cotisations − CSG/CRDS` is an *approximate* net, not exact
-   take-home pay. To be refined (docs/specs/0004).
+1. **Employee cotisations are modelled per-risk but not a full payslip.** Gross
+   salary is taken to declared salary (case 1AJ) via the per-risk employee
+   schedule (vieillesse plafonnée/déplafonnée, AGIRC-ARRCO retraite + CEG T1/T2,
+   CET/APEC for cadres) with PASS-delimited tranches, plus the deductible CSG
+   (applied once, in `salaire_declare`). This resolves the former dual
+   brut/déclaré convention. Still out of scope: chômage/maladie salariales (0 %
+   since 2018), specific exonérations (heures sup, apprentis, ZRR), and the
+   `cadre` flag when unknown (defaults non-cadre). The **low-wage réduction
+   générale is employer-side** (docs/specs/0008), not modelled here.
 2. **AF income test uses a proxy.** The modulation uses current-year (N) salary
    instead of the legal N-2 *base ressources* (revenu net catégoriel, art. R532-3
    CSS). Identical for stable incomes; diverges when income changed year-on-year.
