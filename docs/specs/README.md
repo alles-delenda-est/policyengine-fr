@@ -10,8 +10,8 @@ are drafts for the maintainer, not committed roadmap.
 | 0002 | [Revenu de solidarité active (RSA)](0002-rsa.md) | P1 | 0001 | **Implemented** (PR #27) |
 | 0003 | [Enable the statute-review CI gate](0003-enable-statute-review-gate.md) | P1 | — | **Active** (advisory) |
 | 0004 | [Accurate employee cotisations](0004-employee-cotisations.md) | P1 | 0001 | **Implemented** (PR #27) |
-| 0005 | [Retirement pensions + shared abattement merge](0005-retirement-pensions.md) | P2 | 0001, 0006 | Draft |
-| 0006 | [CSG reduced rates (replacement income)](0006-csg-reduced-rates.md) | P2 | 0001 | Draft |
+| 0005 | [Retirement pensions + shared abattement merge](0005-retirement-pensions.md) | P2 | 0001, 0006 | **Implemented** (PR #28) |
+| 0006 | [CSG reduced rates (replacement income)](0006-csg-reduced-rates.md) | P2 | 0001 | **Implemented** (PR #28) |
 | 0007 | [Multi-year parameterisation](0007-multi-year.md) | P2 | — | Draft |
 | 0008 | [Employer cotisations + réduction générale](0008-employer-cotisations.md) | P2 | 0001, 0004 | Draft |
 
