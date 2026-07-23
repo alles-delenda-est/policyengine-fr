@@ -9,7 +9,7 @@ are drafts for the maintainer, not committed roadmap.
 | 0001 | [Resolve `salaire_brut` input semantics](0001-salary-input-semantics.md) | P0 blocker | — | **Implemented** (PR #27) |
 | 0002 | [Revenu de solidarité active (RSA)](0002-rsa.md) | P1 | 0001 | **Implemented** (PR #27) |
 | 0003 | [Enable the statute-review CI gate](0003-enable-statute-review-gate.md) | P1 | — | **Active** (advisory) |
-| 0004 | [Accurate employee cotisations](0004-employee-cotisations.md) | P1 | 0001 | Draft |
+| 0004 | [Accurate employee cotisations](0004-employee-cotisations.md) | P1 | 0001 | **Implemented** (PR #27) |
 | 0005 | [Retirement pensions + shared abattement merge](0005-retirement-pensions.md) | P2 | 0001, 0006 | Draft |
 | 0006 | [CSG reduced rates (replacement income)](0006-csg-reduced-rates.md) | P2 | 0001 | Draft |
 | 0007 | [Multi-year parameterisation](0007-multi-year.md) | P2 | — | Draft |
