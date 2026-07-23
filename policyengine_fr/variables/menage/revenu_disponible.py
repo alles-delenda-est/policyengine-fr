@@ -54,6 +54,11 @@ class revenu_disponible(Variable):
         )
         csg = menage.sum(menage.members("csg", period))
         crds = menage.sum(menage.members("crds", period))
+        # Pensions de retraite: revenu, net de leur CSG/CRDS (taux réduit selon
+        # le RFR, spec 0006). L'impôt sur ces pensions est déjà dans impot_revenu.
+        pension_retraite = menage.sum(menage.members("pension_retraite", period))
+        csg_retraite = menage.sum(menage.members("csg_retraite", period))
+        crds_retraite = menage.sum(menage.members("crds_retraite", period))
 
         # Composantes de groupe (foyer fiscal, famille): on répartit le total
         # du groupe sur ses membres (montant / nombre de membres) avant de
@@ -92,10 +97,13 @@ class revenu_disponible(Variable):
         return (
             salaire_brut
             + pensions_percues
+            + pension_retraite
             - cotisations_salariales
             - impot_revenu
             - csg
             - crds
+            - csg_retraite
+            - crds_retraite
             - pensions_versees
             + allocations_familiales
             + allocation_soutien_familial

@@ -1,0 +1,62 @@
+# CSG/CRDS sur les pensions de retraite — taux réduits selon le RFR (spec 0006), 2024.
+# RFR (proxy) 1 part = pension × 0,9. Seuils 2024 (1 part) : exo ≤ 12 230,
+# réduit ≤ 15 988, médian ≤ 24 813, normal au-delà. Taux 0 / 3,8 / 6,6 / 8,3 %.
+# Part déductible 0 / 3,8 / 4,2 / 5,9 %. CRDS 0,5 % due aux taux médian et normal.
+
+- name: Pension faible — exonération (RFR sous le seuil)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 10_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    # RFR = 9 000 <= 12 230 -> exonéré
+    taux_csg_pension: 0
+    csg_retraite: 0
+    crds_retraite: 0
+
+- name: Pension moyenne — taux médian 6,6 % (+ CRDS)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 20_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    # RFR = 18 000 : 15 988 < 18 000 <= 24 813 -> médian 6,6 %
+    taux_csg_pension: 0.066
+    csg_retraite: 1_320.00            # 20 000 × 0,066
+    csg_retraite_deductible: 840.00   # 20 000 × 0,042
+    crds_retraite: 100.00             # 20 000 × 0,005
+
+- name: Pension élevée — taux normal 8,3 %
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 40_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    # RFR = 36 000 > 24 813 -> normal 8,3 %
+    taux_csg_pension: 0.083
+    csg_retraite: 3_320.00            # 40 000 × 0,083
+    csg_retraite_deductible: 2_360.00 # 40 000 × 0,059
+    crds_retraite: 200.00
+
+- name: Couple — seuil d'exonération majoré par les parts
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 20_000}
+      d2: {}
+    foyers_fiscaux:
+      f: {declarants: [d1, d2]}
+  output:
+    # RFR = 18 000 ; seuil exo 2 parts = 12 230 + 2×3 264,5 = 18 759 -> exonéré
+    taux_csg_pension: 0
+    csg_retraite: 0

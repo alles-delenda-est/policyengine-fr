@@ -198,6 +198,31 @@ def test_af_monotonic_non_increasing_in_resources():
         prev_af = af
 
 
+def test_pension_abattement_merged_single_ceiling():
+    """Spec 0005: retraite + alimentaire for one beneficiary share a single 10%
+    abattement ceiling (not one each), fixing the double-count."""
+    from policyengine_fr import Simulation
+
+    sim = Simulation(
+        situation={
+            "individus": {
+                "d1": {
+                    "pension_retraite": {Y: 60_000},
+                    "pensions_alimentaires_percues": {Y: 60_000},
+                }
+            },
+            "foyers_fiscaux": {"f": {"declarants": ["d1"]}},
+        }
+    )
+    pensions_imposables = float(sim.calculate("pensions_imposables", Y).sum())
+    declaree = float(sim.calculate("pension_retraite_declaree", Y).sum())
+    total_pension = declaree + 60_000
+    abattement = total_pension - pensions_imposables
+    plafond = 4_399
+    # One ceiling, not two — the merge caps the total abattement at the plafond.
+    assert abattement <= plafond + 0.5
+
+
 def test_csg_identity():
     """csg == csg_deductible + csg_imposable (arithmetic identity) across income grid.
 

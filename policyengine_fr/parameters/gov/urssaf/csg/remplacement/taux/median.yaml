@@ -1,0 +1,3 @@
+description: Taux médian de CSG sur les pensions de retraite (6,6 %).
+values: {2024-01-01: 0.066}
+metadata: {unit: /1, label: CSG pensions - taux médian, reference: [{title: "URSSAF / CSG pensions", href: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000041604370"}]}
