@@ -61,4 +61,4 @@ households:
   # rows skip until `official` is filled. `salaires` are declared 1AJ (fed as salaire_declare).
   - {id: single_0_rsa,               variable: rsa, inputs: {situation: celibataire, parent_isole: false, salaires: [0],       enfants: []},     period: "2024", model: 6639.28,  official: null, captured_on: null}
   - {id: couple_0_2children_rsa,     variable: rsa, inputs: {situation: maries,      parent_isole: false, salaires: [0, 0],    enfants: [8, 10]}, period: "2024", model: 11831.54, official: null, captured_on: null}
-  - {id: single_parent_0_1child_rsa, variable: rsa, inputs: {situation: celibataire, parent_isole: true,  salaires: [0],       enfants: [8]},    period: "2024", model: 5541.42,  official: null, captured_on: null}
+  - {id: single_parent_0_1child_rsa, variable: rsa, inputs: {situation: celibataire, parent_isole: true,  salaires: [0],       enfants: [8]},    period: "2024", model: 8770.83,  official: null, captured_on: null}

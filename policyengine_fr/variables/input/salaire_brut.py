@@ -13,9 +13,7 @@ class salaire_brut(Variable):
         "déclaré (`salaire_declare` = brut − cotisations salariales − CSG "
         "déductible), sur lequel la chaîne impôt sur le revenu applique "
         "l'abattement de 10 %; la CSG/CRDS est assise sur 98,25 % du brut "
-        "(art. L136-2 CSS). Les cotisations salariales sont approchées par un "
-        "taux effectif forfaitaire (voir "
-        "`gov.urssaf.cotisations_salariales.taux_effectif`, simplification MVP "
-        "à raffiner — docs/specs/0004)."
+        "(art. L136-2 CSS). Les cotisations salariales sont calculées par risque "
+        "avec plafonds (voir `cotisations_salariales`)."
     )
     definition_period = YEAR

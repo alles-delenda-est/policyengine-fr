@@ -17,6 +17,21 @@
     csg_retraite: 0
     crds_retraite: 0
 
+- name: Pension modeste — taux réduit 3,8 % (CRDS due, CSG entièrement déductible)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 15_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    # RFR = 13 500 : 12 230 < 13 500 <= 15 988 -> réduit 3,8 %
+    taux_csg_pension: 0.038
+    csg_retraite: 570.00              # 15 000 × 0,038
+    csg_retraite_deductible: 570.00   # entièrement déductible au taux réduit
+    crds_retraite: 75.00              # 15 000 × 0,005 — DUE dès le taux réduit
+
 - name: Pension moyenne — taux médian 6,6 % (+ CRDS)
   absolute_error_margin: 0.01
   period: 2024

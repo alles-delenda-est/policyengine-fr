@@ -1,4 +1,4 @@
-description: Majoration du montant forfaitaire majoré du RSA (parent isolé) par enfant à charge supplémentaire (au-delà du premier), en part du montant pour une personne seule (42,804 % ; CASF art. R262-1).
+description: Majoration du montant forfaitaire majoré du RSA (parent isolé) par enfant à charge (dès le premier), en part du montant pour une personne seule (42,804 % ; CASF art. R262-1).
 values:
   2009-06-01: 0.42804
 metadata:

@@ -16,7 +16,7 @@ core:
     - Réductions et crédits d'impôt
     - Contribution exceptionnelle sur les hauts revenus
     - Prélèvements sociaux sur les revenus du capital et de remplacement
-    - Cotisations sociales salariales détaillées (par risque, plafonds SS, statut cadre, allègements bas salaires) et cotisations patronales
+    - Cotisations salariales : exonérations spécifiques (heures supplémentaires, apprentis, ZRR) ; cotisations patronales et réduction générale bas salaires (côté employeur)
     - Autres prestations sociales (APL, prime d'activité, complément familial, PAJE, ARS, AAH, ASPA…)
     - Revenus non salariés et revenus du capital (hors salaires, pensions de retraite et pensions alimentaires perçues)
   simplifications:
@@ -123,5 +123,7 @@ core:
       (hors prime d'activité, RSA jeune, cumul intéressement, contrat
       d'engagement et sanctions). Le RSA majoré (parent isolé) est déclenché par
       le proxy « un seul parent avec enfant » (comme l'ASF) et sa durée (jusqu'aux
-      3 ans du plus jeune enfant, art. L262-9) n'est pas modélisée. Métropole
-      uniquement.
+      3 ans du plus jeune enfant, art. L262-9) n'est pas modélisée. Les enfants à
+      charge sont comptés avec la limite d'âge des allocations familiales
+      (< 20 ans) alors que la charge au sens du RSA peut s'étendre jusqu'à 25 ans
+      (léger sous-comptage pour les jeunes majeurs). Métropole uniquement.

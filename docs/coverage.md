@@ -16,11 +16,12 @@ income tax (IR) properly, CSG/CRDS and a per-risk employee cotisations layer on
 salary, retirement pensions (with RFR-banded CSG), the two family benefits
 AF + ASF, and the **RSA socle** (the first means-tested benefit), aggregated into
 a household `revenu_disponible`. The salary input is **true gross**; a per-risk
-cotisations schedule derives the declared salary (case 1AJ) the IR chain uses. It
-is **not** yet a full payslip calculator (no low-wage/heures-sup exonérations, and
-the employer side is out of scope); the means-tested layer covers **RSA socle
-only** (no prime d'activité / APL). It understands **salary**, **retirement
-pensions** and **pensions alimentaires** as income.
+cotisations schedule (PASS-bracketed, cadre-aware) derives the declared salary
+(case 1AJ) the IR chain uses. It is **not** yet a full payslip calculator (no
+low-wage/heures-sup exonérations, and the employer side is out of scope); the
+means-tested layer covers **RSA socle only** (no prime d'activité / APL). It
+understands **salary**, **retirement pensions** and **pensions alimentaires** as
+income.
 
 ---
 

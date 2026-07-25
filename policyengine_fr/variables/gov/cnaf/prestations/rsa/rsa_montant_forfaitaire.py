@@ -13,8 +13,9 @@ class rsa_montant_forfaitaire(Variable):
         "40 % par enfant de rang 3 et plus.\n\n"
         "Parent isolé (RSA majoré, CASF art. R262-1): lorsque la famille n'a "
         "qu'un parent et au moins un enfant, on applique le barème majoré "
-        "(128,412 % du montant de base pour le parent et son premier enfant, "
-        "+ 42,804 % par enfant supplémentaire).\n\n"
+        "(128,412 % du montant de base pour le parent seul, + 42,804 % par "
+        "enfant à charge dès le premier — soit 171,216 % pour 1 enfant, "
+        "214,020 % pour 2 enfants).\n\n"
         "Simplifications MVP (voir modelled_policies.yaml): l'isolement est "
         "inféré du seul fait qu'il n'y a qu'un parent (proxy, comme l'ASF); la "
         "durée du RSA majoré (jusqu'aux 3 ans du plus jeune enfant) n'est pas "
@@ -43,9 +44,10 @@ class rsa_montant_forfaitaire(Variable):
             + mf.majoration_enfant_rang_3 * max_(nb_enfants - 2, 0)
         )
 
-        # Barème majoré (parent isolé avec enfant): 1,28412 (parent + 1er enfant)
-        # + 0,42804 par enfant supplémentaire.
-        coef_majore = mf.isole_base + mf.isole_enfant * max_(nb_enfants - 1, 0)
+        # Barème majoré (parent isolé): 1,28412 pour le parent seul, + 0,42804
+        # par enfant à charge (dès le premier). Ex. 1 enfant → 1,71216 ;
+        # 2 enfants → 2,14020.
+        coef_majore = mf.isole_base + mf.isole_enfant * nb_enfants
 
         parent_isole = (nb_parents == 1) & (nb_enfants >= 1)
         coef = where(parent_isole, coef_majore, coef_standard)
