@@ -1,11 +1,16 @@
 # Reviewer-agent gate
 
-> **Status: ACTIVE (advisory)** — the `claude-review.yml` workflow is enabled
-> (`ENABLE_CLAUDE_REVIEW=true`, `ANTHROPIC_API_KEY` set) and runs on every PR
-> touching `variables/**` / `parameters/**`. It posts findings as a review
-> comment and does **not** block auto-merge. Revisit advisory-vs-blocking after
-> ~5 PRs of observed output (spec 0003 §3.4). To gate a specific hard/means-tested
-> PR, use the blocking mode below.
+> **Status: ACTIVE (advisory) — TEMPORARILY routed through Gemini.** The
+> `claude-review.yml` workflow is enabled (`ENABLE_CLAUDE_REVIEW=true`) and runs
+> on every PR touching `variables/**` / `parameters/**`. It posts findings as a
+> review comment and does **not** block auto-merge. **Reviewer model:** while the
+> `ANTHROPIC_API_KEY` secret is unavailable, the review is routed through
+> **Gemini 3.6 Flash** via `.github/scripts/gemini_statute_review.py` (needs a
+> `GEMINI_API_KEY` secret; override the model with a `GEMINI_MODEL` repo
+> variable). The step is advisory and **never fails the build** — a missing key,
+> unknown model, or API error exits 0 with a warning. **To restore the Claude
+> reviewer:** revert the workflow step to `anthropics/claude-code-action@v1`
+> (in git history) and re-add `ANTHROPIC_API_KEY`.
 
 An **independent reviewer** that inspects model PRs against French statute before
 they land. It exists to break the **self-validation loop** of the autonomous
