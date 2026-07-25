@@ -70,7 +70,7 @@
     familles:
       fam: {parents: [p1], enfants: [e1]}
   output:
-    rsa_montant_forfaitaire: 816.33      # 635,71 × 1,28412
+    rsa_montant_forfaitaire: 1_088.44    # 635,71 × (1,28412 + 0,42804)
 
 - name: Montant forfaitaire majoré — parent isolé deux enfants
   absolute_error_margin: 0.01
@@ -83,7 +83,7 @@
     familles:
       fam: {parents: [p1], enfants: [e1, e2]}
   output:
-    rsa_montant_forfaitaire: 1_088.44    # 635,71 × (1,28412 + 0,42804)
+    rsa_montant_forfaitaire: 1_360.55    # 635,71 × (1,28412 + 2×0,42804)
 
 # ── Comportement différentiel (personne seule, sans enfant) ─────────────────
 - name: RSA différentiel — aucune ressource, RSA plein moins forfait logement

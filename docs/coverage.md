@@ -12,14 +12,15 @@
 ## One-line summary
 
 This is a **disposable-income MVP for a wage-earning métropole household in
-2024**. It models income tax (IR) properly, CSG/CRDS and a flat-rate employee
-cotisations layer on salary, and the two family benefits AF + ASF, the **RSA socle** (the first means-tested benefit),
-aggregated into a household `revenu_disponible`. The salary input is **true
-gross**; a flat effective cotisations rate derives the declared salary (case
-1AJ) the IR chain uses. It is **not** yet a full payslip calculator (the
-cotisations rate is a flat approximation, not a per-risk payslip); the
-means-tested layer covers **RSA socle only** (no prime d'activité / APL), and it
-only understands **salary** and **pensions alimentaires** as income.
+2024**. It models income tax (IR) properly, CSG/CRDS and a per-risk employee
+cotisations layer on salary, and the two family benefits AF + ASF, the **RSA
+socle** (the first means-tested benefit), aggregated into a household
+`revenu_disponible`. The salary input is **true gross**; a per-risk cotisations
+schedule (PASS-bracketed, cadre-aware) derives the declared salary (case 1AJ) the
+IR chain uses. It is **not** yet a full payslip calculator (no low-wage/heures-sup
+exonérations, employer side out of scope); the means-tested layer covers **RSA
+socle only** (no prime d'activité / APL), and it only understands **salary** and
+**pensions alimentaires** as income.
 
 ---
 
