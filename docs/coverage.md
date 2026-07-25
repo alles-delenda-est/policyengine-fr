@@ -11,16 +11,17 @@
 
 ## One-line summary
 
-This is a **disposable-income MVP for a wage-earning métropole household in
-2024**. It models income tax (IR) properly, CSG/CRDS and a per-risk employee
-cotisations layer on salary, and the two family benefits AF + ASF, the **RSA
-socle** (the first means-tested benefit), aggregated into a household
-`revenu_disponible`. The salary input is **true gross**; a per-risk cotisations
-schedule (PASS-bracketed, cadre-aware) derives the declared salary (case 1AJ) the
-IR chain uses. It is **not** yet a full payslip calculator (no low-wage/heures-sup
-exonérations, employer side out of scope); the means-tested layer covers **RSA
-socle only** (no prime d'activité / APL), and it only understands **salary** and
-**pensions alimentaires** as income.
+This is a **disposable-income MVP for a métropole household in 2024**. It models
+income tax (IR) properly, CSG/CRDS and a per-risk employee cotisations layer on
+salary, retirement pensions (with RFR-banded CSG), the two family benefits
+AF + ASF, and the **RSA socle** (the first means-tested benefit), aggregated into
+a household `revenu_disponible`. The salary input is **true gross**; a per-risk
+cotisations schedule (PASS-bracketed, cadre-aware) derives the declared salary
+(case 1AJ) the IR chain uses. It is **not** yet a full payslip calculator (no
+low-wage/heures-sup exonérations, and the employer side is out of scope); the
+means-tested layer covers **RSA socle only** (no prime d'activité / APL). It
+understands **salary**, **retirement pensions** and **pensions alimentaires** as
+income.
 
 ---
 
@@ -35,9 +36,11 @@ The full chain from gross salary to net tax is modelled end-to-end:
   applied once here)
 - **Salaire imposable** — declared salary less the 10 % professional-expenses
   abattement (with floor and ceiling)
-- **Pensions alimentaires** — received pensions are taxable after a 10 %
-  abattement (floor per beneficiary, ceiling per foyer fiscal); paid pensions are
-  deducted from global income
+- **Pensions alimentaires + pensions de retraite** — both taxable after a single
+  **merged** 10 % abattement (floor per beneficiary, ceiling per foyer fiscal,
+  common to all pensions); paid pensions alimentaires are deducted from global
+  income. Retirement pensions bear CSG/CRDS at the reduced RFR-banded rates
+  (0 / 3,8 / 6,6 / 8,3 %)
 - **Revenu net imposable** — the assembled taxable base
 - **Nombre de parts** — quotient familial: declarants + dependants, plus the
   parent-isolé extra half-part
@@ -114,10 +117,14 @@ authoritative list with legal references lives under `simplifications:` in
    conditions are not enforced.
 6. **CSG is flat 9,2 %** on salary; reduced rates (3,8 % / 6,2 %) for low earners
    and rates on replacement income are out of scope.
-7. **Shared 10 % pension abattement.** The floor/ceiling on the pension abattement
-   are, in law, common to *all* pensions (retraites incluses). The model applies
-   them to pensions alimentaires alone; when retirement pensions are added the
-   abattement must be merged to share one floor/ceiling, or it is granted twice.
+7. **Retirement-pension CSG uses an RFR proxy.** Retirement pensions are modelled
+   (taxable, with the 10 % abattement now **merged** with pensions alimentaires —
+   one shared floor/ceiling — and CSG/CRDS at the reduced 0/3,8/6,6/8,3 % rates).
+   But the CSG rate legally depends on the **N-2** RFR at a broader perimeter; the
+   single-year model uses a current-year RFR proxy (salaires imposables + pensions
+   abattues − pensions versées), the per-half-part threshold increments are
+   interpolated from the published 1-part and couple thresholds, and the CASA
+   (0,3 %) is not modelled.
 8. **Benefits are paid gross of CRDS.** AF and ASF are returned at their gross
    amounts; the 0,5 % CRDS due on family benefits is never levied, so
    `revenu_disponible` overstates benefit income by ~0,5 %. The AF age-14
@@ -180,10 +187,10 @@ authoritative list with legal references lives under `simplifications:` in
 
 ### Income types not handled
 
-The model ingests only **salary** and **pensions alimentaires**. Not modelled:
+The model ingests **salary**, **pensions de retraite** and **pensions
+alimentaires**. Not modelled:
 
-- Pensions de retraite
-- Revenus de remplacement (chômage, indemnités journalières)
+- Revenus de remplacement autres que la retraite (chômage, indemnités journalières)
 - Revenus du capital (dividendes, intérêts, plus-values)
 - Revenus fonciers (locatif)
 - Revenus non-salariés — BIC / BNC / BA, professions libérales, micro-entreprise,

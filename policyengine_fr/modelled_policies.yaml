@@ -9,6 +9,7 @@ core:
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
     - Allocation de soutien familial (ASF) — taux simple, en complément différentiel de la pension alimentaire perçue (famille monoparentale)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement de 10 % (perçues)
+    - Pensions de retraite — revenu imposable (abattement de 10 % mutualisé avec les pensions alimentaires) et CSG/CRDS à taux réduit selon le revenu fiscal de référence
     - Revenu de solidarité active (RSA) — socle : montant forfaitaire (échelle d'équivalence, RSA majoré parent isolé), forfait logement, base ressources différentielle
     - Revenu disponible — agrégat de tête de l'MVP (revenus 2024)
   not_modelled:
@@ -17,7 +18,7 @@ core:
     - Prélèvements sociaux sur les revenus du capital et de remplacement
     - Cotisations salariales : exonérations spécifiques (heures supplémentaires, apprentis, ZRR) ; cotisations patronales et réduction générale bas salaires (côté employeur)
     - Autres prestations sociales (APL, prime d'activité, complément familial, PAJE, ARS, AAH, ASPA…)
-    - Revenus non salariés, pensions de retraite et revenus du capital (hors pensions alimentaires perçues)
+    - Revenus non salariés et revenus du capital (hors salaires, pensions de retraite et pensions alimentaires perçues)
   simplifications:
     # Explicit scope-narrowings: modelled, but with a documented departure from
     # the exact statute. Surfaced here so the reviewer-agent gate's
@@ -92,13 +93,16 @@ core:
       comme déclarant seul (1,5 part, ou 2 avec la majoration parent isolé),
       soit 0,5 à 1 part de moins.
     - >-
-      Abattement de 10 % sur les pensions — le plancher (par bénéficiaire) et le
-      plafond (par foyer fiscal) sont, dans la loi, communs à l'ensemble des
-      pensions (retraites, rentes et pensions alimentaires). Le modèle ne couvre
-      aujourd'hui que les pensions alimentaires perçues, donc l'abattement est
-      calculé sur cette seule assiette. Lorsque les pensions de retraite seront
-      modélisées, cet abattement devra être fusionné avec elles pour partager un
-      unique plancher/plafond, sous peine d'accorder l'abattement deux fois.
+      Pensions de retraite et CSG à taux réduit (specs 0005/0006) — les pensions
+      de retraite sont imposables (abattement de 10 % mutualisé avec les pensions
+      alimentaires, plancher/plafond communs, cf. `pensions_imposables`) et
+      supportent la CSG/CRDS à taux réduit selon le revenu fiscal de référence.
+      Simplifications : le taux de CSG dépend légalement du RFR de l'année N-2 et
+      d'un RFR au périmètre plus large ; le modèle, mono-année, utilise un RFR
+      proxy de l'année courante (salaires imposables + pensions abattues −
+      pensions versées). Les majorations de seuils par demi-part sont dérivées
+      des seuils publiés 1 part et 2 parts (interpolation linéaire). La CASA
+      (0,3 %) n'est pas modélisée. Métropole uniquement.
     - >-
       RSA — base ressources approchée (spec 0002) : la base légale est la
       moyenne des ressources des 3 mois précédant la demande (CASF art. R262-3) ;

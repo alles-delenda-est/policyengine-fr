@@ -13,7 +13,10 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install ruff
-        run: pip install "ruff>=0.9.0"
+        # Pinned so CI formatting is deterministic — a floating ruff version
+        # silently reformats files it didn't used to and breaks Lint on every
+        # unrelated PR. Bump deliberately, in lockstep with the dev dependency.
+        run: pip install "ruff==0.15.20"
       - name: Check formatting
         run: ruff format --check .
   check-changelog:

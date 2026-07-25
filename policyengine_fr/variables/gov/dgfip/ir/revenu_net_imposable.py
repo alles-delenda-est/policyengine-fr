@@ -19,6 +19,8 @@ class revenu_net_imposable(Variable):
     def formula(foyer_fiscal, period, parameters):
         salaire_imposable_i = foyer_fiscal.members("salaire_imposable", period)
         salaires = foyer_fiscal.sum(salaire_imposable_i)
-        pensions_percues = foyer_fiscal("pensions_alimentaires_imposables", period)
+        # Pensions imposables: retraite + alimentaires perçues, abattement de 10%
+        # mutualisé (plancher par bénéficiaire, plafond unique au foyer).
+        pensions_percues = foyer_fiscal("pensions_imposables", period)
         pensions_versees = foyer_fiscal("pensions_alimentaires_versees", period)
         return max_(salaires + pensions_percues - pensions_versees, 0)

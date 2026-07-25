@@ -24,7 +24,7 @@ CSG/CRDS on salary (assiette 98,25 %), pensions alimentaires (versées deducted,
 perçues taxed after the 10 % abattement), `allocations_familiales` and
 `allocation_soutien_familial` (ASF différentielle) on the famille; aggregated
 into `revenu_disponible` on the ménage. Whole-household integration scenarios
-pass. `make test` passes (91 YAML tests + 43 pytest), ruff clean. See
+pass. `make test` passes (100 YAML tests + 44 pytest), ruff clean. See
 `policyengine_fr/modelled_policies.yaml` for the modelled / not-modelled
 boundary (and its `simplifications:` list for every named departure from the
 statute). A local `.venv/` exists (pip was bootstrapped via get-pip.py since the
