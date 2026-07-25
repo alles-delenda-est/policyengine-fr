@@ -1,0 +1,9 @@
+description: Taux salarié de la cotisation APEC (Association pour l'emploi des cadres), part salariale, dans la limite de 4 PASS. Due par les seuls cadres.
+values:
+  2024-01-01: 0.00024
+metadata:
+  unit: /1
+  label: Cotisation salariale APEC (cadres)
+  reference:
+    - title: APEC — Cotisation 2024 (total 0,06 %, part salariale 0,024 %, sur TA+TB dans la limite de 4 PASS)
+      href: https://www.apec.fr/

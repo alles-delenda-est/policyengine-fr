@@ -1,0 +1,12 @@
+description: Montant forfaitaire mensuel du RSA pour une personne seule (socle). Revalorisé au 1er avril. Base de l'échelle d'équivalence du RSA (CASF art. R262-1).
+values:
+  2023-04-01: 607.75
+  2024-04-01: 635.71
+metadata:
+  unit: currency-EUR
+  label: Montant forfaitaire RSA (1 personne)
+  reference:
+    - title: Décret n° 2024-396 du 29 avril 2024 portant revalorisation du montant forfaitaire du RSA (635,71 € au 1er avril 2024)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049486510
+    - title: Code de l'action sociale et des familles, art. R262-1
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037861692

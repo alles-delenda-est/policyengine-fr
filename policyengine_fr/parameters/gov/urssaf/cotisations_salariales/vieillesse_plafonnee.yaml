@@ -1,0 +1,9 @@
+description: Taux salarié de l'assurance vieillesse plafonnée (part salariale), sur la fraction du salaire dans la limite d'un PASS.
+values:
+  2024-01-01: 0.069
+metadata:
+  unit: /1
+  label: Cotisation salariale vieillesse plafonnée
+  reference:
+    - title: URSSAF — Taux de cotisations (assurance vieillesse plafonnée, part salariale 6,90 %)
+      href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/vieillesse.html

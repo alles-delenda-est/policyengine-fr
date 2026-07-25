@@ -9,7 +9,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -29,7 +29,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       parent_2: {}
       enfant_1:
         age: 5
@@ -52,7 +52,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       enfant_1:
         age: 17
       enfant_2:
@@ -71,7 +71,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 100_000
+        salaire_declare: 100_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -92,7 +92,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 130_000
+        salaire_declare: 130_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -113,7 +113,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -128,7 +128,7 @@
   absolute_error_margin: 0.01
   period: 2024-04
   input:
-    # Note: salaire_brut omis volontairement — un bug policyengine-core
+    # Note: salaire_declare omis volontairement — un bug policyengine-core
     # (get_known_periods split incorrecte) plante quand une variable YEAR est
     # fournie pour un test de période non-janvier. Ressources = 0 => taux plein,
     # ce qui ne change pas l'objet du test (vérifier la BMAF du 1er avril).
@@ -148,7 +148,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -164,7 +164,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -184,7 +184,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 5}
       enfant_2: {age: 8}
@@ -200,7 +200,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 0}
       enfant_2: {age: 3}
@@ -214,7 +214,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 83_000}
+      parent_1: {salaire_declare: 83_000}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -228,7 +228,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 83_500}
+      parent_1: {salaire_declare: 83_500}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -242,7 +242,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 111_100}
+      parent_1: {salaire_declare: 111_100}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -256,7 +256,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 2}
       enfant_2: {age: 6}

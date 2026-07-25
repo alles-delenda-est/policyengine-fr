@@ -1,12 +1,16 @@
 # Déduction forfaitaire de 10% — revenus 2024: taux 10%, plancher 504 €,
 # plafond 14 426 € par personne (Article 83-3° CGI ; décret 2024-496).
+# L'abattement s'applique au salaire DÉCLARÉ (case 1AJ). On saisit ici
+# `salaire_declare` directement pour isoler la logique d'abattement du passage
+# brut → déclaré (cotisations + CSG déductible), testé séparément dans
+# cotisations_salariales.yaml.
 - name: Salaire en plein abattement (10% entre plancher et plafond)
   absolute_error_margin: 0.01
   period: 2024
   input:
     individus:
       individu_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1]
@@ -20,7 +24,7 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 4_000
+        salaire_declare: 4_000
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1]
@@ -33,7 +37,7 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 200_000
+        salaire_declare: 200_000
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1]
@@ -46,7 +50,7 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 0
+        salaire_declare: 0
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1]
@@ -59,9 +63,9 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       individu_2:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1, individu_2]

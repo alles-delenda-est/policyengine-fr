@@ -1,0 +1,1 @@
+- Pin ruff (`==0.15.20`) in the Lint CI job and the dev dependency so a floating version can't silently reformat unrelated files and break Lint on every PR.

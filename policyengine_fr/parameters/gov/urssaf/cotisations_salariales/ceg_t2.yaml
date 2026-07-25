@@ -1,0 +1,9 @@
+description: Taux salarié de la contribution d'équilibre général (CEG) tranche 2 (part salariale), entre 1 et 8 PASS.
+values:
+  2024-01-01: 0.0108
+metadata:
+  unit: /1
+  label: Cotisation salariale CEG T2
+  reference:
+    - title: AGIRC-ARRCO — CEG 2024 (T2 total 2,70 %, part salariale 1,08 %)
+      href: https://www.agirc-arrco.fr/employeurs/effectuer-versements/taux-cotisation/

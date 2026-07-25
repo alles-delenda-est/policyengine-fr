@@ -1,0 +1,11 @@
+description: Plafond annuel de la sécurité sociale (PASS). Sert de borne de tranche pour les cotisations plafonnées (vieillesse, retraite complémentaire AGIRC-ARRCO).
+values:
+  2024-01-01: 46368
+metadata:
+  unit: currency-EUR
+  label: Plafond annuel de la sécurité sociale (PASS)
+  reference:
+    - title: Arrêté du 19 décembre 2023 (PASS 2024 = 46 368 € ; plafond mensuel 3 864 €)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000048633127
+    - title: URSSAF — Plafond de la sécurité sociale
+      href: https://www.urssaf.fr/accueil/employeur/cotisations/bases-de-calcul/plafond-securite-sociale.html

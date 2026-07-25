@@ -12,7 +12,7 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 30_000          # salaire imposable 27 000
+        salaire_declare: 30_000       # salaire imposable 27 000
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1]
@@ -26,7 +26,7 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 10_000          # salaire imposable 9 000
+        salaire_declare: 10_000       # salaire imposable 9 000
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1]
@@ -116,7 +116,7 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 40_000          # salaire imposable 36 000
+        salaire_declare: 40_000       # salaire imposable 36 000
         pensions_alimentaires_percues: 10_000
     foyers_fiscaux:
       foyer_1:
@@ -133,7 +133,7 @@
   input:
     individus:
       individu_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
     foyers_fiscaux:
       foyer_1:
         declarants: [individu_1]
