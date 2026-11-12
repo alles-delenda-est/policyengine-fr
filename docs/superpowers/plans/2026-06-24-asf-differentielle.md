@@ -161,22 +161,19 @@ In `policyengine_fr/variables/gov/cnaf/prestations/asf/allocation_soutien_famili
 replace the body of `formula` from the `montant = ...` line to the `return` with:
 
 ```python
-        asf_pleine = bmaf * asf.taux_orphelin_un_parent * nb_enfants
+asf_pleine = bmaf * asf.taux_orphelin_un_parent * nb_enfants
 
-        # Complément différentiel (CSS art. L523-1, L581-2) : la pension
-        # alimentaire perçue par la famille, ramenée au mois, est défalquée de
-        # l'ASF pleine ; le résultat est borné à zéro. La base annuelle de la
-        # pension est lue via period.this_year, comme la modulation AF lit ses
-        # ressources. Pension nulle → ASF pleine (cas de l'allocation non
-        # recouvrable, parent décédé/inconnu).
-        pension_mensuelle = (
-            famille.sum(
-                famille.members("pensions_alimentaires_percues", period.this_year)
-            )
-            / 12
-        )
-        montant = max_(asf_pleine - pension_mensuelle, 0)
-        return where(parent_unique, montant, 0)
+# Complément différentiel (CSS art. L523-1, L581-2) : la pension
+# alimentaire perçue par la famille, ramenée au mois, est défalquée de
+# l'ASF pleine ; le résultat est borné à zéro. La base annuelle de la
+# pension est lue via period.this_year, comme la modulation AF lit ses
+# ressources. Pension nulle → ASF pleine (cas de l'allocation non
+# recouvrable, parent décédé/inconnu).
+pension_mensuelle = (
+    famille.sum(famille.members("pensions_alimentaires_percues", period.this_year)) / 12
+)
+montant = max_(asf_pleine - pension_mensuelle, 0)
+return where(parent_unique, montant, 0)
 ```
 
 (The lines above this — `asf`, `bmaf`, `age_limite`, `age`, `est_enfant`,
@@ -288,7 +285,9 @@ the top — use it directly, no in-function import):
 def test_asf_non_increasing_in_pension():
     # A received pension reduces ASF euro-for-euro until it reaches zero.
     base = float(
-        build_household([0], [8]).calculate("allocation_soutien_familial", "2024-04").sum()
+        build_household([0], [8])
+        .calculate("allocation_soutien_familial", "2024-04")
+        .sum()
     )
     with_pension = float(
         build_household([0], [8], adult_pensions=[1_200])
@@ -374,7 +373,9 @@ def compute_asf_differentielle_annual(child_ages, pension_annuelle, year=2024):
     situation = {
         "individus": individus,
         "familles": {"fam": {"parents": ["parent1"], "enfants": enfants}},
-        "foyers_fiscaux": {"ff": {"declarants": ["parent1"], "personnes_a_charge": enfants}},
+        "foyers_fiscaux": {
+            "ff": {"declarants": ["parent1"], "personnes_a_charge": enfants}
+        },
         "menages": {"men": {"personne_de_reference": ["parent1"], "enfants": enfants}},
     }
     sim = SimulationBuilder().build_from_entities(tbs, situation)
