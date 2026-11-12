@@ -300,6 +300,7 @@ Add to `tests/test_properties.py` (full helper-based assertion; reuse `build_hou
 def test_asf_in_revenu_disponible_single_parent():
     # Single parent, 1 child, no income: revenu_disponible == annual ASF.
     from tests.helpers import build_household
+
     sim = build_household([0], [8])
     rd = float(sim.calculate("revenu_disponible", "2024").sum())
     # 3×188,18246 (jan-mars) + 9×196,83768 (avr-déc) = 2336.0865...
@@ -374,6 +375,7 @@ import pytest
 @pytest.mark.parametrize("child_ages", [[], [8], [4, 9], [1, 7, 12]])
 def test_asf_non_negative(child_ages):
     from tests.helpers import build_household
+
     sim = build_household([20000], child_ages)
     asf = sim.calculate("allocation_soutien_familial", "2024-04")
     assert (asf >= 0).all()
@@ -381,6 +383,7 @@ def test_asf_non_negative(child_ages):
 
 def test_asf_zero_for_couple():
     from tests.helpers import build_household
+
     sim = build_household([20000, 15000], [4, 9])
     asf = float(sim.calculate("allocation_soutien_familial", "2024-04").sum())
     assert asf == 0
@@ -388,8 +391,17 @@ def test_asf_zero_for_couple():
 
 def test_asf_scales_with_eligible_children():
     from tests.helpers import build_household
-    one = float(build_household([0], [8]).calculate("allocation_soutien_familial", "2024-04").sum())
-    two = float(build_household([0], [4, 9]).calculate("allocation_soutien_familial", "2024-04").sum())
+
+    one = float(
+        build_household([0], [8])
+        .calculate("allocation_soutien_familial", "2024-04")
+        .sum()
+    )
+    two = float(
+        build_household([0], [4, 9])
+        .calculate("allocation_soutien_familial", "2024-04")
+        .sum()
+    )
     assert abs(two - 2 * one) < 0.01
 ```
 
@@ -490,7 +502,9 @@ def compute_asf_annual(child_ages, year=2024):
     situation = {
         "individus": individus,
         "familles": {"fam": {"parents": ["parent1"], "enfants": enfants}},
-        "foyers_fiscaux": {"ff": {"declarants": ["parent1"], "personnes_a_charge": enfants}},
+        "foyers_fiscaux": {
+            "ff": {"declarants": ["parent1"], "personnes_a_charge": enfants}
+        },
         "menages": {"men": {"personne_de_reference": ["parent1"], "enfants": enfants}},
     }
     sim = SimulationBuilder().build_from_entities(tbs, situation)
