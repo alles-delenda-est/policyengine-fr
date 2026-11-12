@@ -116,20 +116,21 @@ copy-paste. Each entity declares roles and one is flagged `is_person=True`.
 ### 3.2 Variables (the formulas) — `variables/.../foo.py`
 
 ```python
-from policyengine_canada.model_api import *   # → policyengine_fr.model_api for FR
+from policyengine_canada.model_api import *  # → policyengine_fr.model_api for FR
+
 
 class child_benefit(Variable):
     value_type = float
-    entity = Household          # which entity this is computed on
+    entity = Household  # which entity this is computed on
     label = "Canada child benefit"
-    unit = CAD                  # FR: define EUR = "currency-EUR" in model_api
+    unit = CAD  # FR: define EUR = "currency-EUR" in model_api
     documentation = "Non taxable amount paid monthly per child under 18."
-    definition_period = YEAR    # YEAR / MONTH / etc.
+    definition_period = YEAR  # YEAR / MONTH / etc.
 
     def formula(household, period, parameters):
-        base = household("child_benefit_base", period)        # call other vars
+        base = household("child_benefit_base", period)  # call other vars
         reduction = household("child_benefit_reduction", period)
-        return max_(0, base - reduction)                       # vectorised (numpy)
+        return max_(0, base - reduction)  # vectorised (numpy)
 ```
 
 - The class **name = the variable name** other variables/tests reference.
