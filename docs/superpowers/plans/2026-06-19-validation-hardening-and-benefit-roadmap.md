@@ -394,9 +394,11 @@ import yaml, pathlib, pytest
 
 FIX = pathlib.Path(__file__).parent / "fixtures" / "oracle_values.yaml"
 
+
 def _rows():
     data = yaml.safe_load(FIX.read_text(encoding="utf-8"))
     return data["households"]
+
 
 @pytest.mark.parametrize("row", _rows(), ids=lambda r: r["id"])
 def test_model_matches_official_oracle(row):
