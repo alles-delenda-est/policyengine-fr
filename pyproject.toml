@@ -18,7 +18,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-    "policyengine_core>=3.23.6",
+    "policyengine_core>=3.23.6,<4",
     "numpy",
     "pandas>=2.2.0",
     "pytest",
@@ -81,4 +81,4 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F"]
-ignore = ["E402", "E501", "E712", "E713", "E721", "E722", "E741", "F401", "F402", "F403", "F405", "F541", "F811", "F821", "F841"]
+ignore = ["E402", "E501", "E712", "E713", "E721", "E722", "E741", "F401", "F402", "F403", "F405", "F541", "F811", "F841"]
