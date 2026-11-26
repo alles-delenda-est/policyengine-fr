@@ -1,9 +1,13 @@
-name: Claude statute review
+name: Statute review
 
 # Independent reviewer-agent gate (see docs/reviewer-agent-gate.md).
-# Dormant until you set repo variable ENABLE_CLAUDE_REVIEW=true and add the
-# ANTHROPIC_API_KEY secret — so it never shows a red X before it is configured.
-# Advisory by default: it posts a review comment and does NOT block auto-merge.
+# Runs only when repo variable ENABLE_CLAUDE_REVIEW=true. Advisory: it posts a
+# review comment and does NOT block auto-merge, and it never fails the build.
+#
+# TEMPORARY: the reviewer is routed through **Gemini** (GEMINI_API_KEY secret)
+# while the ANTHROPIC_API_KEY is unavailable. To restore the Claude reviewer,
+# revert this step to the anthropics/claude-code-action@v1 block (in git history)
+# and remove .github/scripts/gemini_statute_review.py.
 
 on:
   pull_request:
@@ -26,42 +30,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Independent statute review
-        uses: anthropics/claude-code-action@v1
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/setup-python@v6
         with:
-          # API-key mode: use the built-in token for GitHub ops so the action
-          # does not depend on the OIDC/Claude-GitHub-App exchange.
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: |
-            You are an INDEPENDENT reviewer of a French tax-benefit
-            microsimulation PR (policyengine-fr, on policyengine-core). You did
-            NOT write this code. Be adversarial: assume the author may have
-            misread the law. Review only the changed variables, parameters, and
-            tests against French statute. If the PolicyEngine plugin is
-            available, use its `program-reviewer` and `reference-validator`
-            skills.
+          python-version: "3.12"
 
-            Check, and report findings tied to specific articles/URLs:
-            1. Statute fidelity — does each formula match the cited CGI/CSS/arrêté
-               article? Is the `reference:` real, current and on-point?
-            2. Independent reference values — are test expected values traceable
-               to an INDEPENDENT source (openfisca-france parameters at
-               github.com/openfisca/openfisca-france, or the official simulator),
-               not merely re-derived from this same code? Hand-check at least one.
-            3. Silent scope-narrowing — any simplification (e.g. a means-test
-               using current-year income instead of base ressources N-2, a
-               benefit without its phase-out) must be explicit in the variable
-               docstring AND modelled_policies.yaml. Flag undocumented ones.
-            4. Entity & period — correct entity (individu/foyer_fiscal/famille/
-               menage) and definition_period (YEAR vs MONTH); correct cross-entity
-               aggregation (no double counting).
-            5. Edge cases — zero income, thresholds, single/couple/parent-isolé,
-               many children, age boundaries (14/18/20): are they tested?
-            6. Vectorisation & safety — numpy-safe, no divide-by-zero, no NaN.
-
-            End with a clear verdict line: `VERDICT: APPROVE` or
-            `VERDICT: REQUEST CHANGES`, then the prioritised findings. Post this as
-            a single PR review comment. Do not modify any files.
+      # TEMPORARY reroute: statute review via Gemini 3.6 Flash. The script is
+      # advisory and never fails the build — a missing GEMINI_API_KEY, an unknown
+      # model, or an API error exits 0 with a warning (no red X).
+      - name: Independent statute review (Gemini — temporary)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.6-flash' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python .github/scripts/gemini_statute_review.py

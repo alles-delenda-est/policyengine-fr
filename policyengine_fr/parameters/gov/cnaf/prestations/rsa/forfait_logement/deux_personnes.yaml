@@ -1,0 +1,9 @@
+description: Forfait logement RSA pour un foyer de deux personnes, en part du montant forfaitaire pour deux personnes (16 % ; CASF art. R262-9).
+values:
+  2009-06-01: 0.16
+metadata:
+  unit: /1
+  label: Forfait logement RSA (2 personnes, en part du MF 2 pers.)
+  reference:
+    - title: Code de l'action sociale et des familles, art. R262-9
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000021666480

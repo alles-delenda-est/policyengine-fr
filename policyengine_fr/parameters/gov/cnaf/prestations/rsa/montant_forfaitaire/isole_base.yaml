@@ -1,0 +1,9 @@
+description: Coefficient du montant forfaitaire majoré du RSA (parent isolé) pour le parent seul, en part du montant pour une personne seule (128,412 % ; CASF art. R262-1).
+values:
+  2009-06-01: 1.28412
+metadata:
+  unit: /1
+  label: Coefficient RSA majoré (parent isolé, base)
+  reference:
+    - title: Code de l'action sociale et des familles, art. R262-1 (montant majoré)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037861692

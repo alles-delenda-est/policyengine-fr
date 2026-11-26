@@ -5,16 +5,18 @@ core:
     - Plafonnement du quotient familial
     - Décote
     - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %)
+    - Cotisations sociales salariales — par risque avec plafonds (tranches PASS), statut cadre (passage du salaire brut au salaire déclaré, case 1AJ)
     - Allocations familiales (base, modulation selon les revenus, majoration pour âge)
     - Allocation de soutien familial (ASF) — taux simple, en complément différentiel de la pension alimentaire perçue (famille monoparentale)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement de 10 % (perçues)
+    - Revenu de solidarité active (RSA) — socle : montant forfaitaire (échelle d'équivalence, RSA majoré parent isolé), forfait logement, base ressources différentielle
     - Revenu disponible — agrégat de tête de l'MVP (revenus 2024)
   not_modelled:
     - Réductions et crédits d'impôt
     - Contribution exceptionnelle sur les hauts revenus
     - Prélèvements sociaux sur les revenus du capital et de remplacement
-    - Cotisations sociales salariales (maladie, retraite, chômage…)
-    - Autres prestations sociales (RSA, APL, prime d'activité…)
+    - Cotisations salariales : exonérations spécifiques (heures supplémentaires, apprentis, ZRR) ; cotisations patronales et réduction générale bas salaires (côté employeur)
+    - Autres prestations sociales (APL, prime d'activité, complément familial, PAJE, ARS, AAH, ASPA…)
     - Revenus non salariés, pensions de retraite et revenus du capital (hors pensions alimentaires perçues)
   simplifications:
     # Explicit scope-narrowings: modelled, but with a documented departure from
@@ -53,26 +55,20 @@ core:
       sa propre pension) puis le total est plafonné au niveau du foyer fiscal,
       ce qui approche la règle légale de répartition exacte du plafond.
     - >-
-      Convention d'entrée du salaire — la variable d'entrée `salaire_brut` est
-      lue comme le salaire DÉCLARÉ (case 1AJ, net de cotisations sociales et de
-      CSG déductible) par la chaîne impôt sur le revenu — c'est la convention
-      sous laquelle le modèle reproduit le simulateur DGFiP à l'euro près —
-      mais comme un salaire BRUT par les formules CSG/CRDS (abattement
-      d'assiette de 1,75 %, art. L136-2 CSS). Les deux lectures diffèrent
-      d'environ 20-25 % sur une fiche de paie réelle. En saisissant le salaire
-      déclaré, l'IR est exact et la CSG/CRDS est calculée sur une base
-      sous-estimée; `revenu_disponible` soustrait les deux du même montant et
-      n'est donc le revenu disponible exact d'aucun ménage réel sous l'une ou
-      l'autre lecture. À trancher avant toute prestation sous condition de
-      ressources (voir la feuille de route).
-    - >-
-      CSG déductible non déduite de la base imposable — `csg_deductible`
-      (6,8 % sur 98,25 % du salaire) est calculée comme prélèvement, mais la
-      déductibilité prévue par le CGI art. 154 quinquies n'est pas appliquée
-      dans `revenu_net_imposable`. Cohérent avec la lecture « salaire déclaré »
-      de l'entrée (un montant 1AJ est déjà net de CSG déductible), incohérent
-      sous la lecture « brut ». Si la convention brut est retenue un jour, la
-      déduction devra être ajoutée et l'oracle DGFiP re-capturé.
+      Cotisations salariales par risque (specs 0001, 0004) — l'entrée
+      `salaire_brut` est un salaire BRUT réel, converti en salaire déclaré
+      (case 1AJ) en retranchant les cotisations salariales et la CSG déductible
+      (CGI art. 154 quinquies, appliquée une seule fois dans `salaire_declare`).
+      Les cotisations sont calculées par risque avec plafonds (vieillesse
+      plafonnée/déplafonnée, retraite complémentaire AGIRC-ARRCO T1/T2 et CEG,
+      tranches délimitées par le PASS ; CET et APEC pour les cadres via l'entrée
+      `cadre`). L'IR porte sur le salaire déclaré et la CSG/CRDS sur 98,25 % du
+      brut : l'ancienne double-convention brut/déclaré est levée et
+      `revenu_disponible` retranche les cotisations. Non modélisés : chômage et
+      maladie salariales (nuls depuis 2018, remplacés par la CSG), les
+      exonérations spécifiques (heures supplémentaires, apprentis, ZRR) et le
+      statut cadre lorsqu'il n'est pas fourni (défaut non cadre). Les allègements
+      bas salaires (réduction générale) sont côté employeur (docs/specs/0008).
     - >-
       Allocations familiales — complément dégressif non modélisé : la
       modulation applique les taux plein/moitié/quart en marche d'escalier aux
@@ -103,3 +99,27 @@ core:
       calculé sur cette seule assiette. Lorsque les pensions de retraite seront
       modélisées, cet abattement devra être fusionné avec elles pour partager un
       unique plancher/plafond, sous peine d'accorder l'abattement deux fois.
+    - >-
+      RSA — base ressources approchée (spec 0002) : la base légale est la
+      moyenne des ressources des 3 mois précédant la demande (CASF art. R262-3) ;
+      le modèle utilise le revenu annuel modélisé / 12 comme proxy mensuel (même
+      simplification que la base ressources des AF). Le périmètre des ressources
+      est réduit à ce que le MVP sait modéliser (salaires déclarés, pensions
+      alimentaires perçues, AF et ASF ; ni capital, ni revenus de remplacement,
+      ni autres prestations). L'abattement / la neutralisation des revenus
+      d'activité des 3 premiers mois (art. R262-7) n'est pas appliqué.
+    - >-
+      RSA — forfait logement appliqué systématiquement : le statut de logement
+      n'étant pas modélisé, le forfait logement (CASF art. R262-9) est toujours
+      déduit (hypothèse d'un foyer bénéficiant d'une aide au logement ou logé à
+      titre gratuit). Un locataire sans aide au logement verrait son RSA
+      sous-estimé du montant du forfait.
+    - >-
+      RSA — socle seul, isolement par proxy : seul le RSA socle est modélisé
+      (hors prime d'activité, RSA jeune, cumul intéressement, contrat
+      d'engagement et sanctions). Le RSA majoré (parent isolé) est déclenché par
+      le proxy « un seul parent avec enfant » (comme l'ASF) et sa durée (jusqu'aux
+      3 ans du plus jeune enfant, art. L262-9) n'est pas modélisée. Les enfants à
+      charge sont comptés avec la limite d'âge des allocations familiales
+      (< 20 ans) alors que la charge au sens du RSA peut s'étendre jusqu'à 25 ans
+      (léger sous-comptage pour les jeunes majeurs). Métropole uniquement.

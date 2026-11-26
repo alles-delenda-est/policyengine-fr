@@ -4,21 +4,16 @@ from policyengine_fr.model_api import *
 class salaire_brut(Variable):
     value_type = float
     entity = Individu
-    label = "Salaire brut imposable"
+    label = "Salaire brut"
     unit = EUR
     documentation = (
-        "Revenu d'activité salariée annuel déclaré (avant déduction forfaitaire "
-        "de 10% pour frais professionnels).\n\n"
-        "Attention à la convention d'entrée (simplification MVP, voir "
-        "modelled_policies.yaml): la chaîne impôt sur le revenu traite ce "
-        "montant comme le salaire DÉCLARÉ (case 1AJ — net de cotisations "
-        "sociales et de CSG déductible; c'est la convention sous laquelle le "
-        "modèle a été validé à l'euro près face au simulateur DGFiP), tandis "
-        "que les formules CSG/CRDS le traitent comme un salaire BRUT "
-        "(l'abattement d'assiette de 1,75 % de l'art. L136-2 CSS s'applique au "
-        "brut). Ces deux lectures diffèrent d'environ 20-25 % sur une fiche de "
-        "paie réelle; tant que les cotisations salariales ne sont pas "
-        "modélisées, saisir le salaire déclaré donne un IR exact et une "
-        "CSG/CRDS sous-estimée."
+        "Revenu d'activité salariée annuel BRUT (avant cotisations sociales "
+        "salariales, CSG/CRDS et impôt).\n\n"
+        "Convention d'entrée: salaire brut réel. Le modèle en dérive le salaire "
+        "déclaré (`salaire_declare` = brut − cotisations salariales − CSG "
+        "déductible), sur lequel la chaîne impôt sur le revenu applique "
+        "l'abattement de 10 %; la CSG/CRDS est assise sur 98,25 % du brut "
+        "(art. L136-2 CSS). Les cotisations salariales sont calculées par risque "
+        "avec plafonds (voir `cotisations_salariales`)."
     )
     definition_period = YEAR
