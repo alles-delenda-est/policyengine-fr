@@ -1,0 +1,1 @@
+- Cap the `policyengine_core` dependency at `<4` so an engine major bump cannot silently change model semantics, and re-enable the ruff `F821` (undefined-name) lint check.
