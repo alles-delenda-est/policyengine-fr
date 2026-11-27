@@ -1,0 +1,1 @@
+Added the PolicyEngine France Interactive Studio (`policyengine_fr.studio` API server and React/Vite `ui/` web application) with 60fps household simulation, 2024–2025 comparison, vectorised budget-constraint & marginal-rate curves, and interactive `LVTShift` & `budget_fr_sim_test` policy reforms.

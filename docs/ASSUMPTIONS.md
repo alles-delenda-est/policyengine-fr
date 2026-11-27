@@ -111,3 +111,15 @@ All 25 rows in `tests/fixtures/oracle_values.yaml` have `official != null` (`0` 
 | `prime_activite` (`6k €` gross wage stacked with RSA; plus 9 YAML & grid checks) | `openfisca-france` `175.0.45` | 1 (+9 YAML) | `0.00 €` |
 | `salaire_net` & `salaire_declare` (`30k €`, `60k €` non-cadre & `60k €` cadre) | `openfisca-france` `175.0.45` | 3 | `0.01–1.44 €` (`< 0.003 %`, float32 rounding) |
 | `reduction_generale` (employer Fillon reduction at full-time SMIC `21,203 €`) | `openfisca-france` `175.0.45` | 1 | `0.00 €` |
+
+
+---
+
+## 5. Interactive Studio UI Architecture & Design Assumptions (`feat/ui-studio`)
+
+1. **Zero-Extra-Dependency Python Microsimulation Server (`policyengine_fr/studio.py`):**
+   - Uses stdlib `http.server.ThreadingHTTPServer` so `policyengine-fr` keeps its minimal `pyproject.toml` dependency footprint (no Flask/FastAPI install required).
+   - Caches compiled `CountryTaxBenefitSystem(reform=...)` instances via `@lru_cache(maxsize=64)` and evaluates the **61-point earnings curve** (`salaire_brut` → `revenu_disponible`, stacked benefits, and effective marginal rate `EMTR %`) in a **single vectorised `Simulation` pass** (`< 15 ms` end-to-end).
+2. **Cross-Repository UX & Design Reuse (`budget_fr_sim_test` & `LVTShift`):**
+   - Reuses the French Civic Editorial palette & typography (`Crimson Pro` + `Inter`, deep marine `#1a2744`, emerald `#1e6b4b`, crimson `#b5281e`, warm stone `#f6f4ef`, `tabular-nums` anti-jitter numbers), `useDeferredValue` + `AbortController` 60fps slider responsiveness, URL hash state sharing (`#s=...`), `;`-delimited French CSV export with formula-injection protection, and inline `InfoPopover` statutory citations wired directly to `/api/metadata`.
+   - Provides a global **`€ / mois` ↔ `€ / an` toggle** (scaling inputs and outputs instantaneously on the client), `2024` ↔ `2025` legislation toggle, 7 one-click household presets, and combinable `LVTShift` (`S1`–`S3_IFI`) + `budget_fr_sim_test` (`IR`, `CSG`, `ir_freeze_2024`, and `day1` `D-P6` targeted pension under-indexation with live mechanical clawback readout) reforms.

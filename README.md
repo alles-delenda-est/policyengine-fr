@@ -17,6 +17,7 @@ All modelling lives in the `policyengine_fr/` package:
 - `tests/` — YAML test suites mirroring the `variables/` tree.
 - `data/` — pinned calibration artifacts with SHA-256 provenance (`lvt_yields.json`).
 - `reforms/` — parameterised policy reforms (`lvt_shift` S1–S3_IFI and `budget_levers` IR/CSG/pension indexation levers).
+- `studio.py` + `../ui/` — interactive React 19 + Vite 7 + Recharts 3 microsimulation Studio (`python -m policyengine_fr.studio --open`).
 
 > For the wider PolicyEngine architecture and the plan for this project, see
 > [`docs/policyengine-ecosystem.md`](docs/policyengine-ecosystem.md) and
@@ -61,6 +62,20 @@ pytest tests/ -q
 The model itself is cross-platform (CI runs on Linux; PolicyEngine country
 packages also test on Windows). `.gitattributes` keeps line endings as LF so
 `ruff format --check` stays consistent across platforms.
+
+## Interactive Studio UI
+
+Build the frontend bundle once and launch the local microsimulation Studio:
+
+```powershell
+cd ui
+npm install
+npm run build
+cd ..
+.venv\Scripts\python.exe -m policyengine_fr.studio --open
+```
+
+For hot-reloading frontend development, run `.venv\Scripts\python.exe -m policyengine_fr.studio` in one terminal (`http://127.0.0.1:8765`) and `npm run dev` inside `ui/` (`http://localhost:5173`, proxying `/api` automatically).
 
 ## Current status
 

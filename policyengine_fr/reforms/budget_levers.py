@@ -45,6 +45,35 @@ def make_ir_proportional_reform(multiplier: float) -> type[Reform]:
     return ProportionalIRReform
 
 
+def make_ir_freeze_brackets_reform() -> type[Reform]:
+    """Freeze 2025+ IR bracket thresholds, décote, and QF caps at 2024 levels."""
+
+    def _modify(parameters):
+        span = make_period("year:2025:10")
+        for bracket in parameters.gov.dgfip.ir.bareme.brackets:
+            t_2024 = float(bracket.threshold("2024-01-01"))
+            bracket.threshold.update(period=span, value=t_2024)
+        dec = parameters.gov.dgfip.ir.decote
+        dec.seuil_celibataire.update(
+            period=span, value=float(dec.seuil_celibataire("2024-01-01"))
+        )
+        dec.seuil_couple.update(
+            period=span, value=float(dec.seuil_couple("2024-01-01"))
+        )
+        pqf = parameters.gov.dgfip.ir.plafond_quotient_familial
+        pqf.general.update(period=span, value=float(pqf.general("2024-01-01")))
+        pqf.celib_enf.update(period=span, value=float(pqf.celib_enf("2024-01-01")))
+        return parameters
+
+    class FreezeIRBracketsReform(Reform):
+        name = "Freeze IR brackets, décote & QF caps at 2024 levels"
+
+        def apply(self):
+            self.modify_parameters(_modify)
+
+    return FreezeIRBracketsReform
+
+
 def make_csg_delta_reform(delta_rate: float) -> type[Reform]:
     """Add ``delta_rate`` (e.g. +0.01 for +1 pp) to activity CSG."""
 
