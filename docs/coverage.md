@@ -80,7 +80,9 @@ employer `cout_du_travail`.
   `taxe_valeur_sol`)** — local bills (`taxe_fonciere_locale`, `thrs_locale`)
   plus the 3 % State management fee (CGI art. 1641), and land-value tax on
   `valeur_terrain_imposable`, paired with parameterised reforms in
-  `policyengine_fr.reforms` (`lvt_shift` S1–S3_IFI and `budget_levers`).
+  `policyengine_fr.reforms` (`lvt_shift` S1–S3_IFI — where S3 exempts net rents
+  from IR and social levies while retaining them in RFR and means-tests — and
+  `budget_levers`).
 
 ### Family & solidarity benefits (CNAF)
 

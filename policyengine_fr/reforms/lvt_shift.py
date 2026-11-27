@@ -9,7 +9,10 @@ equal-yield replacement scenarios (spec 0005 of LVTShift and `LVT_MODULE` of
 - ``S1``     : replaces TFPB, TFPNB, THRS, and DMTO -> indicative national rate 1.10 %
 - ``S2``     : ``S1`` + IR & PS on real-estate capital gains -> 1.16 %
 - ``S2_IFI`` : ``S2`` + IFI -> 1.20 %
-- ``S3``     : ``S2`` + IR & PS on net rental income -> 1.30 %
+- ``S3``     : ``S2`` + IR & PS on net rental income (removes ``revenus_fonciers_nets``
+  from ``revenu_net_imposable`` and ``prelevements_sociaux_patrimoine`` while
+  retaining net rents in ``revenu_fiscal_de_reference`` and ``rsa_base_ressources``
+  so means-tested benefits and RFR-assessed levies remain intact) -> 1.30 %
 - ``S3_IFI`` : ``S3`` + IFI -> 1.34 %
 """
 
@@ -67,7 +70,13 @@ def make_lvt_shift_reform(
     *,
     custom_rate: float | None = None,
 ) -> type[Reform]:
-    """Build a PolicyEngine `Reform` implementing an LVTShift equal-yield scenario."""
+    """Build a PolicyEngine `Reform` implementing an LVTShift equal-yield scenario.
+
+    In ``S3`` / ``S3_IFI``, net rental income is removed from progressive IR
+    (``revenu_net_imposable``) and social levies (``prelevements_sociaux_patrimoine``)
+    while staying included in ``revenu_fiscal_de_reference`` and benefit means-tests
+    (preventing spurious RSA eligibility and preserving RFR-based CEHR / CSG tiers).
+    """
     rate = lvt_variant_rate(scenario_id) if custom_rate is None else float(custom_rate)
     replace_gains = scenario_id in {"S2", "S2_IFI", "S3", "S3_IFI"}
     replace_ifi = scenario_id in {"S2_IFI", "S3_IFI"}

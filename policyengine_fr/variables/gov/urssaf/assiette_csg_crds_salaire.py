@@ -18,6 +18,10 @@ class assiette_csg_crds_salaire(Variable):
 
     def formula(individu, period, parameters):
         salaire_brut = individu("salaire_brut", period)
-        abattement = parameters(period).gov.urssaf.csg.activite.abattement
+        csg_params = parameters(period).gov.urssaf.csg.activite
+        abattement = csg_params.abattement
+        plafond_pass = csg_params.plafond_abattement_pass
         pass_annuel = parameters(period).gov.urssaf.plafond_securite_sociale
-        return salaire_brut - min_(salaire_brut, 4 * pass_annuel) * abattement
+        return (
+            salaire_brut - min_(salaire_brut, plafond_pass * pass_annuel) * abattement
+        )

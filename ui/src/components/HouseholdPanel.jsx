@@ -670,8 +670,8 @@ export default function HouseholdPanel({
                 onChange={(e) => setRef('ir_freeze_2024', e.target.checked)}
               />
               <span>
-                Gel du barème IR, de la décote et du plafonnement QF aux seuils 2024
-                {year === '2024' && ' (actif en 2025)'}
+                Gel du barème IR, de la décote et du plafonnement QF aux seuils 2024 (hors
+                abattements 10 %){year === '2024' && ' (actif en 2025)'}
               </span>
             </label>
 

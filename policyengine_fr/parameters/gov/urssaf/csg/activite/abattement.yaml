@@ -1,4 +1,4 @@
-description: Taux de l'abattement d'assiette pour frais professionnels appliqué aux revenus d'activité avant calcul de la CSG et de la CRDS (l'assiette retenue est donc 98,25 % du revenu brut).
+description: Taux de l'abattement d'assiette pour frais professionnels appliqué aux revenus d'activité avant calcul de la CSG et de la CRDS (l'assiette retenue est 98,25 % du revenu brut dans la limite de 4 PASS, puis 100 % au-delà).
 values:
   2012-01-01: 0.0175
 metadata:

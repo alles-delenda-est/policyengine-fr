@@ -46,7 +46,15 @@ def make_ir_proportional_reform(multiplier: float) -> type[Reform]:
 
 
 def make_ir_freeze_brackets_reform() -> type[Reform]:
-    """Freeze 2025+ IR bracket thresholds, décote, and QF caps at 2024 levels."""
+    """Freeze 2025–2034 IR brackets, décote, and QF caps at 2024 levels.
+
+    Applies over ``year:2025:10`` (2025–2034 incomes) so 2024 is untouched.
+    Freezes only the progressive IR bracket thresholds, the single/couple
+    décote thresholds (889 EUR / 1,470 EUR), and the two quotient-familial
+    caps (1,791 EUR / 4,224 EUR); does NOT freeze the 10% salary/pension
+    abatement ceilings and floors (CGI art. 83, 3° and 158, 5, a), pension CSG
+    RFR thresholds, or CEHR thresholds.
+    """
 
     def _modify(parameters):
         span = make_period("year:2025:10")

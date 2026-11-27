@@ -47,7 +47,11 @@ def test_csg_crds_exact_and_non_negative(income):
     sim = build_household([income], [])
     csg = sim.calculate("csg", Y).sum()
     crds = sim.calculate("crds", Y).sum()
-    base = income - min(income, 4 * 46_368) * 0.0175
+    params = sim.tax_benefit_system.parameters(Y)
+    abattement = float(params.gov.urssaf.csg.activite.abattement)
+    plafond_pass = float(params.gov.urssaf.csg.activite.plafond_abattement_pass)
+    pass_annuel = float(params.gov.urssaf.plafond_securite_sociale)
+    base = income - min(income, plafond_pass * pass_annuel) * abattement
     assert csg >= -0.01 and crds >= -0.01
     assert math.isclose(csg, 0.092 * base, abs_tol=0.5)
     assert math.isclose(crds, 0.005 * base, abs_tol=0.5)
@@ -172,7 +176,11 @@ def test_assiette_identity():
     for income in _INCOME_GRID:
         sim = build_household([income], [])
         assiette = float(sim.calculate("assiette_csg_crds_salaire", _CSG_PERIOD).sum())
-        expected = income - min(income, 4 * 46_368) * 0.0175
+        params = sim.tax_benefit_system.parameters(_CSG_PERIOD)
+        abattement = float(params.gov.urssaf.csg.activite.abattement)
+        plafond_pass = float(params.gov.urssaf.csg.activite.plafond_abattement_pass)
+        pass_annuel = float(params.gov.urssaf.plafond_securite_sociale)
+        expected = income - min(income, plafond_pass * pass_annuel) * abattement
         assert math.isclose(assiette, expected, abs_tol=0.05)
 
 

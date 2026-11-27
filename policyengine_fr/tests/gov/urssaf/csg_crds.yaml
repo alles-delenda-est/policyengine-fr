@@ -64,3 +64,25 @@
     csg_deductible: 2_471.97
     csg_imposable: 872.46
     csg: 3_344.43
+
+- name: Borne exacte à 4 PASS (2024, 185 472 €) — abattement plein 1,75 %
+  absolute_error_margin: 0.02
+  period: 2024
+  input:
+    salaire_brut: 185_472
+  output:
+    # 4 × PASS 2024 = 185 472 ; abattement = 3 245,76 -> assiette = 182 226,24
+    assiette_csg_crds_salaire: 182_226.24
+    csg: 16_764.81
+    crds: 911.13
+
+- name: Salaire brut 200 000 € en 2025 — abattement 1,75 % plafonné à 4 PASS 2025 (188 400 €)
+  absolute_error_margin: 0.02
+  period: 2025
+  input:
+    salaire_brut: 200_000
+  output:
+    # 4 × PASS 2025 = 4 × 47 100 = 188 400 ; abattement = 3 297,00 -> assiette = 196 703,00
+    assiette_csg_crds_salaire: 196_703.00
+    csg: 18_096.68
+    crds: 983.515

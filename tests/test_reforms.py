@@ -10,6 +10,7 @@ from policyengine_fr.reforms import (
     lvt_variant_rate,
     make_csg_delta_reform,
     make_d_p6_targeted_pension_underindexation_reform,
+    make_ir_freeze_brackets_reform,
     make_ir_proportional_reform,
     make_lvt_shift_reform,
 )
@@ -231,3 +232,149 @@ def test_d_p6_updates_rfr_and_csg_tier():
         r_sim.calculate("revenu_fiscal_de_reference", "2024")[0]
     ) == pytest.approx(23_683.50, abs=0.1)
     assert float(r_sim.calculate("taux_csg_pension", "2024")[0]) == pytest.approx(0.066)
+
+
+def test_ir_freeze_brackets_reform_reverts_2025_to_2024_and_leaves_2024_unchanged():
+    """Verify `make_ir_freeze_brackets_reform`:
+    1) In 2025, single person reverts to exact 2024 barème (11 497) & décote (889).
+    2) In 2025, family quotient capping reverts to 2024 cap (1 791 EUR / half-part).
+    3) In 2024, all IR amounts are strictly unchanged.
+    """
+    freeze = make_ir_freeze_brackets_reform()
+
+    single_sit = {
+        "individus": {
+            "a1": {
+                "age": {"2025": 35, "2024": 35},
+                "salaire_declare": {"2025": 30_000, "2024": 30_000},
+            }
+        },
+        "foyers_fiscaux": {"ff1": {"declarants": ["a1"]}},
+        "familles": {"fam1": {"parents": ["a1"], "enfants": []}},
+        "menages": {"m1": {"personnes_de_reference": ["a1"]}},
+    }
+    b25 = Simulation(situation=single_sit)
+    r25 = Simulation(situation=single_sit, reform=freeze)
+
+    assert float(b25.calculate("impot_brut", "2025")[0]) == pytest.approx(
+        1_694.00, abs=0.05
+    )
+    assert float(b25.calculate("impot_revenu", "2025")[0]) == pytest.approx(
+        1_563.54, abs=0.05
+    )
+    # Frozen 2024 thresholds: (27 000 - 11 497) * 0.11 = 1 705.33; decote = 889 - 0.4525 * 1 705.33 = 117.34
+    assert float(r25.calculate("impot_brut", "2025")[0]) == pytest.approx(
+        1_705.33, abs=0.05
+    )
+    assert float(r25.calculate("decote", "2025")[0]) == pytest.approx(117.34, abs=0.05)
+    assert float(r25.calculate("impot_revenu", "2025")[0]) == pytest.approx(
+        1_587.99, abs=0.05
+    )
+
+    # 2024 itself is completely untouched
+    assert float(r25.calculate("impot_brut", "2024")[0]) == pytest.approx(
+        float(b25.calculate("impot_brut", "2024")[0]), abs=0.01
+    )
+    assert float(r25.calculate("impot_revenu", "2024")[0]) == pytest.approx(
+        float(b25.calculate("impot_revenu", "2024")[0]), abs=0.01
+    )
+
+    # Couple + 2 children at 140 000 EUR (below 144 260 EUR so 10% abatement is equal in 2024/2025)
+    # still hits the general QF cap: 2 × 1 791 = 3 582 EUR under 2024 freeze vs 2 × 1 807 in 2025.
+    family_sit = {
+        "individus": {
+            "a1": {"age": {"2025": 40}, "salaire_declare": {"2025": 140_000}},
+            "a2": {"age": {"2025": 40}, "salaire_declare": {"2025": 0}},
+            "e1": {"age": {"2025": 8}},
+            "e2": {"age": {"2025": 10}},
+        },
+        "foyers_fiscaux": {
+            "ff1": {"declarants": ["a1", "a2"], "personnes_a_charge": ["e1", "e2"]}
+        },
+        "familles": {"fam1": {"parents": ["a1", "a2"], "enfants": ["e1", "e2"]}},
+        "menages": {
+            "m1": {
+                "personnes_de_reference": ["a1"],
+                "conjoints": ["a2"],
+                "enfants": ["e1", "e2"],
+            }
+        },
+    }
+    f_b25 = Simulation(situation=family_sit)
+    f_r25 = Simulation(situation=family_sit, reform=freeze)
+    f_b24_like = Simulation(
+        situation={
+            "individus": {
+                "a1": {"age": {"2024": 40}, "salaire_declare": {"2024": 140_000}},
+                "a2": {"age": {"2024": 40}, "salaire_declare": {"2024": 0}},
+                "e1": {"age": {"2024": 8}},
+                "e2": {"age": {"2024": 10}},
+            },
+            "foyers_fiscaux": {
+                "ff1": {"declarants": ["a1", "a2"], "personnes_a_charge": ["e1", "e2"]}
+            },
+            "familles": {"fam1": {"parents": ["a1", "a2"], "enfants": ["e1", "e2"]}},
+            "menages": {
+                "m1": {
+                    "personnes_de_reference": ["a1"],
+                    "conjoints": ["a2"],
+                    "enfants": ["e1", "e2"],
+                }
+            },
+        }
+    )
+    assert float(f_r25.calculate("plafonnement_quotient_familial", "2025")[0]) > 0
+    assert float(f_r25.calculate("impot_revenu", "2025")[0]) > float(
+        f_b25.calculate("impot_revenu", "2025")[0]
+    )
+    assert float(f_r25.calculate("impot_revenu", "2025")[0]) == pytest.approx(
+        float(f_b24_like.calculate("impot_revenu", "2024")[0]), abs=0.05
+    )
+
+
+def test_reforms_match_baseline_when_neutral():
+    """Neutral reform parameters must match baseline formulas across all copied variables."""
+    sit = {
+        "individus": {
+            "a1": {
+                "age": {"2024": 68},
+                "salaire_brut": {"2024": 12_000},
+                "pension_retraite": {"2024": 22_000},
+                "pensions_alimentaires_percues": {"2024": 2_400},
+                "revenus_capital": {"2024": 3_000},
+            }
+        },
+        "foyers_fiscaux": {
+            "ff1": {
+                "declarants": ["a1"],
+                "pensions_alimentaires_versees": {"2024": 1_200},
+                "revenus_fonciers_bruts": {"2024": 0},
+                "plus_values_immobilieres": {"2024": 1_500},
+            }
+        },
+        "familles": {"fam1": {"parents": ["a1"], "enfants": []}},
+        "menages": {"m1": {"personnes_de_reference": ["a1"]}},
+    }
+    base = Simulation(situation=sit)
+    dp6_zero = Simulation(
+        situation=sit, reform=make_d_p6_targeted_pension_underindexation_reform(0.0)
+    )
+    for var in (
+        "revenu_fiscal_de_reference",
+        "csg_retraite",
+        "crds_retraite",
+        "casa_retraite",
+        "pension_retraite_declaree",
+        "pension_retraite_nette",
+        "revenu_disponible",
+    ):
+        assert float(dp6_zero.calculate(var, "2024")[0]) == pytest.approx(
+            float(base.calculate(var, "2024")[0]), abs=1e-4
+        )
+
+    lvt_s3_no_rents = Simulation(situation=sit, reform=make_lvt_shift_reform("S3"))
+    assert float(
+        lvt_s3_no_rents.calculate("revenu_net_imposable", "2024")[0]
+    ) == pytest.approx(
+        float(base.calculate("revenu_net_imposable", "2024")[0]), abs=1e-4
+    )
