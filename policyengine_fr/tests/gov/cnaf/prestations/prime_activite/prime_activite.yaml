@@ -1,0 +1,126 @@
+# Prime d'activité (CSS art. L842-3, D843-1 à D843-3) — revenus 2024.
+# Base 2024-01 : 595,25 € ; 2024-04 : 622,63 € ; SMIC 1er janv. 2024 : 11,65 €/h.
+# Seuils bonification : 59×11,65 = 687,35 € à 120×11,65 = 1 398,00 € ; max 0,29101 × base.
+
+- name: Personne seule sans revenu d'activité — prime d'activité nulle (couverte par le RSA)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 30}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    ppa_bonification: 0
+    prime_activite: 0
+
+- name: Personne seule, salaire brut 6 000 €/an (395,80 €/mois net, sous le seuil de bonification)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 30, salaire_brut: 6_000}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # ppa_non_bonifiee > 0 -> PPA = 61 % × 395,7988 = 241,44 € (openfisca : 241,44)
+    ppa_bonification: 0
+    prime_activite: 241.44
+
+- name: Personne seule, salaire brut 15 000 €/an (989,50 €/mois net, bonification partielle)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 30, salaire_brut: 15_000}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # bonification = (989,4969 − 687,35) / (1 398 − 687,35) × (0,29101 × 595,25) = 73,65 (OF: 73,65)
+    # PPA = 595,25 − 71,43 − 0,39 × 989,4969 + 73,65 = 211,57 (OF: 211,56)
+    ppa_bonification: 73.65
+    prime_activite: 211.57
+
+- name: Personne seule au SMIC temps plein (21 203 €/an brut → 1 398,69 €/mois net, bonification maximale)
+  absolute_error_margin: 0.02
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 30, salaire_brut: 21_203}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # bonification max = 0,29101 × 595,25 = 173,2237 (OF: 173,22)
+    # PPA = 595,25 − 71,43 − 0,39 × 1 398,689 + 173,2237 = 151,55
+    ppa_bonification: 173.22
+    prime_activite: 151.55
+
+- name: Personne seule, salaire brut 30 000 €/an (au-dessus du plafond de sortie — PPA nulle)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 30, salaire_brut: 30_000}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    ppa_bonification: 173.22
+    prime_activite: 0
+
+- name: Jeune de 19 ans au SMIC — éligible à la prime d'activité dès 18 ans (contrairement au RSA)
+  absolute_error_margin: 0.02
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 19, salaire_brut: 21_203}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    prime_activite: 151.55
+
+- name: Mineur de 17 ans — non éligible (< 18 ans)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 17, salaire_brut: 15_000}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    prime_activite: 0
+
+- name: Couple trois enfants (5 personnes, +40 % au 3e enfant), un actif au SMIC en janvier 2024
+  absolute_error_margin: 0.02
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 38, salaire_brut: 21_203}
+      adulte_2: {age: 37}
+      enfant_1: {age: 4}
+      enfant_2: {age: 8}
+      enfant_3: {age: 11}
+    familles:
+      famille_1:
+        parents: [adulte_1, adulte_2]
+        enfants: [enfant_1, enfant_2, enfant_3]
+  output:
+    # forfaitaire = 595,25 × 2,5 = 1 488,125 ; FL 3p+ = 176,78925 ; AF base = 325,5289
+    ppa_montant_forfaitaire: 1488.125
+    prime_activite: 613.54
+
+- name: Couple avec un enfant de 22 ans, un actif au SMIC en janvier 2024 (compté PPA < 25, hors AF)
+  absolute_error_margin: 0.02
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 48, salaire_brut: 21_203}
+      adulte_2: {age: 47}
+      enfant_1: {age: 22}
+    familles:
+      famille_1:
+        parents: [adulte_1, adulte_2]
+        enfants: [enfant_1]
+  output:
+    # forfaitaire = 595,25 × 1,8 = 1 071,45 ; FL 3p+ = 176,78925 ; AF = 0
+    ppa_montant_forfaitaire: 1071.45
+    prime_activite: 522.40

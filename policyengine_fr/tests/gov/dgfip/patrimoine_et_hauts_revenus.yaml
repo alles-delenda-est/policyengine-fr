@@ -1,0 +1,180 @@
+# Fiscalité du patrimoine, des revenus fonciers, du capital et des hauts revenus
+# (réutilisant les règles et sources vérifiées de LVTShift et budget_fr_sim_test).
+
+- name: CEHR célibataire à 600 000 € de RFR (3 % sur 250-500 k€ + 4 % au-delà)
+  absolute_error_margin: 0.1
+  period: 2024
+  input:
+    individus:
+      d1: {revenus_capital: 600_000}
+    foyers_fiscaux:
+      f1: {declarants: [d1]}
+  output:
+    # RFR = 600 000 -> CEHR = 250 000 × 3 % + 100 000 × 4 % = 7 500 + 4 000 = 11 500 €
+    revenu_fiscal_de_reference: 600_000
+    cehr: 11_500.00
+    pfu_ir: 76_800.00                        # 600 000 × 12,8 %
+    prelevements_sociaux_patrimoine: 103_200.00 # 600 000 × 17,2 %
+
+- name: CEHR couple à 600 000 € de RFR (3 % au-delà de 500 k€ seulement)
+  absolute_error_margin: 0.1
+  period: 2024
+  input:
+    individus:
+      d1: {revenus_capital: 600_000}
+      d2: {}
+    foyers_fiscaux:
+      f1: {declarants: [d1, d2]}
+  output:
+    # (600 000 − 500 000) × 3 % = 3 000 €
+    cehr: 3_000.00
+
+- name: Revenus fonciers au régime micro-foncier (10 000 € <= 15 000 € -> abattement 30 %)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        revenus_fonciers_bruts: 10_000
+        regime_micro_foncier: true
+  output:
+    # net foncier = 7 000 € ; PS = 7 000 × 17,2 % = 1 204 € ;
+    # CSG déductible (art. 154 quinquies II) = 7 000 × 6,8 % = 476 € -> RNI = 6 524 €
+    revenus_fonciers_nets: 7_000.00
+    prelevements_sociaux_patrimoine: 1_204.00
+    revenu_net_imposable: 6_524.00
+
+- name: Revenus fonciers au-delà de 15 000 € — bascule automatique au régime réel
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        revenus_fonciers_bruts: 20_000
+        charges_foncieres_reelles: 8_000
+        regime_micro_foncier: true
+  output:
+    revenus_fonciers_nets: 12_000.00
+    prelevements_sociaux_patrimoine: 2_064.00
+
+- name: "Plus-value immobilière imposable de 50 000 € (S2 LVTShift : 19 % IR + 17,2 % PS = 36,2 %)"
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        plus_values_immobilieres: 50_000
+  output:
+    impot_plus_values_immobilieres: 9_500.00
+    prelevements_sociaux_patrimoine: 8_600.00
+
+- name: IFI sous le seuil de 1,3 M€ après abattement de 30 % sur la résidence principale
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        patrimoine_immobilier_residence_principale: 1_800_000
+  output:
+    # 1 800 000 × 0,70 = 1 260 000 < 1 300 000 -> IFI nul
+    ifi: 0
+
+- name: IFI à 1 350 000 € — application de la décote entre 1,3 M€ et 1,4 M€ (CGI art. 977 II)
+  absolute_error_margin: 0.05
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        patrimoine_immobilier_autre: 1_350_000
+  output:
+    # brut = 500 000 × 0,5 % (2 500) + 50 000 × 0,7 % (350) = 2 850 €
+    # décote = 17 500 − 0,0125 × 1 350 000 = 17 500 − 16 875 = 625 € -> net = 2 225 €
+    ifi: 2_225.00
+
+- name: IFI à 3 000 000 € — barème plein jusqu'à la tranche 1 %
+  absolute_error_margin: 0.1
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        patrimoine_immobilier_autre: 3_000_000
+  output:
+    # 500k×0,5% (2 500) + 1 270k×0,7% (8 890) + 430k×1,0% (4 300) = 15 690 €
+    ifi: 15_690.00
+
+- name: Taxe foncière et THRS avec frais de gestion de l'État de 3 % (CGI art. 1641, LVTShift S1)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    menages:
+      m1:
+        personnes_de_reference: [d1]
+        taxe_fonciere_locale: 1_500
+        thrs_locale: 800
+        valeur_terrain_imposable: 200_000
+  output:
+    taxe_fonciere: 1_545.00
+    taxe_habitation_residence_secondaire: 824.00
+    taxe_valeur_sol: 0
+
+- name: Retraité célibataire avec 300 000 € de pension — plafond d'abattement 4 399 € dans le RFR et CEHR
+  absolute_error_margin: 0.05
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 300_000}
+    foyers_fiscaux:
+      f1: {declarants: [d1]}
+  output:
+    # RFR = 300 000 − plafond abattement pensions 2024 (4 399) = 295 601 €
+    # CEHR = (295 601 − 250 000) × 3 % = 1 368,03 €
+    revenu_fiscal_de_reference: 295_601.00
+    cehr: 1_368.03
+
+- name: "IFI exactement au seuil de 1 300 000 € — non imposable (CGI art. 964 : excède 1 300 000 €)"
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        patrimoine_immobilier_autre: 1_300_000
+  output:
+    ifi: 0
+
+- name: LFSS 2026 (exercice 2026) — prélèvements sociaux à 18,6 % sur dividendes et maintenus à 17,2 % sur loyers nus
+  absolute_error_margin: 0.01
+  period: 2026
+  input:
+    individus:
+      d1: {revenus_capital: 10_000}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        revenus_fonciers_bruts: 10_000
+        regime_micro_foncier: true
+  output:
+    # 10 000 × 18,6 % (1 860 €) + 7 000 × 17,2 % (1 204 €) = 3 064 €
+    prelevements_sociaux_patrimoine: 3_064.00

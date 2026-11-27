@@ -1,0 +1,9 @@
+description: Taux patronal CEG tranche 2 (1-8 PASS).
+values:
+  2024-01-01: 0.0162
+metadata:
+  unit: /1
+  label: CEG patronale T2
+  reference:
+  - title: URSSAF — Contribution d'équilibre général (part employeur T2 = 1,62 %)
+    href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/retraite-complementaire.html

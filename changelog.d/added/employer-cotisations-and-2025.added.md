@@ -1,0 +1,1 @@
+Modelled employer social contributions (`cotisations_patronales` with SMIC bandeaux on health and family rates, PASS ceilings, FNAL, AT/MP), the dégressive `reduction_generale` (ex-Fillon up to 1.6 SMIC), and `cout_du_travail` (super-brut) (spec 0008), plus 2025 multi-year parameterisation across IR, URSSAF, SMIC, and CNAF benefits (spec 0007).

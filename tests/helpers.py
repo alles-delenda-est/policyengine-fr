@@ -1,13 +1,4 @@
-"""Helpers to build whole-household simulations for property/golden-master tests.
-
-These tests exercise the model through the public ``policyengine_fr.Simulation``
-API on realistic households, complementing the per-variable YAML unit tests.
-
-Scope note: the builder wires one person into each of the four entities
-(individu / foyer_fiscal / famille / menage) as a single foyer = single famille
-= single menage household. That keeps the inter-entity aggregation in
-``revenu_disponible`` (which averages group totals over members) well-defined.
-"""
+"""Helpers to build whole-household simulations for property/golden-master tests."""
 
 from __future__ import annotations
 
@@ -24,18 +15,15 @@ def build_household(
     adult_age: int = 40,
     year: int = YEAR,
     adult_pensions: list[float] | None = None,
+    adult_retraites: list[float] | None = None,
+    cadres: list[bool] | None = None,
 ) -> Simulation:
-    """Build a single-household Simulation.
-
-    adult_incomes: gross annual salary (salaire_brut) for each adult (1 or 2).
-    child_ages: age of each dependent child (placed as enfant/personne à charge).
-    adult_pensions: optional annual pension alimentaire received per adult;
-        if provided must have the same length as adult_incomes.
-    """
+    """Build a single-household Simulation."""
     assert 1 <= len(adult_incomes) <= 2, "1 or 2 adults"
-    assert adult_pensions is None or len(adult_pensions) == len(adult_incomes), (
-        "adult_pensions must match adult_incomes length"
-    )
+    assert adult_pensions is None or len(adult_pensions) == len(adult_incomes)
+    assert adult_retraites is None or len(adult_retraites) == len(adult_incomes)
+    assert cadres is None or len(cadres) == len(adult_incomes)
+
     y = str(year)
     individus: dict = {}
     adults: list[str] = []
@@ -46,6 +34,10 @@ def build_household(
         individus[pid] = {"salaire_brut": {y: income}, "age": {y: adult_age}}
         if adult_pensions is not None:
             individus[pid]["pensions_alimentaires_percues"] = {y: adult_pensions[i]}
+        if adult_retraites is not None:
+            individus[pid]["pension_retraite"] = {y: adult_retraites[i]}
+        if cadres is not None:
+            individus[pid]["cadre"] = {y: cadres[i]}
     for j, age in enumerate(child_ages):
         cid = f"enfant_{j + 1}"
         kids.append(cid)
@@ -72,10 +64,23 @@ def build_household(
     return Simulation(situation=situation)
 
 
-# Output variables and how to read them (allocations_familiales is monthly).
 ANNUAL_VARS = ["revenu_net_imposable", "impot_revenu", "revenu_disponible"]
-PER_PERSON_ANNUAL_VARS = ["csg", "crds"]
-MONTHLY_VARS = ["allocations_familiales", "allocation_soutien_familial"]
+PER_PERSON_ANNUAL_VARS = [
+    "cotisations_salariales",
+    "salaire_declare",
+    "salaire_net",
+    "csg",
+    "crds",
+    "cotisations_patronales",
+    "reduction_generale",
+    "cout_du_travail",
+]
+MONTHLY_VARS = [
+    "allocations_familiales",
+    "allocation_soutien_familial",
+    "rsa",
+    "prime_activite",
+]
 
 
 def totals(sim: Simulation, year: int = YEAR) -> dict[str, float]:

@@ -1,0 +1,9 @@
+description: Plafond annuel de revenus fonciers bruts ouvrant droit au régime micro-foncier (15 000 €).
+values:
+  2002-01-01: 15000
+metadata:
+  unit: currency-EUR
+  label: Plafond annuel du régime micro-foncier
+  reference:
+  - title: Article 32 du Code général des impôts (régime micro-foncier jusqu'à 15 000 €)
+    href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006302323

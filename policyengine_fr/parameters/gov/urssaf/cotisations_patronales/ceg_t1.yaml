@@ -1,0 +1,9 @@
+description: Taux patronal CEG tranche 1 (0-1 PASS).
+values:
+  2024-01-01: 0.0129
+metadata:
+  unit: /1
+  label: CEG patronale T1
+  reference:
+  - title: URSSAF — Contribution d'équilibre général (part employeur T1 = 1,29 %)
+    href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/retraite-complementaire.html

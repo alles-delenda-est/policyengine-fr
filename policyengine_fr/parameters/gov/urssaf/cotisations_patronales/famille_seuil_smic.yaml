@@ -1,0 +1,10 @@
+description: Seuil de rémunération (en multiple du SMIC annuel) jusqu'auquel s'applique le taux réduit patronal d'allocations familiales (3,5 SMIC en 2024 ; abaissé à 3,3 SMIC en 2025 par la LFSS 2025).
+values:
+  2024-01-01: 3.5
+  2025-01-01: 3.3
+metadata:
+  unit: /1
+  label: Plafond du bandeau famille patronal (en SMIC)
+  reference:
+    - title: Article L241-6-1 du Code de la sécurité sociale (LFSS 2025 art. 17)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000031667029

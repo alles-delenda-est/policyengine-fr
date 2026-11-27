@@ -1,0 +1,9 @@
+description: Forfait logement RSA pour un foyer de deux personnes, en proportion du montant forfaitaire applicable (logement ou aide au logement présumés).
+values:
+  2009-06-01: 0.16
+metadata:
+  unit: /1
+  label: Forfait logement RSA — deux personnes
+  reference:
+    - title: Article R262-9 du Code de l'action sociale et des familles
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000020526192/2022-01-21/

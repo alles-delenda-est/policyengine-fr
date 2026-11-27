@@ -1,0 +1,12 @@
+description: Valeur maximale du coefficient T pour les entreprises de 50 salariés et plus (FNAL à 0,50
+  %).
+values:
+  2024-01-01: 0.3234
+  2025-01-01: 0.3234
+metadata:
+  unit: /1
+  label: Coefficient maximal T (>= 50 salariés)
+  reference:
+  - title: Décret n° 2023-1329 du 29 décembre 2023 fixant la valeur T de la réduction générale en 2024
+      (0,3194 / 0,3234)
+    href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000048726658

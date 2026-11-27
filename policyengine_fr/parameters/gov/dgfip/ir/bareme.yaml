@@ -1,4 +1,4 @@
-description: Barème progressif de l'impôt sur le revenu (taux marginaux par tranche).
+description: Barème progressif de l'impôt sur le revenu (taux marginaux par tranche, revenus 2024 et 2025).
 metadata:
   type: marginal_rate
   threshold_unit: currency-EUR
@@ -6,28 +6,35 @@ metadata:
   name: ir_bareme
   label: Barème de l'impôt sur le revenu
   reference:
-    - title: Service-Public.fr — Barème de l'impôt sur les revenus de 2024
-      href: https://www.service-public.fr/particuliers/vosdroits/F1419
-    - title: Loi n° 2025-127 du 14 février 2025 de finances pour 2025, art. 2 (barème des revenus 2024, indexation +1,8 %)
-      href: https://www.impots.gouv.fr/www2/fichiers/documentation/brochure/ir_2025/pdf_som/nouveautes.pdf
+    - title: Article 197, I.1 du Code général des impôts
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046860759
+    - title: Loi n° 2025-127 du 14 février 2025 de finances pour 2025, art. 2 (revenus 2024, +1,8 %)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000051168007
+    - title: Loi n° 2026-103 du 19 février 2026 de finances pour 2026, art. 4 (revenus 2025, +0,9 %)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000053508155
 brackets:
   - threshold:
       2024-01-01: 0
+      2025-01-01: 0
     rate:
       2024-01-01: 0.0
   - threshold:
       2024-01-01: 11_497
+      2025-01-01: 11_600
     rate:
       2024-01-01: 0.11
   - threshold:
       2024-01-01: 29_315
+      2025-01-01: 29_579
     rate:
       2024-01-01: 0.30
   - threshold:
       2024-01-01: 83_823
+      2025-01-01: 84_577
     rate:
       2024-01-01: 0.41
   - threshold:
       2024-01-01: 180_294
+      2025-01-01: 181_917
     rate:
       2024-01-01: 0.45

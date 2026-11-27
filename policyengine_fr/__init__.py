@@ -17,7 +17,7 @@ class CountryTaxBenefitSystem(TaxBenefitSystem):
         "salaire_brut",
     ]
 
-    def __init__(self):
+    def __init__(self, reform=None):
         super().__init__(entities)
 
 

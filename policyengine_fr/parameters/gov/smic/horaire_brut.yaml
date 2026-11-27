@@ -1,0 +1,12 @@
+description: "Salaire minimum interprofessionnel de croissance (SMIC) horaire brut en métropole (lu au 1er janvier par les variables annuelles cotisations_patronales, reduction_generale et ppa_bonification : 11,65 €/h sur 2024 et 11,88 €/h sur 2025)."
+values:
+  2024-01-01: 11.65
+  2024-11-01: 11.88
+metadata:
+  unit: currency-EUR
+  label: SMIC horaire brut
+  reference:
+    - title: Décret n° 2023-1216 du 20 décembre 2023 portant relèvement du SMIC au 1er janvier 2024 (11,65 €/h)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000048604614
+    - title: Décret n° 2024-951 du 23 octobre 2024 portant relèvement anticipé du SMIC au 1er novembre 2024 (11,88 €/h)
+      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000050387124

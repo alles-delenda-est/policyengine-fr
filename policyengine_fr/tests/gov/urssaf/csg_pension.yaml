@@ -1,0 +1,83 @@
+# CSG/CRDS/CASA sur les pensions de retraite — taux réduits selon le RFR (spec 0006), 2024.
+# RFR (proxy) 1 part = pension × 0,9. Seuils 2024 (1 part) : exo <= 12 230,
+# réduit <= 15 988, médian <= 24 813, normal au-delà. Taux CSG 0 / 3,8 / 6,6 / 8,3 %.
+# Part déductible 0 / 3,8 / 4,2 / 5,9 %. CRDS 0,5 % dès le taux réduit.
+# CASA 0,3 % aux seuls taux médian et normal (CASF art. L14-10-4).
+
+- name: Pension faible — exonération totale (CSG, CRDS et CASA nulles)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 10_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    taux_csg_pension: 0
+    csg_retraite: 0
+    crds_retraite: 0
+    casa_retraite: 0
+    pension_retraite_nette: 10_000
+
+- name: Pension modeste — taux réduit 3,8 % (CRDS due, CASA exonérée)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 15_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    taux_csg_pension: 0.038
+    csg_retraite: 570.00              # 15 000 × 0,038
+    csg_retraite_deductible: 570.00   # entièrement déductible au taux réduit
+    crds_retraite: 75.00              # 15 000 × 0,005
+    casa_retraite: 0                  # exonéré au taux réduit
+    pension_retraite_nette: 14_355.00
+
+- name: Pension moyenne — taux médian 6,6 % (+ CRDS 0,5 % + CASA 0,3 % = 7,4 %)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 20_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    taux_csg_pension: 0.066
+    csg_retraite: 1_320.00            # 20 000 × 0,066
+    csg_retraite_deductible: 840.00   # 20 000 × 0,042
+    crds_retraite: 100.00             # 20 000 × 0,005
+    casa_retraite: 60.00              # 20 000 × 0,003
+    pension_retraite_nette: 18_520.00
+
+- name: Pension élevée — taux normal 8,3 % (+ CRDS 0,5 % + CASA 0,3 % = 9,1 %)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 40_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    taux_csg_pension: 0.083
+    csg_retraite: 3_320.00            # 40 000 × 0,083
+    csg_retraite_deductible: 2_360.00 # 40 000 × 0,059
+    crds_retraite: 200.00             # 40 000 × 0,005
+    casa_retraite: 120.00             # 40 000 × 0,003
+    pension_retraite_nette: 36_360.00
+
+- name: Couple — seuil d'exonération majoré par les parts
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 20_000}
+      d2: {}
+    foyers_fiscaux:
+      f: {declarants: [d1, d2]}
+  output:
+    taux_csg_pension: 0
+    csg_retraite: [0, 0]
+    casa_retraite: [0, 0]
+    pension_retraite_nette: [20_000, 0]

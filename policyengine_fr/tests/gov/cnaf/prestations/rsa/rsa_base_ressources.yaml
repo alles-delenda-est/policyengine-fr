@@ -1,0 +1,91 @@
+# Base ressources mensuelle du RSA : salaire_net/12 + pensions alimentaires
+# perçues/12 + AF base (hors majoration âge) + min(ASF, forfait ASF 0,225 BMAF).
+- name: Personne seule, salaire brut 6 000 €/an (salaire_net 4 749,585 → 395,80/mois)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40, salaire_brut: 6_000}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # 6 000 × (1 − 0,1131 − 0,9825 × 0,097) / 12 = 395,7988 (OF: 395,7988)
+    rsa_base_ressources: 395.80
+
+- name: Personne seule, pension perçue 1 200 €/an (100/mois)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40, pensions_alimentaires_percues: 1_200}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa_base_ressources: 100.0
+
+- name: Parent isolé, un enfant, sans revenu (forfait ASF 0,225 BMAF seul)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      enfant_1: {age: 8}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1]}
+  output:
+    # forfait ASF = 0,225 × 445,93 = 100,33425 (OF: 100,3343)
+    rsa_base_ressources: 100.33425
+
+- name: Parent isolé, un enfant, pension perçue 1 200 €/an (ASF différentielle + pension)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40, pensions_alimentaires_percues: 1_200}
+      enfant_1: {age: 8}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1]}
+  output:
+    # pension 100 + min(ASF diff 88,1825, forfait 100,3343) = 188,1825 (OF: 188,1825)
+    rsa_base_ressources: 188.1825
+
+- name: Parent isolé, un enfant, pension 3 600 €/an >= ASF pleine (pas de forfait ASF fictif)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40, pensions_alimentaires_percues: 3_600}
+      enfant_1: {age: 8}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1]}
+  output:
+    # ASF = 0 -> min(0, forfait) = 0 ; seule la pension 300/mois compte (OF: 300,00)
+    rsa_base_ressources: 300.0
+
+- name: Parent isolé, deux enfants, sans revenu (AF base + forfait ASF ×2)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1, enfant_2]}
+  output:
+    # AF base 142,6976 + forfait ASF 2×100,33425 = 343,3661 (OF: 343,3685)
+    rsa_base_ressources: 343.3661
+
+- name: Couple, deux enfants dont un de 16 ans, sans revenu (majoration d'âge AF exclue, R262-11)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+      enfant_1: {age: 8}
+      enfant_2: {age: 16}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1, enfant_2]}
+  output:
+    rsa_base_ressources: 142.6976

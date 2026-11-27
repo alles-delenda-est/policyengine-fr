@@ -1,0 +1,11 @@
+description: Taux annuel de la taxe sur la valeur du terrain nu (TVTN / LVT). Nul en législation courante
+  ; activé par les réformes de remplacement à rendement égal de LVTShift (S1 = 1,10 %, S2 = 1,16 %, S2_IFI
+  = 1,20 %, S3 = 1,30 %, S3_IFI = 1,34 %).
+values:
+  2024-01-01: 0.0
+metadata:
+  unit: /1
+  label: Taux de la taxe sur la valeur du sol (LVT / TVTN)
+  reference:
+  - title: LVTShift-FR — Scénarios de remplacement à rendement égal (spec 0005, yields.json)
+    href: https://github.com/alles-delenda-est/LVTShift

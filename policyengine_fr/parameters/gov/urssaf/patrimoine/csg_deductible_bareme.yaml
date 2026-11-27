@@ -1,0 +1,9 @@
+description: Part déductible de la CSG sur les revenus du patrimoine imposés au barème progressif de l'impôt sur le revenu (6,8 %, notamment sur les revenus fonciers).
+values:
+  2018-01-01: 0.068
+metadata:
+  unit: /1
+  label: CSG déductible sur les revenus du patrimoine imposés au barème (6,8 %)
+  reference:
+    - title: Article 154 quinquies II du Code général des impôts (CSG déductible à 6,8 % sur les revenus du patrimoine au barème)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042683600

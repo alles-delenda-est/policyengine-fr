@@ -1,0 +1,1 @@
+Modelled the statutory allocations familiales complément dégressif (CSS art. D521-1, al. 3), smoothing the modulation threshold crossings (taux plein → moitié → quart) and eliminating the artificial ~€745/year marginal-rate cliff.

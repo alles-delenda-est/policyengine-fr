@@ -1,0 +1,1 @@
+- Add a doc-currency CI check (`make check-docs`, `bin/check_doc_currency.py`) that fails the build when the advertised test counts in `CLAUDE.md` drift from the collected tests, or when the `simplifications:` list in `modelled_policies.yaml` and the numbered caveats in `docs/coverage.md` fall out of parity.

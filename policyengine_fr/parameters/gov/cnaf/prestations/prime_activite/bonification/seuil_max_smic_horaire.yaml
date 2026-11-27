@@ -1,0 +1,9 @@
+description: Seuil de revenus professionnels mensuels à partir duquel la bonification individuelle de la prime d'activité atteint son maximum, exprimé en multiple du SMIC horaire brut au 1er janvier (120 × SMIC horaire, soit environ 1 SMIC net).
+values:
+  2019-01-01: 120
+metadata:
+  unit: hour
+  label: Seuil de plafonnement de la bonification individuelle PPA (en heures de SMIC)
+  reference:
+    - title: Article D843-2 du Code de la sécurité sociale (Décret n° 2018-1197 du 21 décembre 2018)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037850516

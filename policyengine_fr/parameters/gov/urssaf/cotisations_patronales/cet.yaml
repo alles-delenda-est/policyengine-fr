@@ -1,0 +1,9 @@
+description: Taux patronal CET (0-8 PASS dès que brut > 1 PASS).
+values:
+  2024-01-01: 0.0021
+metadata:
+  unit: /1
+  label: CET patronale
+  reference:
+  - title: URSSAF — Contribution d'équilibre technique (part employeur 0,21 %)
+    href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/retraite-complementaire.html

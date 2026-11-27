@@ -7,84 +7,109 @@ class revenu_disponible(Variable):
     label = "Revenu disponible du ménage"
     unit = EUR
     documentation = (
-        "Revenu disponible annuel du ménage: l'agrégat de tête de l'MVP. "
-        "Pour le périmètre modélisé, on part du revenu d'activité brut, on "
-        "retranche les prélèvements modélisés (impôt sur le revenu net, CSG et "
-        "CRDS sur les salaires) et on ajoute les prestations familiales "
-        "modélisées (allocations familiales et ASF annualisées):\n\n"
-        "    revenu_disponible = salaire_brut + pensions_alimentaires_percues\n"
-        "        − impot_revenu − csg − crds − pensions_alimentaires_versees\n"
-        "        + allocations_familiales\n"
-        "        + allocation_soutien_familial\n\n"
-        "Définition et limites du périmètre MVP:\n"
-        "- Le seul revenu d'activité est le `salaire_brut` (revenus du capital "
-        "et revenus non salariés hors champ); les pensions alimentaires perçues "
-        "sont toutefois comptées comme un revenu et celles versées comme une "
-        "charge.\n"
-        "- Les seuls prélèvements sociaux modélisés sur le salaire sont la CSG "
-        "et la CRDS; les autres cotisations sociales salariales (maladie, "
-        "retraite, chômage…) ne sont pas modélisées, donc le « net » ici ne "
-        "neutralise que la CSG/CRDS.\n"
-        "- Les prestations modélisées sont les allocations familiales et "
-        "l'allocation de soutien familial (familles monoparentales); les "
-        "allocations mensuelles sont annualisées (somme des douze mois). Elles "
-        "sont comptées brutes: la CRDS de 0,5 % due sur les prestations "
-        "familiales n'est pas prélevée, donc le revenu disponible est "
-        "surestimé d'environ 0,5 % du montant des prestations.\n"
-        "- Agrégation inter-entités: les composantes vivent sur des entités "
-        "différentes (individu pour le salaire/CSG/CRDS, foyer fiscal pour "
-        "l'impôt, famille pour les allocations); chacune est ramenée au ménage "
-        "en répartissant le total du groupe sur ses membres puis en sommant, ce "
-        "qui compte chaque foyer/famille exactement une fois."
+        "Revenu disponible annuel du ménage : agrège les revenus d'activité, "
+        "de remplacement (retraites), alimentaires, fonciers et financiers du "
+        "ménage, retranche les cotisations salariales, les prélèvements "
+        "sociaux (activité, retraite, patrimoine), l'impôt sur le revenu, la "
+        "CEHR, le PFU, l'impôt sur les plus-values immobilières, l'IFI et les "
+        "impôts fonciers locaux (ou la taxe sur la valeur du sol en réforme "
+        "LVTShift), et ajoute les prestations sociales annualisées (AF, ASF, "
+        "RSA et prime d'activité) :\n\n"
+        "    revenu_disponible =\n"
+        "        salaire_brut + pension_retraite + pensions_alimentaires_percues\n"
+        "        + revenus_capital + max(revenus_fonciers_bruts − charges_foncieres_reelles, 0)\n"
+        "        + plus_values_immobilieres\n"
+        "        − cotisations_salariales − csg − crds\n"
+        "        − csg_retraite − crds_retraite − casa_retraite\n"
+        "        − impot_revenu − cehr − pfu_ir − impot_plus_values_immobilieres\n"
+        "        − prelevements_sociaux_patrimoine − ifi − pensions_alimentaires_versees\n"
+        "        − taxe_fonciere − taxe_habitation_residence_secondaire − taxe_valeur_sol\n"
+        "        + allocations_familiales + allocation_soutien_familial\n"
+        "        + rsa + prime_activite"
     )
     definition_period = YEAR
     reference = "https://www.insee.fr/fr/metadonnees/definition/c1352"
 
     def formula(menage, period, parameters):
-        # Composantes au niveau de l'individu: somme directe sur le ménage.
         salaire_brut = menage.sum(menage.members("salaire_brut", period))
+        pension_retraite_nette = menage.sum(
+            menage.members("pension_retraite_nette", period)
+        )
         pensions_percues = menage.sum(
             menage.members("pensions_alimentaires_percues", period)
+        )
+        revenus_capital = menage.sum(menage.members("revenus_capital", period))
+
+        cotisations_salariales = menage.sum(
+            menage.members("cotisations_salariales", period)
         )
         csg = menage.sum(menage.members("csg", period))
         crds = menage.sum(menage.members("crds", period))
 
-        # Composantes de groupe (foyer fiscal, famille): on répartit le total
-        # du groupe sur ses membres (montant / nombre de membres) avant de
-        # sommer sur le ménage, de sorte que chaque groupe ne soit compté
-        # qu'une fois même si le ménage contient plusieurs foyers/familles.
         ones = menage.members("salaire_brut", period) * 0 + 1
-
-        impot_revenu_groupe = menage.members.foyer_fiscal("impot_revenu", period)
         membres_foyer = menage.members.foyer_fiscal.sum(ones)
-        impot_revenu = menage.sum(impot_revenu_groupe / membres_foyer)
-
-        pensions_versees_groupe = menage.members.foyer_fiscal(
-            "pensions_alimentaires_versees", period
-        )
-        pensions_versees = menage.sum(pensions_versees_groupe / membres_foyer)
-
-        # Allocations familiales: variable mensuelle, annualisée via ADD.
-        allocations_groupe = menage.members.famille(
-            "allocations_familiales", period, options=[ADD]
-        )
         membres_famille = menage.members.famille.sum(ones)
-        allocations_familiales = menage.sum(allocations_groupe / membres_famille)
 
-        # Allocation de soutien familial: mensuelle, annualisée via ADD,
-        # répartie sur les membres de la famille comme les AF.
-        asf_groupe = menage.members.famille(
-            "allocation_soutien_familial", period, options=[ADD]
+        def sum_foyer(var_name):
+            return menage.sum(
+                menage.members.foyer_fiscal(var_name, period) / membres_foyer
+            )
+
+        def sum_famille_add(var_name):
+            return menage.sum(
+                menage.members.famille(var_name, period, options=[ADD])
+                / membres_famille
+            )
+
+        loyers_economiques = menage.sum(
+            max_(
+                menage.members.foyer_fiscal("revenus_fonciers_bruts", period)
+                - menage.members.foyer_fiscal("charges_foncieres_reelles", period),
+                0,
+            )
+            / membres_foyer
         )
-        allocation_soutien_familial = menage.sum(asf_groupe / membres_famille)
+        plus_values_immo = sum_foyer("plus_values_immobilieres")
+
+        impot_revenu = sum_foyer("impot_revenu")
+        cehr = sum_foyer("cehr")
+        pfu_ir = sum_foyer("pfu_ir")
+        impot_pv = sum_foyer("impot_plus_values_immobilieres")
+        ps_patrimoine = sum_foyer("prelevements_sociaux_patrimoine")
+        ifi = sum_foyer("ifi")
+        pensions_versees = sum_foyer("pensions_alimentaires_versees")
+
+        taxe_fonciere = menage("taxe_fonciere", period)
+        thrs = menage("taxe_habitation_residence_secondaire", period)
+        lvt = menage("taxe_valeur_sol", period)
+
+        allocations_familiales = sum_famille_add("allocations_familiales")
+        allocation_soutien_familial = sum_famille_add("allocation_soutien_familial")
+        rsa = sum_famille_add("rsa")
+        prime_activite = sum_famille_add("prime_activite")
 
         return (
             salaire_brut
+            + pension_retraite_nette
             + pensions_percues
-            - impot_revenu
+            + revenus_capital
+            + loyers_economiques
+            + plus_values_immo
+            - cotisations_salariales
             - csg
             - crds
+            - impot_revenu
+            - cehr
+            - pfu_ir
+            - impot_pv
+            - ps_patrimoine
+            - ifi
             - pensions_versees
+            - taxe_fonciere
+            - thrs
+            - lvt
             + allocations_familiales
             + allocation_soutien_familial
+            + rsa
+            + prime_activite
         )

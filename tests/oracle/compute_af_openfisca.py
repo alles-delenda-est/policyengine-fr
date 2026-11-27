@@ -141,6 +141,64 @@ def compute_asf_differentielle_annual(child_ages, pension_annuelle, year=2024):
     return sum(float(sim.calculate("asf", f"{year}-{m:02d}")[0]) for m in range(1, 13))
 
 
+def compute_rsa_annual(salaires, child_ages, pension_annuelle=0, year=2024):
+    """Return the openfisca-france annual `rsa` total for a housed household.
+
+    Feeds constant monthly salaries across N-1..N and marks `loge_gratuitement`
+    across all 12 months so the statutory forfait logement applies identically
+    to policyengine-fr's always-applied forfait logement.
+    """
+    individus, parents, enfants = {}, [], []
+    for i, sal in enumerate(salaires):
+        pid = f"parent{i + 1}"
+        parents.append(pid)
+        individus[pid] = {
+            "date_naissance": {"ETERNITY": f"{year - 40}-01-01"},
+            "salaire_de_base": {
+                f"{y}-{m:02d}": sal / 12 for y in (year - 1, year) for m in range(1, 13)
+            },
+            "categorie_salarie": {
+                f"{y}-{m:02d}": "prive_non_cadre"
+                for y in (year - 1, year)
+                for m in range(1, 13)
+            },
+        }
+        if i == 0 and pension_annuelle > 0:
+            individus[pid]["pensions_alimentaires_percues"] = {
+                f"{y}-{m:02d}": pension_annuelle / 12
+                for y in (year - 1, year)
+                for m in range(1, 13)
+            }
+    for j, age in enumerate(child_ages):
+        cid = f"enfant{j + 1}"
+        enfants.append(cid)
+        individus[cid] = {"date_naissance": {"ETERNITY": f"{year - age}-06-01"}}
+    famille = {"parents": parents, "enfants": enfants}
+    if len(parents) == 1 and len(enfants) >= 1:
+        famille["rsa_isolement_recent"] = {
+            f"{year}-{m:02d}": True for m in range(1, 13)
+        }
+    menage = {
+        "personne_de_reference": [parents[0]],
+        "enfants": enfants,
+        "statut_occupation_logement": {
+            f"{year}-{m:02d}": "loge_gratuitement" for m in range(1, 13)
+        },
+    }
+    if len(parents) > 1:
+        menage["conjoint"] = [parents[1]]
+    situation = {
+        "individus": individus,
+        "familles": {"fam": famille},
+        "foyers_fiscaux": {
+            "ff": {"declarants": parents, "personnes_a_charge": enfants}
+        },
+        "menages": {"men": menage},
+    }
+    sim = SimulationBuilder().build_from_entities(tbs, situation)
+    return sum(float(sim.calculate("rsa", f"{year}-{m:02d}")[0]) for m in range(1, 13))
+
+
 if __name__ == "__main__":
     for name, salaires, child_ages in BATTERY:
         annual = compute_af_annual(salaires, child_ages)
@@ -149,4 +207,13 @@ if __name__ == "__main__":
     print(
         f"{'single_parent_1child_pension':<28} "
         f"asf_diff={compute_asf_differentielle_annual([8], 1_200):.2f}"
+    )
+    print(f"{'single_0_rsa':<28} rsa={compute_rsa_annual([0], []):.2f}")
+    print(
+        f"{'couple_0_2children_rsa':<28} rsa={compute_rsa_annual([0, 0], [8, 10]):.2f}"
+    )
+    print(f"{'single_parent_0_1child_rsa':<28} rsa={compute_rsa_annual([0], [8]):.2f}")
+    print(
+        f"{'single_parent_1200pen_rsa':<28} "
+        f"rsa={compute_rsa_annual([0], [8], pension_annuelle=1_200):.2f}"
     )

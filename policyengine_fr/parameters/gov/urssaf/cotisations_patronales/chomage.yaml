@@ -1,0 +1,10 @@
+description: Taux patronal d'assurance chômage (0-4 PASS ; 4,05 % en 2024 et au 1er janv. 2025, abaissé à 4,00 % au 1er mai 2025 — lu au 1er janvier par la variable annuelle `cotisations_patronales`, donc effectif à compter de l'exercice 2026).
+values:
+  2024-01-01: 0.0405
+  2025-05-01: 0.04
+metadata:
+  unit: /1
+  label: Assurance chômage patronale
+  reference:
+    - title: URSSAF — Contribution d'assurance chômage (4,05 % puis 4,00 % au 1er mai 2025)
+      href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/assurance-chomage-ags.html

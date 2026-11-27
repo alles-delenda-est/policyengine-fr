@@ -1,35 +1,29 @@
 # PolicyEngine France
 
-An open-source tax-benefit microsimulation model for France, built on
-PolicyEngine Core. See the repository `README.md` and
-`docs/policyengine-ecosystem.md` for architecture and the development plan.
+An open-source static tax-benefit, labour-cost, and patrimonial microsimulation
+model for **France métropolitaine (2024–2025)**, built on PolicyEngine Core. See
+the repository `README.md`, `docs/coverage.md`, and
+`docs/policyengine-ecosystem.md` for architecture, coverage, and design specs.
 
-## What is modelled (Disposable-income MVP, revenus 2024)
+## What is modelled (2024–2025, France métropolitaine)
 
-From a household's gross salary, the model computes disposable income through
-the following chain (métropole, tax year 2024):
-
-| Step | Variable | Entity |
+| Domain | Key Variables | Entity |
 | --- | --- | --- |
-| Taxable salary (10 % abattement) | `salaire_imposable` | `individu` |
-| Taxable pensions alimentaires received (10 % abattement) | `pensions_alimentaires_imposables` | `foyer_fiscal` |
-| Net taxable income (salaries + pensions received − pensions paid) | `revenu_net_imposable` | `foyer_fiscal` |
-| Number of parts (quotient familial) | `nombre_parts` | `foyer_fiscal` |
-| Gross income tax (barème per part) | `impot_brut` | `foyer_fiscal` |
-| Family-quotient capping | `plafonnement_quotient_familial` | `foyer_fiscal` |
-| Low-income reduction | `decote` | `foyer_fiscal` |
-| Net income tax | `impot_revenu` | `foyer_fiscal` |
-| CSG / CRDS on salary (assiette 98,25 %) | `csg`, `crds` | `individu` |
-| Family allowances | `allocations_familiales` | `famille` |
-| Family support allowance (differential) | `allocation_soutien_familial` | `famille` |
+| Employee cotisations & net pay | `cotisations_salariales`, `csg`, `crds`, `salaire_declare`, `salaire_net` | `individu` |
+| Employer cotisations & labour cost | `cotisations_patronales`, `reduction_generale`, `cout_du_travail` | `individu` |
+| Retirement pensions & replacement levies | `pension_retraite`, `csg_retraite`, `crds_retraite`, `casa_retraite`, `pension_retraite_nette` | `individu` |
+| Taxable income & merged 10 % pension allowance | `salaire_imposable`, `pensions_imposables`, `revenus_fonciers_nets`, `revenu_net_imposable` | `individu` / `foyer_fiscal` |
+| Income tax & RFR | `nombre_parts`, `impot_brut`, `plafonnement_quotient_familial`, `decote`, `impot_revenu`, `revenu_fiscal_de_reference` | `foyer_fiscal` |
+| Capital, wealth & high-income levies | `pfu_ir`, `prelevements_sociaux_patrimoine`, `impot_plus_values_immobilieres`, `cehr`, `ifi` | `foyer_fiscal` |
+| Local property & land-value taxes | `taxe_fonciere`, `taxe_habitation_residence_secondaire`, `taxe_valeur_sol` | `menage` |
+| Family & solidarity benefits | `allocations_familiales`, `allocation_soutien_familial`, `rsa`, `prime_activite` | `famille` |
 | **Disposable income (headline)** | **`revenu_disponible`** | `menage` |
 
-`revenu_disponible = salaire_brut + pensions_alimentaires_percues −
-impot_revenu − csg − crds − pensions_alimentaires_versees +
-allocations_familiales + allocation_soutien_familial`.
+Parameterised policy reforms live under `policyengine_fr.reforms` (`lvt_shift`
+scenarios `S1`–`S3_IFI` and `budget_levers` macro-fiscal levers).
 
-See `policyengine_fr/modelled_policies.yaml` for the exact modelled /
-not-modelled boundary. Every parameter is dated YAML with an official `reference`
-(legifrance / URSSAF / CAF), and every variable is covered by a YAML test suite
-with reference values, including whole-household integration scenarios under
-`policyengine_fr/tests/integration/`.
+See `policyengine_fr/modelled_policies.yaml` and `docs/coverage.md` for the
+exact modelled / not-modelled boundary. Every parameter is dated YAML with an
+official `reference` (Légifrance / BOFiP / URSSAF / CAF), and every variable is
+covered by YAML unit and integration tests, property tests, and independent
+DGFiP / `openfisca-france` oracle checks.

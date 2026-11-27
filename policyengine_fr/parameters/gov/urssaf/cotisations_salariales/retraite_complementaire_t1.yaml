@@ -1,0 +1,9 @@
+description: Taux salarié de la retraite complémentaire AGIRC-ARRCO tranche 1 (part salariale), sur la fraction du salaire dans la limite d'un PASS.
+values:
+  2024-01-01: 0.0315
+metadata:
+  unit: /1
+  label: Cotisation salariale retraite complémentaire T1
+  reference:
+    - title: AGIRC-ARRCO — Taux de cotisation 2024 (T1 total 7,87 %, part salariale 40 % = 3,15 %)
+      href: https://www.agirc-arrco.fr/employeurs/effectuer-versements/taux-cotisation/

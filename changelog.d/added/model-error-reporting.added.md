@@ -1,0 +1,1 @@
+- Add an external error-reporting surface: a `model-error` issue form (household inputs, expected vs actual with an official source, scope confirmation) and a "Found an error?" section in the README pointing to it and to `docs/coverage.md`.

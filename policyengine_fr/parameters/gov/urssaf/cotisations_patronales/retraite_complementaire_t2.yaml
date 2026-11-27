@@ -1,0 +1,9 @@
+description: Taux patronal AGIRC-ARRCO tranche 2 (1-8 PASS).
+values:
+  2024-01-01: 0.1295
+metadata:
+  unit: /1
+  label: Retraite complémentaire patronale T2
+  reference:
+  - title: URSSAF — Retraite complémentaire AGIRC-ARRCO (part employeur T2 = 12,95 %)
+    href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/retraite-complementaire.html

@@ -1,0 +1,53 @@
+# Paramétrisation multi-années (spec 0007) : vérification des barèmes 2025
+# (IR revenus 2025 indexé +0,9 %, PASS 47 100 €, BMAF 474,37 € au 1er avril 2025,
+# RSA 646,52 €, PPA 633,21 €, seuils CSG pensions 2025).
+
+- name: Célibataire sans enfant, salaire déclaré 30 000 € — IR 2025 en baisse par indexation du barème (+0,9 %)
+  absolute_error_margin: 0.05
+  period: 2025
+  input:
+    individus:
+      d1: {salaire_declare: 30_000}
+    foyers_fiscaux:
+      f1: {declarants: [d1]}
+  output:
+    # RNI = 27 000 ; barème 2025 : (27 000 − 11 600) × 11 % = 1 694,00
+    # décote 2025 : 897 − 0,4525 × 1 694 = 130,465 -> impôt net = 1 563,54 (contre 1 587,99 en 2024)
+    impot_brut: 1_694.00
+    impot_revenu: 1_563.54
+
+- name: Cotisations salariales en 2025 — relèvement du PASS à 47 100 €
+  absolute_error_margin: 0.05
+  period: 2025
+  input:
+    salaire_brut: 47_100
+  output:
+    # Exactement 1 PASS 2025 : tout en T1, CET non déclenchée -> 47 100 × 0,1131 = 5 326,91
+    cotisations_salariales: 5_327.01
+
+- name: RSA personne seule sans revenu en avril 2025 (base 646,52 €, FL 12 %)
+  absolute_error_margin: 0.02
+  period: 2025-04
+  input:
+    individus:
+      adulte_1: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # 646,52 × (1 − 0,12) = 568,9376
+    rsa: 568.94
+
+- name: Allocations familiales deux enfants en avril 2025 (BMAF 474,37 €)
+  absolute_error_margin: 0.02
+  period: 2025-04
+  input:
+    individus:
+      p1: {}
+      p2: {}
+      e1: {age: 6}
+      e2: {age: 9}
+    familles:
+      f1: {parents: [p1, p2], enfants: [e1, e2]}
+  output:
+    # 474,37 × 0,32 = 151,7984
+    allocations_familiales: 151.80
