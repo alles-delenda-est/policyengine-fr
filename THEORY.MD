@@ -1,105 +1,94 @@
-# Theory: Building policyengine-fr — From MVP to Accurate Benefit Modelling
+# Theory: Building `policyengine-fr` — From Disposable-Income MVP to Multi-Year Fiscal & Benefit Microsimulation
 
 ## Problem
 
-The French tax-benefit model (`policyengine-fr`) has a working MVP covering the
-full disposable-income chain (salaire → IR → CSG/CRDS → AF → ASF →
-revenu_disponible), but MVP models inevitably carry explicit simplifications that
-over- or under-estimate for real households. The structural challenge is: how do
-you extend from "roughly right for a canonical household" to "correct for the
-range of household types that actually use the model"?
+An early tax-benefit MVP (`salaire_brut` → `impot_revenu` → `csg`/`crds` → `AF` →
+`ASF` → `revenu_disponible`) proves the engine pipeline works, but breaks down as
+soon as means-tested solidarity benefits (`rsa`, `prime_activite`), replacement
+incomes (`pension_retraite`), employer labour-cost wedges (`cout_du_travail`), or
+patrimonial/land-tax reforms are introduced. Specifically, three structural seams
+had to be resolved cleanly:
 
-The ASF (Allocation de soutien familial) is the testbed for this extension
-strategy. Its MVP approximation — pay full ASF to any single-parent famille —
-systematically over-estimates for the significant subset of single parents who
-already receive a pension alimentaire from the absent parent. The French statute
-(CSS art. L523-1, L581-2) is explicit: ASF is a guarantee mechanism, not an
-unconditional transfer. If the famille receives a pension, ASF fills only the
-gap. The MVP ignored this because `pensions_alimentaires_percues` was not
-connected into the ASF formula.
+1. **The payslip seam (`salaire_brut` vs `salaire_declare` vs `salaire_net`):**
+   Reading a single salary input as declared `1AJ` in IR and as gross salary in
+   CSG/CRDS silently misstates take-home pay by ~21 % and corrupts both RSA and
+   Prime d'activité resource bases.
+2. **Interlocking benefit resource bases (`AF` ↔ `ASF` ↔ `RSA` ↔ `PPA`):**
+   Means-tested French benefits interact non-linearly: RSA counts base AF
+   (excluding age-14 majorations per CASF art. R262-11 3°) and caps counted ASF
+   at the `0,225 × BMAF` forfait (CASF art. R262-10-1); Prime d'activité in turn
+   subtracts the *non-bonified* RSA entitlement (`max(rsa_mf − rsa_fl − ressources, 0)`)
+   so that its 61 % activity slope and individual SMIC bonification stack cleanly
+   on top of the RSA floor without circular dependencies.
+3. **Reform-ready `Simulation(reform=...)` architecture:**
+   Downstream macro-fiscal tools (`budget_fr_sim_test`) and patrimonial tax-shift
+   simulators (`LVTShift`) require parameterised `Reform` objects modifying YAML
+   parameter trees in memory (`CountryTaxBenefitSystem(reform=...)`) without
+   mutating baseline rules.
 
-## Operating Theory
+## Operating Theory & Key Architectural Resolutions
 
-PolicyEngine's architecture makes the fix clean: `pensions_alimentaires_percues`
-already exists as an Individu/YEAR input (created for the deductibility side of
-pension modelling in IR). The ASF formula reads Famille-level aggregates via
-`famille.sum(famille.members(...))`, and divides by 12 to convert annual →
-monthly. The netting is `max_(asf_pleine − pension_mensuelle, 0)` — floored at
-zero because ASF is a guarantee, not a subsidy that can go negative.
+### 1. True-Gross Salary Chain & 2019 AGIRC-ARRCO Unification
+`salaire_brut` is strictly gross pay before employee contributions. Per-risk
+PASS-bracketed employee levies (`cotisations_salariales`) plus deductible CSG
+(6,8 % on 98,25 % of gross) determine `salaire_declare` (case 1AJ, feeding the
+10 % IR abatement), while further subtracting non-deductible CSG (2,4 %) and CRDS
+(0,5 %) yields `salaire_net` (feeding `rsa_base_ressources`, `prime_activite`,
+and `revenu_disponible`). Crucially, under the 2019 AGIRC-ARRCO unified scheme
+(ANI of 17 Nov 2017), the *Contribution d'équilibre technique* (`CET`, 0,14 %
+employee / 0,21 % employer on `0–8 PASS`) applies to **all** private-sector
+employees (cadre and non-cadre alike) as soon as `salaire_brut > 1 PASS`; only
+`APEC` (0,024 % / 0,036 % up to 4 PASS) is restricted to `cadre=True`.
 
-The key constraint the formula must honour: when pension is zero (parent
-deceased, unknown, or pension unrecoverable), the result must equal full ASF. The
-`max_(..., 0)` floor handles this transparently — zero pension → full ASF, no
-special case needed.
+### 2. Smoothing Threshold Cliffs & Exact Statutory Benefit Bases
+- **AF *complément dégressif* (CSS art. D521-1, al. 3):** Eliminates the ~745 €/yr
+  artificial marginal-tax-rate cliff at each AF plafond crossing via
+  `max(0, plafond + 12 × af_retenue − ressources) / 12`.
+- **RSA statutory resource exclusions:** Splitting AF base vs age majoration and
+  capping counted ASF at `0,225 × BMAF` resolved a −1 090,54 €/yr single-parent
+  under-estimation and brought all five RSA household archetypes within 0,01 € of
+  `openfisca-france` (once OpenFisca's monthly `statut_occupation_logement = "loge_gratuitement"`
+  was set across all 12 months so both engines apply *forfait logement* identically).
+- **Prime d'activité (`prime_activite`):** Expresses the monthly entitlement in
+  closed non-circular form as
+  `max(ppa_mf − ppa_fl + ppa_bonification + 0,61 × rev_pro − ressources_hors_rsa − rsa_non_bonifie, 0)`,
+  applying the 15 €/month payment floor (`CSS art. D843-2`) and matching
+  `openfisca-france` across 0,5 SMIC, 1,0 SMIC, single-parent, and 2,0 SMIC
+  phase-out cases.
 
-The test period constraint (all pension-input cases must use 2024-01, not other
-months in 2024) is a policyengine-core loader limitation: when a YEAR-typed
-variable is set in a test case, the loader resolves it against `period.this_year`
-of the test's period. For monthly periods other than January, the year period
-does not start at the same point as the monthly period in the loader's internal
-calendar, triggering a `ValueError: Expected a period; got: 'year'`. January is
-safe because `period.this_year` for 2024-01 resolves unambiguously to 2024.
+### 3. Shared Pension Abattement & Replacement Levies
+`pensions_imposables` merges `pension_retraite_declaree` (net of deductible
+pension CSG: 0 % / 3,8 % / 4,2 % / 5,9 %) and `pensions_alimentaires_percues`
+before applying the per-beneficiary floor and per-foyer ceiling (CGI art. 158, 5,
+a), preventing double-counting for households receiving both. Replacement CSG
+tiers (0 % / 3,8 % / 6,6 % / 8,3 %; CSS art. L136-8 III) use exact statutory
+per-half-part RFR increments (2024 and 2025) alongside CRDS (0,5 %) and CASA
+(0,3 % at median/normal tiers; CASF art. L14-10-4), and wire net pensions into
+both RSA and AF resource bases.
 
-## Strategy
+### 4. Cross-Repository Micro-Macro Integration (`LVTShift` & `budget_fr_sim_test`)
+Accepting `reform=None` in `CountryTaxBenefitSystem.__init__` unlocks native
+`Simulation(reform=...)` counterfactuals:
+- **`lvt_shift` (`S1`–`S3_IFI`):** Pairs household `taxe_fonciere`,
+  `taxe_habitation_residence_secondaire`, `ifi`, and `taxe_valeur_sol` with
+  pinned macro land-base yields from `LVTShift` (`lvt_yields.json`, SHA-256
+  verified) to compute revenue-neutral Land Value Tax rates (`~0,42 %` to
+  `~0,91 %`) and household winner/loser incidence.
+- **`budget_levers` (including Decision D-P6):** Translates macro PLF levers
+  (IR/CSG rate shifts, bracket freezes, and targeted pension under-indexation
+  above a statutory pension threshold) into microsimulated household deltas,
+  confirming from bottom-up IR + CSG/CRDS/CASA schedules that the mechanical
+  fiscal clawback on a 48 000 €/yr pensioner sits inside `budget_fr_sim_test`'s
+  `[0,35 ; 0,45]` calibration band.
 
-The overall development sequence:
-1. **Lock down reference-value tests** (parameter + variable YAML tests) before
-   extending the formula — regression prevention.
-2. **TDD for each extension**: add failing cases first, confirm RED, implement,
-   confirm GREEN. This proves the new cases actually test something.
-3. **Property/invariant tests** (pytest grid) catch structural failures — e.g.,
-   monotonicity, non-negativity — that reference tests might miss.
-4. **Independent oracle validation** (openfisca-france) rules out shared-author
-   blindspots: if both codebases agree, the statute interpretation is likely
-   correct.
-5. **Document the modelled/not-modelled boundary precisely** in
-   `modelled_policies.yaml` — each simplification should be a named, explicit
-   decision, not a silent gap.
+## Verification Discipline
 
-The ASF différentielle completes the first realistic extension: eligibility is
-unchanged (still single-parent proxy), but the amount now correctly reflects the
-net benefit rather than the gross guarantee.
-
-## Key Discoveries
-
-**Float32 precision**: PolicyEngine uses numpy float32. Identity tests must use
-tolerance ~0.01, not machine-epsilon. Any test asserting an arithmetic equality
-must be calibrated to float32 noise.
-
-**AF monotonicity holds**: The modulation property (AF weakly decreasing in
-income across plafond thresholds) passed cleanly on a deterministic grid. The
-formula is directionally correct; the exact threshold values remain a validation
-task.
-
-**ASF oracle confirmed**: openfisca-france (v175.0.45) agrees with policyengine-fr
-on full ASF (taux simple) for a bare single-parent famille. Δ ≈ 0.00 EUR. The
-oracle row is live in `oracle_values.yaml`.
-
-**Integration test update required when a new benefit is wired in**: When ASF
-joined revenu_disponible, the foyers_2024.yaml integration test updated from
-34 998.87 → 37 334.95 (Δ ≈ 2 336 EUR/year = the ASF amount). This is the
-expected pattern and signals correct wiring, not a bug.
-
-**ASF différentielle (Task 1) now modelled**: The pension netting formula
-`max_(asf_pleine − pension/12, 0)` was validated against four explicit cases
-(partial pension, pension ≥ ASF → zero, two-child famille, couple with pension →
-zero). RED → GREEN confirmed via TDD. 77/77 full suite passes. The previous
-over-estimation for pension-receiving single parents is eliminated.
-
-## Open Questions
-
-- Whether the AF modulation thresholds (plafonds) are correctly parameterised for
-  2024 remains a validation task. Monotonicity is confirmed; the exact values are not.
-- CSG rates are modelled flat (9.2 % on salary). Reduced rates for low earners on
-  pension income (3.8 % / 6.2 %) are out of scope.
-- revenu_disponible covers AF + ASF. Next extensions (prime d'activité, APL) will
-  follow the same `membres_famille` aggregation pattern.
-- ASF taux majoré (orphelin de deux parents) remains unmodelled (one rate only).
-- The ASF différentielle comparison is at famille level, not child by child. This
-  is a simplification: the statute compares per-child, but the input
-  `pensions_alimentaires_percues` is a single annual total. Multi-child households
-  where pensions differ per child cannot be represented without restructuring the
-  input. Documented in the variable docstring.
-- Recouvrement (CAF advancing ASF then recovering from the absent parent) is not
-  modelled — it is a CAF↔débiteur transfer with no net effect on the famille's
-  income, so it is correctly excluded.
+1. **Float32 calibration:** `policyengine-core` vectorises in `float32`; tests
+   and rounding steps account for ~`0,01 €` single-precision tolerance.
+2. **Four-layer test pyramid:** 146 YAML unit & integration cases + 25 grid
+   property/invariant tests (`test_properties.py`) + golden-master locks + 25
+   live DGFiP / `openfisca-france` oracle assertions (`test_oracle.py`) + 5
+   cross-repo reform counterfactual tests (`test_reforms.py`).
+3. **Automated doc currency (`bin/check_doc_currency.py`):** Blocks drift between
+   code test counts and `CLAUDE.md`, and enforces exact 1-for-1 parity between
+   `modelled_policies.yaml` (`simplifications:`) and `docs/coverage.md`.

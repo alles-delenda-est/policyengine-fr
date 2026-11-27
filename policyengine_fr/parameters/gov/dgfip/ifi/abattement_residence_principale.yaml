@@ -1,0 +1,10 @@
+description: Abattement légal de 30 % sur la valeur vénale de la résidence principale pour l'assiette
+  de l'IFI.
+values:
+  2018-01-01: 0.3
+metadata:
+  unit: /1
+  label: Abattement IFI résidence principale (30 %)
+  reference:
+  - title: Article 973 I du Code général des impôts (abattement de 30 % sur la résidence principale)
+    href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036385040

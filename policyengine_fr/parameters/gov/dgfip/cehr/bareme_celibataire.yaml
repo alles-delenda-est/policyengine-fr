@@ -1,0 +1,23 @@
+description: Barème de la contribution exceptionnelle sur les hauts revenus (CEHR) pour un contribuable célibataire, veuf, séparé ou divorcé (1 déclarant). Assise sur le revenu fiscal de référence (CGI art. 223 sexies).
+metadata:
+  type: marginal_rate
+  threshold_unit: currency-EUR
+  rate_unit: /1
+  name: cehr_celibataire
+  label: Barème CEHR — célibataire (1 déclarant)
+  reference:
+    - title: "Article 223 sexies du Code général des impôts (CEHR : 3 % de 250 k€ à 500 k€, 4 % au-delà)"
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000025049309
+brackets:
+  - threshold:
+      2012-01-01: 0
+    rate:
+      2012-01-01: 0.0
+  - threshold:
+      2012-01-01: 250_000
+    rate:
+      2012-01-01: 0.03
+  - threshold:
+      2012-01-01: 500_000
+    rate:
+      2012-01-01: 0.04

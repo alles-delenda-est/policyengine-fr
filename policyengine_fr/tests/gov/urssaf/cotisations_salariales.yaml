@@ -1,0 +1,65 @@
+# Cotisations sociales salariales (part salariale, hors CSG/CRDS), 2024 (spec 0004).
+# Barème par tranche, PASS 2024 = 46 368 € :
+#   vieillesse plafonnée 6,90 % (0-1 PASS) + déplafonnée 0,40 % (totalité)
+#   + retraite comp. AGIRC-ARRCO T1 3,15 % / CEG T1 0,86 % (0-1 PASS)
+#   + T2 8,64 % / CEG T2 1,08 % (1-8 PASS)
+#   + CET 0,14 % sur 0-8 PASS dès que brut > 1 PASS (tous salariés, ANI 2017)
+#   + cadres : APEC 0,024 % (0-4 PASS).
+# salaire_declare = brut − cotisations − csg_deductible (brut × 0,9825 × 0,068).
+# salaire_net     = brut − cotisations − csg (9,2 % × 98,25 %) − crds (0,5 % × 98,25 %).
+
+- name: Salaire ≤ 1 PASS (non cadre) — somme des taux de tranche 1 (pas de CET)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 30_000
+  output:
+    # 30 000 × (0,069 + 0,004 + 0,0315 + 0,0086) = 30 000 × 0,1131
+    cotisations_salariales: 3_393.00
+    salaire_declare: 24_602.70          # 30 000 − 3 393 − 2 004,30
+    salaire_net: 23_747.92              # 30 000 − 3 393 − 2 711,70 − 147,375
+
+- name: Salaire exactement au PASS (non cadre) — CET non déclenchée
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 46_368
+  output:
+    # 46 368 × 0,1131 (tout en tranche 1, brut == PASS donc CET = 0)
+    cotisations_salariales: 5_244.22
+
+- name: Salaire > 1 PASS (non cadre) — plafonnement vieillesse + tranche 2 + CET (0-8 PASS)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 60_000
+  output:
+    # vieillesse plaf 0,069×46 368 = 3 199,392 ; déplaf 0,004×60 000 = 240 ;
+    # retraite T1 0,0315×46 368 = 1 460,592 ; T2 0,0864×13 632 = 1 177,8048 ;
+    # CEG T1 0,0086×46 368 = 398,7648 ; CEG T2 0,0108×13 632 = 147,2256 ;
+    # CET 0,0014×60 000 = 84,00 -> total 6 707,78
+    cotisations_salariales: 6_707.78
+    salaire_declare: 49_283.62          # 60 000 − 6 707,78 − 4 008,60 (OF: 49 285,06)
+    salaire_net: 47_574.07              # 60 000 − 6 707,78 − 5 423,40 − 294,75
+
+- name: Salaire > 1 PASS, cadre — supplément APEC (0,024 % jusqu'à 4 PASS)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 60_000
+    cadre: true
+  output:
+    # 6 707,78 + APEC 0,00024×60 000 (14,40) = 6 722,18
+    cotisations_salariales: 6_722.18
+    salaire_declare: 49_269.22          # OF: 49 270,66
+    salaire_net: 47_559.67
+
+- name: Salaire nul — aucune cotisation
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    salaire_brut: 0
+  output:
+    cotisations_salariales: 0
+    salaire_declare: 0
+    salaire_net: 0

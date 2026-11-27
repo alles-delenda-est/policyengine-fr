@@ -1,0 +1,124 @@
+# RSA = max(forfaitaire − forfait logement − ressources, 0), versé si un parent
+# a >= 25 ans ou charge d'enfant (CASF L262-4) et si le montant >= 6 € (R262-39).
+- name: Personne seule, sans revenu, janvier 2024
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # 607,75 − 72,93 = 534,82
+    rsa: 534.82
+
+- name: Personne seule, sans revenu, avril 2024 (revalorisation)
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      adulte_1: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # 635,71 − 76,2852 = 559,4248
+    rsa: 559.4248
+
+- name: Personne seule, salaire brut 6 000 €/an (395,80/mois de salaire_net)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40, salaire_brut: 6_000}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # 534,82 − 395,7988 = 139,0212
+    rsa: 139.02
+
+- name: Personne seule, salaire brut 12 000 €/an (RSA nul)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40, salaire_brut: 12_000}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa: 0
+
+- name: Couple sans revenu, janvier 2024
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: []}
+  output:
+    # 911,625 − 145,86 = 765,765
+    rsa: 765.765
+
+- name: Parent isolé, un enfant, sans revenu (majoré − FL − forfait ASF)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      enfant_1: {age: 8}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1]}
+  output:
+    # 1040,56524 − 145,86 − 100,33425 = 794,37099
+    rsa: 794.37099
+
+- name: Parent isolé, deux enfants, sans revenu
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1, enfant_2]}
+  output:
+    # 1300,70655 − 180,50175 − 343,3661 = 776,8387
+    rsa: 776.8387
+
+- name: Demandeur de moins de 25 ans sans enfant — non éligible (CASF L262-4)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 22}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa: 0
+
+- name: Parent de moins de 25 ans avec enfant à charge — éligible (CASF L262-4)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 22}
+      enfant_1: {age: 2}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1]}
+  output:
+    rsa: 794.37099
+
+- name: Retraité avec pension de retraite de 24 000 €/an — RSA nul (pension incluse dans les ressources)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 68, pension_retraite: 24_000}
+    foyers_fiscaux:
+      foyer_1: {declarants: [adulte_1]}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa: 0

@@ -1,0 +1,60 @@
+# Pensions de retraite imposables + abattement de 10% mutualisé (spec 0005), 2024.
+# pensions_imposables applique l'abattement de 10% (plancher 450 €/bénéficiaire,
+# plafond 4 399 €/foyer) sur le TOTAL retraite déclarée + alimentaires perçues,
+# corrigeant le double comptage du plancher/plafond.
+
+- name: Pension de retraite seule — abattement 10% (exonérée de CSG)
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 10_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    # exonérée de CSG (RFR 9 000) -> déclarée = 10 000 ; abattement 10% = 1 000
+    pension_retraite_declaree: 10_000
+    pensions_imposables: 9_000
+    revenu_net_imposable: 9_000
+
+- name: Pension de retraite au taux médian — CSG déductible retranchée
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 20_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    # CSG déductible 840 -> déclarée 19 160 ; abattement 10% = 1 916
+    pension_retraite_declaree: 19_160
+    pensions_imposables: 17_244
+    revenu_net_imposable: 17_244
+
+- name: Abattement mutualisé — plafond foyer unique sur une grosse pension
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 60_000}
+    foyers_fiscaux:
+      f: {declarants: [d1]}
+  output:
+    # taux normal : CSG déductible 3 540 -> déclarée 56 460 ;
+    # 10% = 5 646 > plafond 4 399 -> abattement 4 399
+    pensions_imposables: 52_061          # 56 460 − 4 399
+
+- name: Deux bénéficiaires — plancher par personne partagé retraite/alimentaire
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 2_000}
+      d2: {pensions_alimentaires_percues: 2_000}
+    foyers_fiscaux:
+      f: {declarants: [d1, d2]}
+  output:
+    # RFR 3 600 -> exonéré de CSG ; chacun : 10% de 2 000 = 200 < plancher 450
+    # -> abattement 450 par bénéficiaire ; total 900 ; base 4 000 − 900 = 3 100
+    pensions_imposables: 3_100
+    revenu_net_imposable: 3_100

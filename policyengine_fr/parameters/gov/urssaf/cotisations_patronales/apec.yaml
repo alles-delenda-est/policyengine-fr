@@ -1,0 +1,9 @@
+description: Taux patronal APEC (cadres uniquement, 0-4 PASS).
+values:
+  2024-01-01: 0.00036
+metadata:
+  unit: /1
+  label: APEC patronale (cadres)
+  reference:
+  - title: URSSAF — Cotisation APEC (part employeur 0,036 %)
+    href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/apec.html

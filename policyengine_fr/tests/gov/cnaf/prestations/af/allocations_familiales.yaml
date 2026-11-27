@@ -1,15 +1,16 @@
-# Allocations familiales (CSS art. L521-1 et s.) — revenus/barèmes 2024.
+# Allocations familiales (CSS art. L521-1 et s., D521-1) — revenus/barèmes 2024.
 # BMAF au 1er janvier 2024 = 445,93 € (revalorisation à 466,44 € au 1er avril).
 # Taux: 0,32 BMAF (2 enfants) + 0,41 BMAF par enfant supplémentaire ;
 # majoration pour âge 0,16 BMAF par enfant >= 14 ans ;
-# modulation 1 / 0,5 / 0,25 selon deux plafonds de ressources.
+# modulation 1 / 0,5 / 0,25 selon deux plafonds de ressources, lissée par le
+# complément dégressif (CSS art. D521-1, al. 3).
 - name: Couple, deux enfants, ressources sous le plafond 1 (taux plein)
   absolute_error_margin: 0.01
   period: 2024-01
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -29,7 +30,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       parent_2: {}
       enfant_1:
         age: 5
@@ -52,7 +53,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       enfant_1:
         age: 17
       enfant_2:
@@ -71,7 +72,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 100_000
+        salaire_declare: 100_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -82,7 +83,7 @@
         parents: [parent_1, parent_2]
         enfants: [enfant_1, enfant_2]
   output:
-    # ressources 90 000 : 74 966 < 90 000 <= 99 922 -> coefficient 0,5
+    # ressources 90 000 : 74 966 < 90 000 <= 99 922 (hors zone dégressive) -> 0,5
     # 142,6976 × 0,5 = 71,3488
     allocations_familiales: 71.3488
 
@@ -92,7 +93,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 130_000
+        salaire_declare: 130_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -103,7 +104,7 @@
         parents: [parent_1, parent_2]
         enfants: [enfant_1, enfant_2]
   output:
-    # ressources 117 000 > 99 922 -> coefficient 0,25
+    # ressources 117 000 > 99 922 (hors zone dégressive) -> coefficient 0,25
     # 142,6976 × 0,25 = 35,6744
     allocations_familiales: 35.6744
 
@@ -113,7 +114,7 @@
   input:
     individus:
       parent_1:
-        salaire_brut: 30_000
+        salaire_declare: 30_000
       parent_2: {}
       enfant_1:
         age: 8
@@ -128,10 +129,6 @@
   absolute_error_margin: 0.01
   period: 2024-04
   input:
-    # Note: salaire_brut omis volontairement — un bug policyengine-core
-    # (get_known_periods split incorrecte) plante quand une variable YEAR est
-    # fournie pour un test de période non-janvier. Ressources = 0 => taux plein,
-    # ce qui ne change pas l'objet du test (vérifier la BMAF du 1er avril).
     individus:
       parent_1: {}
       parent_2: {}
@@ -148,7 +145,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -156,7 +153,6 @@
     familles:
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3]}
   output:
-    # l'aîné de 20 ans n'ouvre plus droit -> 2 enfants -> 445,93 × 0,32
     allocations_familiales: 142.6976
 
 - name: Enfant de 19 ans encore à charge (limite non atteinte)
@@ -164,7 +160,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -172,11 +168,6 @@
     familles:
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3]}
   output:
-    # 3 enfants, tous < 20 (le cadet de 19 ans ouvre encore droit).
-    # base 445,93 × (0,32 + 0,41) = 325,5289 ;
-    # l'enfant de 19 ans (>= 14) ouvre droit à la majoration d'âge, sans
-    # exclusion d'aîné car la famille a 3 enfants : + 445,93 × 0,16 = 71,3488.
-    # total 396,8777 (à comparer au cas de l'enfant de 20 ans, exclu).
     allocations_familiales: 396.8777
 
 - name: Majoration d'âge exactement à 14 ans (3 enfants, pas d'exclusion d'aîné)
@@ -184,7 +175,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 5}
       enfant_2: {age: 8}
@@ -192,7 +183,6 @@
     familles:
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3]}
   output:
-    # base 325,5289 + majoration 445,93 × 0,16 × 1 = 71,3488 -> 396,8777
     allocations_familiales: 396.8777
 
 - name: Nouveau-né (âge 0) compte comme enfant à charge
@@ -200,7 +190,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 0}
       enfant_2: {age: 3}
@@ -214,7 +204,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 83_000}
+      parent_1: {salaire_declare: 83_000}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
@@ -223,32 +213,67 @@
   output:
     allocations_familiales: 142.6976
 
-- name: Ressources juste au-dessus du plafond 1 (tranche 2, demi-montant)
+- name: Complément dégressif juste au-dessus du plafond 1 (CSS art. D521-1, al. 3)
   absolute_error_margin: 0.01
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 83_500}
+      parent_1: {salaire_declare: 83_500}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
     familles:
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
   output:
+    # ressources = 75 150 > plafond 1 (74 966), dépassement = 184 < 12 × 71,3488 (856,19)
+    # montant modulé = 71,3488 ; complément = 71,3488 − 184 / 12 = 56,0155 ; total = 127,3643
+    # (openfisca-france : 127,3667)
+    allocations_familiales: 127.3643
+
+- name: Ressources au-delà de la zone dégressive du plafond 1 (demi-montant plein)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_declare: 84_500}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
+  output:
+    # ressources = 76 050 > 74 966 + 856,19 = 75 822,19 -> complément = 0 -> 71,3488
     allocations_familiales: 71.3488
 
-- name: Ressources juste au-dessus du plafond 2 (tranche 3, quart de montant)
+- name: Complément dégressif juste au-dessus du plafond 2 (tranche 3 lissée)
   absolute_error_margin: 0.01
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 111_100}
+      parent_1: {salaire_declare: 111_100}
       parent_2: {}
       enfant_1: {age: 8}
       enfant_2: {age: 10}
     familles:
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
   output:
+    # ressources = 99 990 > plafond 2 (99 922), dépassement = 68 < 12 × 35,6744 (428,09)
+    # montant modulé = 35,6744 ; complément = 35,6744 − 68 / 12 = 30,0077 ; total = 65,6821
+    allocations_familiales: 65.6821
+
+- name: Ressources au-delà de la zone dégressive du plafond 2 (quart de montant)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {salaire_declare: 112_000}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    familles:
+      famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2]}
+  output:
+    # ressources = 100 800 > 99 922 + 428,09 = 100 350,09 -> complément = 0 -> 35,6744
     allocations_familiales: 35.6744
 
 - name: Quatre enfants à charge, ressources sous plafond (base 1,14 BMAF)
@@ -256,7 +281,7 @@
   period: 2024-01
   input:
     individus:
-      parent_1: {salaire_brut: 30_000}
+      parent_1: {salaire_declare: 30_000}
       parent_2: {}
       enfant_1: {age: 2}
       enfant_2: {age: 6}
@@ -265,5 +290,4 @@
     familles:
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3, enfant_4]}
   output:
-    # base 445,93 × (0,32 + 0,41 × 2) = 445,93 × 1,14 = 508,3602 ; aucune majoration d'âge
     allocations_familiales: 508.3602

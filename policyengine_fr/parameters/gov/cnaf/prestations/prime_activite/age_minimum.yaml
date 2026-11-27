@@ -1,0 +1,9 @@
+description: Âge minimum pour ouvrir droit à la prime d'activité.
+values:
+  2016-01-01: 18
+metadata:
+  unit: year
+  label: Âge minimum prime d'activité
+  reference:
+    - title: Article L842-2 du Code de la sécurité sociale (âge minimal de 18 ans)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000031087895

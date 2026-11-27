@@ -1,0 +1,9 @@
+description: Seuil minimal de revenus professionnels mensuels ouvrant droit à la bonification individuelle de la prime d'activité, exprimé en multiple du SMIC horaire brut au 1er janvier (59 × SMIC horaire, soit environ 0,5 SMIC temps plein).
+values:
+  2019-01-01: 59
+metadata:
+  unit: hour
+  label: Seuil d'entrée de la bonification individuelle PPA (en heures de SMIC)
+  reference:
+    - title: Article D843-2 du Code de la sécurité sociale (Décret n° 2018-1197 du 21 décembre 2018)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037850516

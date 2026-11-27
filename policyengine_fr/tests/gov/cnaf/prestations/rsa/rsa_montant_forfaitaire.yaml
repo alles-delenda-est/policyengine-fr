@@ -1,0 +1,78 @@
+# RSA montant forfaitaire — CASF L262-3, R262-1 (composition), L262-9 (majoré).
+# Base personne seule : 607,75 € (jan-mars 2024) puis 635,71 € (avril 2024).
+- name: Personne seule, janvier 2024 (base 607,75)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa_montant_forfaitaire: 607.75
+
+- name: Personne seule, avril 2024 (base revalorisée 635,71)
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      adulte_1: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa_montant_forfaitaire: 635.71
+
+- name: Couple sans enfant, janvier 2024 (×1,5)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: []}
+  output:
+    # 607,75 × 1,5
+    rsa_montant_forfaitaire: 911.625
+
+- name: Parent isolé, un enfant, janvier 2024 (RSA majoré)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      enfant_1: {age: 8}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1]}
+  output:
+    # 607,75 × (1,28412 + 0,42804) = 607,75 × 1,71216
+    rsa_montant_forfaitaire: 1040.56524
+
+- name: Parent isolé, deux enfants, janvier 2024 (RSA majoré)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: [enfant_1, enfant_2]}
+  output:
+    # 607,75 × (1,28412 + 2×0,42804) = 607,75 × 2,1402
+    rsa_montant_forfaitaire: 1300.70655
+
+- name: Couple deux enfants, janvier 2024 (non majoré, ×2,1)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1, enfant_2]}
+  output:
+    # 607,75 × (1 + 0,5 + 0,3 + 0,3) = 607,75 × 2,1
+    rsa_montant_forfaitaire: 1276.275

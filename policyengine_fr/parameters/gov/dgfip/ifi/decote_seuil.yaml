@@ -1,0 +1,9 @@
+description: Plafond de patrimoine net taxable jusqu'auquel s'applique la décote IFI (1 400 000 €).
+values:
+  2018-01-01: 1400000
+metadata:
+  unit: currency-EUR
+  label: Plafond d'application de la décote IFI
+  reference:
+  - title: Article 977 II du Code général des impôts (décote entre 1,3 M€ et 1,4 M€)
+    href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036385056

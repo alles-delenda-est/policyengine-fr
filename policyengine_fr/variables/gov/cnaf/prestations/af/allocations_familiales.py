@@ -14,21 +14,19 @@ class allocations_familiales(Variable):
         "atteint 14 ans (l'aîné d'une famille de deux enfants n'y ouvre pas "
         "droit). Le montant est ensuite modulé selon les ressources annuelles "
         "(taux plein, moitié ou quart) en fonction de deux plafonds croissant "
-        "avec le nombre d'enfants.\n\n"
+        "avec le nombre d'enfants, avec application du complément dégressif "
+        "(CSS art. D521-1, al. 3) lorsque le dépassement du plafond est "
+        "inférieur à douze fois le montant mensuel modulé.\n\n"
         "Simplifications MVP: les ressources prises en compte sont la somme des "
         "salaires imposables de l'année courante (N) des membres de la famille, "
         "en lieu et place de la base ressources N-2 réelle (revenu net "
         "catégoriel de l'année N-2, art. R532-3 CSS). Les deux coïncident pour "
         "un revenu stable mais divergent pour tout ménage dont le revenu a "
         "changé d'une année sur l'autre. Métropole uniquement; garde alternée, "
-        "forfait des 20 ans et plancher de versement non modélisés. Le "
-        "complément dégressif (CSS art. D521-1, al. 3) qui lisse le passage "
-        "d'une tranche à l'autre n'est pas modélisé: le modèle applique des "
-        "seuils en marche d'escalier, donc les taux marginaux au voisinage "
-        "immédiat des plafonds sont surestimés. La majoration pour âge est "
-        "accordée dès le mois du quatorzième anniversaire, alors que le droit "
-        "ne s'ouvre qu'à compter du mois suivant (un mois de majoration de "
-        "trop par enfant, une seule fois)."
+        "forfait des 20 ans et plancher de versement non modélisés. La "
+        "majoration pour âge est accordée dès le mois du quatorzième "
+        "anniversaire, alors que le droit ne s'ouvre qu'à compter du mois "
+        "suivant (un mois de majoration de trop par enfant, une seule fois)."
     )
     definition_period = MONTH
     reference = "https://www.service-public.fr/particuliers/vosdroits/F13213"
@@ -39,7 +37,6 @@ class allocations_familiales(Variable):
 
         age = famille.members("age", period)
         est_enfant = famille.members.has_role(Famille.ENFANT)
-        # Enfant à charge ouvrant droit: rôle enfant et âge sous la limite.
         ouvre_droit = est_enfant & (age >= 0) & (age < af.age_limite)
         nb_enfants = famille.sum(ouvre_droit)
 
@@ -78,7 +75,27 @@ class allocations_familiales(Variable):
                 af.modulation.tranche_3,
             ),
         )
+        montant_module = montant_plein * coefficient
+
+        # Complément dégressif (CSS art. D521-1, al. 3) : lorsque les ressources
+        # excèdent le plafond franchi d'un montant inférieur à 12 × montant_module,
+        # un complément mensuel égal à (plafond + 12 × montant_module − ressources) / 12
+        # lisse continûment le passage de taux plein → moitié et moitié → quart.
+        depassement = where(
+            ressources <= plafond_1,
+            0,
+            where(
+                ressources <= plafond_2,
+                ressources - plafond_1,
+                ressources - plafond_2,
+            ),
+        )
+        complement_degressif = where(
+            depassement > 0,
+            max_(montant_module - depassement / 12, 0),
+            0,
+        )
 
         # Versées uniquement à partir du nombre d'enfants minimum (2).
         eligible = nb_enfants >= af.nombre_enfants_minimum
-        return where(eligible, montant_plein * coefficient, 0)
+        return where(eligible, montant_module + complement_degressif, 0)

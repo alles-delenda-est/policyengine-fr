@@ -16,19 +16,11 @@ This repo (`PolicyEngineFR`) **is** the `policyengine-fr` package — a French
 tax-benefit microsimulation model that reuses PolicyEngine's existing
 UK/US/Canada stack. Seeded from `policyengine-canada`'s structure (2026-06-15).
 
-Current state: **Disposable-income MVP complete (revenus 2024, métropole).**
-The full chain is modelled end-to-end: `salaire_brut` → `revenu_net_imposable`
-(abattement 10 %) → `nombre_parts` (quotient familial) → `impot_brut` (barème par
-part) → plafonnement du quotient familial → décote → `impot_revenu` net; plus
-CSG/CRDS on salary (assiette 98,25 %), pensions alimentaires (versées deducted,
-perçues taxed after the 10 % abattement), `allocations_familiales` and
-`allocation_soutien_familial` (ASF différentielle) on the famille; aggregated
-into `revenu_disponible` on the ménage. Whole-household integration scenarios
-pass. `make test` passes (77 YAML tests + 37 pytest), ruff clean. See
+Current state: **Multi-year (2024–2025) tax-benefit, payslip, and patrimonial model complete (France métropolitaine).**
+The full chain is modelled end-to-end: true-gross `salaire_brut` → per-risk PASS-bracketed `cotisations_salariales` (`cadre` support) + CSG/CRDS → `salaire_declare` (1AJ) and `salaire_net` (plus employer `cotisations_patronales`, `reduction_generale`, and `cout_du_travail`); `pension_retraite` → RFR-banded CSG/CRDS/CASA → `pension_retraite_nette` and merged 10 % `pensions_imposables` (shared with `pensions_alimentaires_percues`); `revenu_net_imposable` → `nombre_parts` → `impot_brut` → `plafonnement_quotient_familial` → `decote` → `impot_revenu` net; patrimonial & high-income levies (`cehr`, `pfu_ir`, 17,2 % `prelevements_sociaux_patrimoine`, `revenus_fonciers_nets`, `impot_plus_values_immobilieres`, `ifi`, `taxe_fonciere`, `taxe_habitation_residence_secondaire`, `taxe_valeur_sol`) and parameterised reforms (`policyengine_fr.reforms.lvt_shift` & `budget_levers`); plus `allocations_familiales` (with statutory *complément dégressif*), `allocation_soutien_familial`, `rsa`, and `prime_activite`, aggregated into `revenu_disponible` on the ménage. Whole-household integration scenarios pass. `make test` passes (146 YAML tests + 56 pytest), ruff clean. See
 `policyengine_fr/modelled_policies.yaml` for the modelled / not-modelled
 boundary (and its `simplifications:` list for every named departure from the
-statute). A local `.venv/` exists (pip was bootstrapped via get-pip.py since the
-system has no pip); activate it with `. .venv/bin/activate`.
+statute, kept in parity with `docs/coverage.md` via `bin/check_doc_currency.py`). A local `.venv/` exists; activate it with `. .venv/bin/activate` (or `.venv\Scripts\activate` on Windows).
 
 A second, **separate** virtual environment `.venv-of312` may exist **in the
 repo's parent directory** (`PolicyEngineFR/.venv-of312`, i.e. outside this git

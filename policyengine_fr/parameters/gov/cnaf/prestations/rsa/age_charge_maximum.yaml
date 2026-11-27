@@ -1,0 +1,9 @@
+description: Âge limite (exclu) pour qu'un enfant soit compté à charge dans le foyer RSA.
+values:
+  2009-06-01: 25
+metadata:
+  unit: year
+  label: Âge maximum enfant à charge (RSA)
+  reference:
+    - title: Article R262-3 du Code de l'action sociale et des familles
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000020526222/2009-06-01/

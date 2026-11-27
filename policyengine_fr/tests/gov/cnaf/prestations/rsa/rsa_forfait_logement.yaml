@@ -1,0 +1,67 @@
+# Forfait logement RSA — CASF R262-9. Pourcentage du montant forfaitaire du
+# foyer : 12 % (1 pers) de 607,75 ; 16 % (2 pers) de 911,625 ; 16,5 % (3+) de 1093,95.
+- name: Une personne, janvier 2024
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # 0,12 × 607,75
+    rsa_forfait_logement: 72.93
+
+- name: Une personne, avril 2024 (base revalorisée)
+  absolute_error_margin: 0.01
+  period: 2024-04
+  input:
+    individus:
+      adulte_1: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    # 0,12 × 635,71
+    rsa_forfait_logement: 76.2852
+
+- name: Deux personnes (couple), janvier 2024
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: []}
+  output:
+    # 0,16 × (607,75 × 1,5 = 911,625) = 145,86
+    rsa_forfait_logement: 145.86
+
+- name: Trois personnes, janvier 2024
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+      enfant_1: {age: 8}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1]}
+  output:
+    # 0,165 × (607,75 × 1,8 = 1093,95) = 180,50175
+    rsa_forfait_logement: 180.50175
+
+- name: Quatre personnes — plafonné au taux 3 personnes
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1, enfant_2]}
+  output:
+    # même base que 3 personnes (plafond) : 180,50175
+    rsa_forfait_logement: 180.50175

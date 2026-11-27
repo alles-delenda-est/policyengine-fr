@@ -1,0 +1,9 @@
+description: Montant mensuel en deçà duquel la prime d'activité n'est pas versée.
+values:
+  2016-01-01: 15
+metadata:
+  unit: currency-EUR
+  label: Montant minimum versé de la prime d'activité
+  reference:
+    - title: Article D843-3 du Code de la sécurité sociale (seuil de versement de 15 €)
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000031673893

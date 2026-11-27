@@ -1,0 +1,9 @@
+description: Taux salarié de la contribution d'équilibre technique (CET, AGIRC-ARRCO), due par tous les salariés dont la rémunération excède 1 PASS, assise sur les tranches 1 et 2 (0 à 8 PASS).
+values:
+  2024-01-01: 0.0014
+metadata:
+  unit: /1
+  label: Cotisation salariale CET (rémunération > 1 PASS, assiette 0-8 PASS)
+  reference:
+    - title: URSSAF — Contribution d'équilibre technique (CET, part salariale 0,14 % dès que le brut dépasse 1 PASS, sur T1+T2)
+      href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/retraite-complementaire.html

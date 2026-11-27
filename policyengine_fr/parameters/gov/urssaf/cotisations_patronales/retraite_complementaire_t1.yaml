@@ -1,0 +1,9 @@
+description: Taux patronal AGIRC-ARRCO tranche 1 (0-1 PASS).
+values:
+  2024-01-01: 0.0472
+metadata:
+  unit: /1
+  label: Retraite complémentaire patronale T1
+  reference:
+  - title: URSSAF — Retraite complémentaire AGIRC-ARRCO (part employeur T1 = 4,72 %)
+    href: https://www.urssaf.fr/accueil/employeur/cotisations/liste-cotisations/retraite-complementaire.html
