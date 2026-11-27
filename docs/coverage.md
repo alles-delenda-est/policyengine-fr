@@ -127,8 +127,9 @@ enumerated below and mirrored 1-for-1 under `simplifications:` in
    private-sector employee (`cadre=False` by default, `cadre=True` for APEC)
    without mandatory *mutuelle*, exempt overtime, apprenticeship, civil-service
    or Alsace-Moselle rules; activity CSG is flat 9,2 % (98,25 % assiette capped
-   at 4 PASS, 100 % above), and `YEAR` parameters are evaluated on 1 January of
-   the simulated year.
+   at 4 annual PASS on a full-year, full-time basis without part-time or
+   part-year proration, 100 % above), and `YEAR` parameters are evaluated on
+   1 January of the simulated year.
 2. **Employer cotisations and *réduction générale* evaluate rates and SMIC on
    1 January without infra-annual proration.** Because `cotisations_patronales`
    and `reduction_generale` are `YEAR` variables, `parameters(period)` reads the

@@ -86,3 +86,18 @@
     assiette_csg_crds_salaire: 196_703.00
     csg: 18_096.68
     crds: 983.515
+
+- name: Cadre juste au-dessus de 4 PASS (2024, 185 572 €) — dépassement et propagation 1AJ / salaire net
+  absolute_error_margin: 0.05
+  period: 2024
+  input:
+    salaire_brut: 185_572
+    cadre: true
+  output:
+    # 4 × 46 368 = 185 472 -> abattement plafonné à 3 245,76 -> assiette 182 326,24 (et non 182 324,49)
+    assiette_csg_crds_salaire: 182_326.24
+    csg_deductible: 12_398.18
+    csg: 16_774.01
+    crds: 911.63
+    salaire_declare: 153_537.83
+    salaire_net: 148_250.38

@@ -22,6 +22,9 @@ from policyengine_core.periods import period as make_period
 from policyengine_core.reforms import Reform
 
 from policyengine_fr.model_api import *
+from policyengine_fr.variables.gov.dgfip.ir.revenu_fiscal_de_reference import (
+    compute_revenu_fiscal_de_reference,
+)
 
 
 def make_ir_proportional_reform(multiplier: float) -> type[Reform]:
@@ -150,43 +153,11 @@ def make_d_p6_targeted_pension_underindexation_reform(
                 definition_period = YEAR
 
                 def formula(foyer_fiscal, period, parameters):
-                    salaires = foyer_fiscal.sum(
-                        foyer_fiscal.members("salaire_imposable", period)
-                    )
-                    p = parameters(period).gov.dgfip.ir.abattement_pensions
-                    pension_i = foyer_fiscal.members(
-                        "pension_retraite_effective", period
-                    ) + foyer_fiscal.members("pensions_alimentaires_percues", period)
-                    abattement_i = where(
-                        pension_i > 0,
-                        min_(pension_i, max_(p.taux * pension_i, p.plancher)),
-                        0,
-                    )
-                    abattement = min_(p.plafond, foyer_fiscal.sum(abattement_i))
-                    pensions_abattues = max_(
-                        foyer_fiscal.sum(pension_i) - abattement, 0
-                    )
-
-                    foncier_net = foyer_fiscal("revenus_fonciers_nets", period)
-                    taux_csg_ded_pat = parameters(
-                        period
-                    ).gov.urssaf.patrimoine.csg_deductible_bareme
-                    csg_ded_foncier = foncier_net * taux_csg_ded_pat
-
-                    capital = foyer_fiscal.sum(
-                        foyer_fiscal.members("revenus_capital", period)
-                    )
-                    plus_values = foyer_fiscal("plus_values_immobilieres", period)
-                    versees = foyer_fiscal("pensions_alimentaires_versees", period)
-                    return max_(
-                        salaires
-                        + pensions_abattues
-                        + foncier_net
-                        - csg_ded_foncier
-                        + capital
-                        + plus_values
-                        - versees,
-                        0,
+                    return compute_revenu_fiscal_de_reference(
+                        foyer_fiscal,
+                        period,
+                        parameters,
+                        pension_var="pension_retraite_effective",
                     )
 
             revenu_fiscal_de_reference_r.__name__ = "revenu_fiscal_de_reference"

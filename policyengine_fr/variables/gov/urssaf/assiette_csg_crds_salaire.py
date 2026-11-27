@@ -9,12 +9,13 @@ class assiette_csg_crds_salaire(Variable):
     documentation = (
         "Base de calcul de la CSG et de la CRDS pour un salarié (CSS art. "
         "L136-2, I) : salaire brut diminué de l'abattement d'assiette pour "
-        "frais professionnels de 1,75 %, dans la limite de 4 plafonds annuels "
-        "de la sécurité sociale (PASS) ; la fraction excédant 4 PASS est "
+        "frais professionnels de 1,75 %, dans la limite annuelle de 4 PASS "
+        "appréciée en année pleine temps plein sans proratisation infra-annuelle "
+        "ni temps partiel (CSS art. L241-3) ; la fraction excédant 4 PASS est "
         "assujettie à 100 %."
     )
     definition_period = YEAR
-    reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037948012"
+    reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000025013432"
 
     def formula(individu, period, parameters):
         salaire_brut = individu("salaire_brut", period)

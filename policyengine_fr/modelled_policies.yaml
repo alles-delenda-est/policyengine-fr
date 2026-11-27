@@ -36,8 +36,9 @@ core:
       l'APEC) sans mutuelle obligatoire d'entreprise, heures supplémentaires
       exonérées, apprentissage, ni régimes spéciaux, fonction publique ou
       Alsace-Moselle ; la CSG d'activité est au taux plein de 9,2 % (assiette
-      98,25 % jusqu'à 4 PASS, 100 % au-delà), et les paramètres annuels
-      (`YEAR`) sont lus au 1er janvier de l'année simulée.
+      98,25 % jusqu'à 4 PASS annuels sans proratisation infra-annuelle ni temps
+      partiel, 100 % au-delà), et les paramètres annuels (`YEAR`) sont lus au
+      1er janvier de l'année simulée.
     - >-
       Cotisations patronales et réduction générale (`cotisations_patronales`,
       `reduction_generale`) — convention annuelle au 1er janvier et SMIC temps

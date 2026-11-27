@@ -144,7 +144,12 @@ def test_lvt_s3_does_not_leak_rsa_or_wipe_rfr():
 
     assert float(base.calculate_add("rsa", "2024")[0]) == 0.0
     assert float(ref.calculate_add("rsa", "2024")[0]) == 0.0
-    assert float(ref.calculate("revenu_fiscal_de_reference", "2024")[0]) > 0.0
+    assert float(
+        base.calculate("revenu_fiscal_de_reference", "2024")[0]
+    ) == pytest.approx(30_000.0 * (1.0 - 0.068), abs=0.05)
+    assert float(
+        ref.calculate("revenu_fiscal_de_reference", "2024")[0]
+    ) == pytest.approx(30_000.0, abs=0.05)
     assert float(ref.calculate("revenu_net_imposable", "2024")[0]) == 0.0
 
 

@@ -26,6 +26,9 @@ from policyengine_core.periods import period as make_period
 from policyengine_core.reforms import Reform
 
 from policyengine_fr.model_api import *
+from policyengine_fr.variables.gov.dgfip.ir.revenu_fiscal_de_reference import (
+    compute_revenu_fiscal_de_reference,
+)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 YIELDS_PATH = DATA_DIR / "lvt_yields.json"
@@ -74,7 +77,8 @@ def make_lvt_shift_reform(
 
     In ``S3`` / ``S3_IFI``, net rental income is removed from progressive IR
     (``revenu_net_imposable``) and social levies (``prelevements_sociaux_patrimoine``)
-    while staying included in ``revenu_fiscal_de_reference`` and benefit means-tests
+    while staying included in ``revenu_fiscal_de_reference`` (without subtracting
+    the abolished 6.8% rental deductible CSG) and benefit means-tests
     (preventing spurious RSA eligibility and preserving RFR-based CEHR / CSG tiers).
     """
     rate = lvt_variant_rate(scenario_id) if custom_rate is None else float(custom_rate)
@@ -123,6 +127,33 @@ def make_lvt_shift_reform(
 
                 revenu_net_imposable_lvt.__name__ = "revenu_net_imposable"
                 self.replace_variable(revenu_net_imposable_lvt)
+
+                pension_var_name = (
+                    "pension_retraite_effective"
+                    if "pension_retraite_effective" in self.variables
+                    else "pension_retraite"
+                )
+
+                class revenu_fiscal_de_reference_lvt(Variable):
+                    value_type = float
+                    entity = FoyerFiscal
+                    label = (
+                        "Revenu fiscal de référence du foyer fiscal (réforme LVT S3)"
+                    )
+                    unit = EUR
+                    definition_period = YEAR
+
+                    def formula(foyer_fiscal, period, parameters):
+                        return compute_revenu_fiscal_de_reference(
+                            foyer_fiscal,
+                            period,
+                            parameters,
+                            pension_var=pension_var_name,
+                            deduct_foncier_csg=False,
+                        )
+
+                revenu_fiscal_de_reference_lvt.__name__ = "revenu_fiscal_de_reference"
+                self.replace_variable(revenu_fiscal_de_reference_lvt)
 
             if replace_gains or replace_rents:
 
