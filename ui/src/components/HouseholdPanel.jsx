@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { LVT_SCENARIOS } from '../lib/presets.js'
 import {
   countActiveReforms,
@@ -13,6 +13,83 @@ function childBadgeText(age) {
   if (age < 14) return 'AF · ASF · RSA (< 14 ans)'
   if (age < 20) return 'Maj. âge AF +14 ans'
   return 'RSA & PPA seuls (20–24 ans)'
+}
+
+function DraftNumberInput({
+  value,
+  onCommit,
+  min = 0,
+  max,
+  ariaLabel,
+  className,
+  integer = true,
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const cancelledRef = useRef(false)
+  const inputRef = useRef(null)
+
+  const clampCommit = (raw) => {
+    const trimmed = String(raw).trim()
+    if (trimmed === '') {
+      return min > 0 ? value : 0
+    }
+    const parsed = Number(trimmed)
+    if (!Number.isFinite(parsed)) {
+      return value
+    }
+    const normalized = integer ? Math.round(parsed) : parsed
+    const lo = min !== undefined ? Math.max(min, normalized) : normalized
+    return max !== undefined ? Math.min(max, lo) : lo
+  }
+
+  return (
+    <input
+      ref={inputRef}
+      type="number"
+      step={1}
+      min={min}
+      max={max}
+      className={className}
+      aria-label={ariaLabel}
+      value={editing ? draft : String(value)}
+      onFocus={() => {
+        cancelledRef.current = false
+        setEditing(true)
+        setDraft(String(value))
+      }}
+      onChange={(e) => {
+        const nextRaw = e.target.value
+        setDraft(nextRaw)
+        if (nextRaw.trim() === '') return
+        const parsed = Number(nextRaw)
+        if (!Number.isFinite(parsed)) return
+        if (min !== undefined && parsed < min) return
+        if (max !== undefined && parsed > max) return
+        onCommit(integer ? Math.round(parsed) : parsed)
+      }}
+      onBlur={() => {
+        setEditing(false)
+        if (cancelledRef.current) {
+          cancelledRef.current = false
+          return
+        }
+        const nextVal = clampCommit(draft)
+        if (nextVal !== value) {
+          onCommit(nextVal)
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.currentTarget.blur()
+        } else if (e.key === 'Escape') {
+          cancelledRef.current = true
+          setEditing(false)
+          e.currentTarget.blur()
+        }
+      }}
+    />
+  )
 }
 
 function MoneySliderInput({
@@ -34,13 +111,11 @@ function MoneySliderInput({
       <div className="pe-field-header">
         <label className="pe-field-label">{label}</label>
         <div className="pe-money-box">
-          <input
-            type="number"
+          <DraftNumberInput
             min={0}
-            step={stepDisplay}
             value={displayVal}
-            aria-label={`${label} (${unitSuffix})`}
-            onChange={(e) => onChangeAnnual(Math.max(0, unscalePeriod(e.target.value, periodMode)))}
+            ariaLabel={`${label} (${unitSuffix})`}
+            onCommit={(v) => onChangeAnnual(Math.max(0, unscalePeriod(v, periodMode)))}
           />
           <span>{unitSuffix}</span>
         </div>
@@ -71,12 +146,12 @@ function AdultCard({ index, adult, onChange, periodMode, title }) {
         <div className="pe-inline-controls">
           <label className="pe-age-pill">
             <span>Âge</span>
-            <input
-              type="number"
+            <DraftNumberInput
               min={18}
               max={105}
               value={adult.age}
-              onChange={(e) => setField('age', Math.max(18, Math.min(105, Number(e.target.value) || 18)))}
+              ariaLabel={`Âge ${title}`}
+              onCommit={(v) => setField('age', v)}
             />
           </label>
           <button
@@ -130,12 +205,15 @@ export default function HouseholdPanel({
   year,
   dp6ClawbackShare,
   lvtMeta,
+  presetSeq = 0,
 }) {
   const [sidebarTab, setSidebarTab] = useState('foyer')
-  const [patOpen, setPatOpen] = useState(() => countPatrimoineInputs(household.patrimoine) > 0)
+  const patCount = countPatrimoineInputs(household.patrimoine)
+  const [patOverride, setPatOverride] = useState(null)
+  const patOpen =
+    patOverride && patOverride.seq === presetSeq ? patOverride.open : patCount > 0
 
   const activeReformsCount = countActiveReforms(reforms)
-  const patCount = countPatrimoineInputs(household.patrimoine)
 
   const updateAdult = (idx, nextAdult) => {
     const nextAdults = [...household.adults]
@@ -187,7 +265,14 @@ export default function HouseholdPanel({
           onClick={() => setSidebarTab('foyer')}
         >
           Mon foyer
-          {patCount > 0 && <span className="pe-count-pill">{patCount}</span>}
+          {patCount > 0 && (
+            <span
+              className="pe-count-pill"
+              title="Champs patrimoniaux ou pensions alimentaires actifs"
+            >
+              {patCount}
+            </span>
+          )}
         </button>
         <button
           type="button"
@@ -213,6 +298,7 @@ export default function HouseholdPanel({
               <button
                 type="button"
                 className={`pe-seg-btn${!household.couple ? ' active' : ''}`}
+                aria-pressed={!household.couple}
                 onClick={() => onHouseholdChange({ ...household, couple: false })}
               >
                 Personne seule
@@ -220,6 +306,7 @@ export default function HouseholdPanel({
               <button
                 type="button"
                 className={`pe-seg-btn${household.couple ? ' active' : ''}`}
+                aria-pressed={household.couple}
                 onClick={() => onHouseholdChange({ ...household, couple: true })}
               >
                 Couple (marié / pacsé)
@@ -322,7 +409,7 @@ export default function HouseholdPanel({
               type="button"
               className="pe-drawer-toggle"
               aria-expanded={patOpen}
-              onClick={() => setPatOpen((o) => !o)}
+              onClick={() => setPatOverride({ seq: presetSeq, open: !patOpen })}
             >
               <span>
                 Patrimoine, loyers, capital &amp; pensions alimentaires
@@ -481,7 +568,13 @@ export default function HouseholdPanel({
               id="pe-lvt-select"
               className="pe-select"
               value={reforms.lvt_scenario}
-              onChange={(e) => setRef('lvt_scenario', e.target.value)}
+              onChange={(e) =>
+                onReformsChange({
+                  ...reforms,
+                  lvt_scenario: e.target.value,
+                  lvt_custom_rate: null,
+                })
+              }
             >
               {LVT_SCENARIOS.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -518,6 +611,7 @@ export default function HouseholdPanel({
                 <input
                   type="range"
                   className="pe-slider"
+                  aria-label="Taux TVTN appliqué"
                   min={0.2}
                   max={3.0}
                   step={0.02}
@@ -560,6 +654,7 @@ export default function HouseholdPanel({
               <input
                 type="range"
                 className="pe-slider"
+                aria-label="Échelle des taux marginaux IR"
                 min={-20}
                 max={20}
                 step={0.5}
@@ -591,6 +686,7 @@ export default function HouseholdPanel({
               <input
                 type="range"
                 className="pe-slider"
+                aria-label="Variation du taux de CSG activité"
                 min={-2.0}
                 max={2.0}
                 step={0.1}
@@ -622,6 +718,7 @@ export default function HouseholdPanel({
               <input
                 type="range"
                 className="pe-slider"
+                aria-label="Sous-indexation au-dessus du seuil"
                 min={0}
                 max={6}
                 step={0.2}
@@ -643,6 +740,7 @@ export default function HouseholdPanel({
                   <input
                     type="range"
                     className="pe-slider"
+                    aria-label="Seuil de protection pension brute"
                     min={12000}
                     max={48000}
                     step={1200}

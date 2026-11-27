@@ -144,7 +144,9 @@ function OverviewWaterfall({ result, periodMode }) {
     if (!result.reform_active || !result.deltas) return []
     const watch = [
       { key: 'impot_revenu', label: 'Impôt sur le revenu' },
+      { key: 'cehr', label: 'CEHR' },
       { key: 'csg', label: 'CSG activité' },
+      { key: 'csg_retraite', label: 'CSG retraite' },
       { key: 'pension_retraite_nette', label: 'Pension de retraite nette' },
       { key: 'taxe_fonciere', label: 'Taxe foncière' },
       { key: 'taxe_habitation_residence_secondaire', label: 'TH résidence secondaire' },
@@ -499,7 +501,7 @@ function CurvesView({ curve, periodMode, reformActive }) {
                 strokeDasharray="3 3"
                 label={{
                   value: 'Votre foyer',
-                  position: 'insideTopRight',
+                  position: currentX <= 0 ? 'insideTopLeft' : 'insideTopRight',
                   fontSize: 11,
                   fill: COLORS.marine,
                 }}
@@ -539,7 +541,10 @@ function CurvesView({ curve, periodMode, reformActive }) {
               <YAxis
                 tick={{ fontSize: 11, fill: COLORS.slate }}
                 tickFormatter={(v) => `${v} %`}
-                domain={[0, 100]}
+                domain={[
+                  (dataMin) => Math.min(0, Math.floor(dataMin / 10) * 10),
+                  (dataMax) => Math.max(100, Math.ceil(dataMax / 10) * 10),
+                ]}
                 width={56}
               />
               <Tooltip

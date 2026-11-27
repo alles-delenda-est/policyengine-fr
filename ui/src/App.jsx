@@ -156,6 +156,7 @@ export default function App() {
         getShareUrl={getShareUrl}
         onExportCsv={handleExportCsv}
         onResetAll={handleResetAll}
+        canExport={Boolean(result)}
         isSimulating={isSimulating}
       />
 
@@ -168,7 +169,9 @@ export default function App() {
       <section className="pe-presets-strip" aria-label="Foyers types en un clic">
         <div className="pe-presets-header">
           <h2>Profils types en un clic</h2>
-          <span>Choisissez un ménage de départ puis ajustez librement chaque curseur</span>
+          <span>
+            Charge un profil type complet (remplace les paramètres du foyer, conserve vos réformes)
+          </span>
         </div>
         <div className="pe-presets-scroll">
           {PRESETS.map((p) => {
@@ -194,7 +197,6 @@ export default function App() {
 
       <main className="pe-main-grid">
         <HouseholdPanel
-          key={presetSeq}
           household={household}
           onHouseholdChange={handleHouseholdChange}
           reforms={reforms}
@@ -203,6 +205,7 @@ export default function App() {
           year={year}
           dp6ClawbackShare={result?.dp6_clawback_share}
           lvtMeta={metadata?.lvt}
+          presetSeq={presetSeq}
         />
 
         <ResultsWorkspace result={result} periodMode={periodMode} metadata={metadata} />

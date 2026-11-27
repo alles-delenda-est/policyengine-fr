@@ -8,6 +8,7 @@ export default function ShareBar({
   getShareUrl,
   onExportCsv,
   onResetAll,
+  canExport = true,
   isSimulating,
 }) {
   const [copyState, setCopyState] = useState('idle')
@@ -29,7 +30,7 @@ export default function ShareBar({
   return (
     <div className="pe-command-bar" role="region" aria-label="Réglages globaux d’affichage et partage">
       <div className="pe-command-group">
-        <span className="pe-command-label"> Législation</span>
+        <span className="pe-command-label">Législation</span>
         <div className="pe-segmented" role="group" aria-label="Année de législation">
           {['2024', '2025'].map((y) => (
             <button
@@ -77,7 +78,12 @@ export default function ShareBar({
         <button type="button" className="pe-btn pe-btn-ghost" onClick={onResetAll}>
           Réinitialiser
         </button>
-        <button type="button" className="pe-btn pe-btn-secondary" onClick={onExportCsv}>
+        <button
+          type="button"
+          className="pe-btn pe-btn-secondary"
+          onClick={onExportCsv}
+          disabled={!canExport}
+        >
           Exporter CSV
         </button>
         <button type="button" className="pe-btn pe-btn-primary" onClick={handleCopy}>

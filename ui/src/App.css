@@ -140,18 +140,14 @@ code {
   white-space: nowrap;
 }
 
-/* STICKY COMMAND BAR */
+/* COMMAND BAR */
 .pe-command-bar {
-  position: sticky;
-  top: 0.5rem;
-  z-index: 90;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(8px);
+  background: var(--pe-surface);
   border: 1px solid var(--pe-border);
   border-radius: var(--pe-radius);
   padding: 0.65rem 1rem;
@@ -345,7 +341,8 @@ code {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.4rem;
   margin-bottom: 0.25rem;
 }
 
@@ -488,7 +485,7 @@ code {
 }
 
 .pe-age-pill input {
-  width: 38px;
+  width: 54px;
   border: none;
   background: transparent;
   font-family: inherit;
@@ -545,7 +542,7 @@ code {
 }
 
 .pe-money-box input {
-  width: 82px;
+  width: 104px;
   border: none;
   background: transparent;
   font-family: inherit;

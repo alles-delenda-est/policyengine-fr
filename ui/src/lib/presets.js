@@ -38,7 +38,7 @@ export const PRESETS = [
   {
     id: 'smic_seul',
     titre: 'Salarié seul au SMIC',
-    badge: '1 767 € brut/mois',
+    badge: '29 ans · 1 767 €/mois',
     resume: 'Réduction générale Fillon maximale + Prime d’activité (~152 €/mois)',
     household: {
       couple: false,
@@ -54,7 +54,7 @@ export const PRESETS = [
   {
     id: 'parent_isole_modeste',
     titre: 'Parent isolé, 1 enfant',
-    badge: '1 000 € brut/mois',
+    badge: '34 ans · 1 000 €/mois',
     resume: 'Cumul RSA majoré, Prime d’activité, ASF et demi-part case T',
     household: {
       couple: false,
@@ -70,7 +70,7 @@ export const PRESETS = [
   {
     id: 'couple_classe_moyenne',
     titre: 'Couple, 2 enfants',
-    badge: '3 500 + 2 333 € brut/mois',
+    badge: '39 & 37 ans · 3 500 + 2 333 €/mois',
     resume: 'Quotient familial (3 parts), décote et allocations familiales taux plein',
     household: {
       couple: true,
@@ -86,7 +86,7 @@ export const PRESETS = [
   {
     id: 'cadre_sup',
     titre: 'Cadre supérieur, 2 enfants',
-    badge: '7 917 € brut/mois',
+    badge: '44 & 42 ans · 7 917 €/mois',
     resume: 'Tranche 2 AGIRC-ARRCO, CET, APEC et modulation dégressive des AF',
     household: {
       couple: true,
@@ -102,7 +102,7 @@ export const PRESETS = [
   {
     id: 'couple_retraites',
     titre: 'Couple de retraités',
-    badge: '2 667 + 1 333 € pension/mois',
+    badge: '69 & 67 ans · 2 667 + 1 333 €/mois',
     resume: 'CSG par tranches de RFR, CASA 0,3 %, abattement 10 % (test idéal D-P6)',
     household: {
       couple: true,
@@ -118,7 +118,7 @@ export const PRESETS = [
   {
     id: 'proprietaire_bailleur',
     titre: 'Propriétaire bailleur',
-    badge: 'Salaires + loyers + foncier',
+    badge: '46 ans · Salaires + loyers',
     resume: 'Micro-foncier, PFU, taxe foncière (test idéal réformes LVTShift S1–S3)',
     household: {
       couple: false,
@@ -142,7 +142,7 @@ export const PRESETS = [
   {
     id: 'haut_patrimoine_ifi',
     titre: 'Haut patrimoine (IFI & CEHR)',
-    badge: '3,0 M€ immo. + hauts revenus',
+    badge: '54 & 52 ans · 3,0 M€ immo.',
     resume: 'IFI (abattement RP 30 %), CEHR 3 %/4 %, PFU (test LVTShift S3_IFI)',
     household: {
       couple: true,
