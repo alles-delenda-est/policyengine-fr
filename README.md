@@ -77,6 +77,17 @@ cd ..
 
 For hot-reloading frontend development, run `.venv\Scripts\python.exe -m policyengine_fr.studio` in one terminal (`http://127.0.0.1:8765`) and `npm run dev` inside `ui/` (`http://localhost:5173`, proxying `/api` automatically).
 
+### Deploy with Docker (production)
+
+The repository ships a multi-stage [`Dockerfile`](Dockerfile) (`node:22-alpine` UI build → `python:3.12-slim` non-root `gunicorn` WSGI runtime serving `policyengine_fr.studio:application` with `--preload` shared `BASE_SYSTEM`):
+
+```bash
+docker build -t policyengine-fr-studio .
+docker run --rm -p 8080:8080 policyengine-fr-studio
+```
+
+It honours the standard PaaS `PORT` environment variable (default `8080`), `STUDIO_UI_DIST` (auto-set to `/app/ui/dist`), and `STUDIO_ALLOWED_ORIGINS` (optional comma-separated CORS allowlist; same-origin requests are automatically accepted). Ready-to-use manifests are included for **Render** ([`render.yaml`](render.yaml)), **Fly.io** ([`fly.toml`](fly.toml) in Paris region `cdg`), and any container platform (Cloud Run, Railway, AWS App Runner).
+
 ## Current status
 
 **Multi-year tax-benefit, labour-cost, and patrimonial model (revenus 2024–2025, France métropolitaine).** From a household's gross wages, pensions, capital income, and property/land endowments, the model computes end-to-end:

@@ -15,11 +15,16 @@ import argparse
 import functools
 import json
 import mimetypes
+import os
+import signal
+import threading
 import webbrowser
+from collections.abc import Callable
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import numpy as np
 import yaml
@@ -658,6 +663,226 @@ def get_metadata() -> dict[str, Any]:
 
 MAX_REQUEST_BYTES = 65_536
 
+_SECURITY_HEADERS: tuple[tuple[str, str], ...] = (
+    ("X-Content-Type-Options", "nosniff"),
+    ("Referrer-Policy", "strict-origin-when-cross-origin"),
+    ("X-Frame-Options", "DENY"),
+)
+
+_TEXT_MIME_PREFIXES = (
+    "text/html",
+    "text/css",
+    "application/javascript",
+    "text/javascript",
+)
+
+
+def resolve_ui_dist_dir() -> Path | None:
+    """Resolve built Vite static directory from env override, repo root, or CWD."""
+    env_dist = (os.environ.get("STUDIO_UI_DIST") or "").strip()
+    if env_dist:
+        env_path = Path(env_dist)
+        if env_path.is_dir():
+            return env_path
+    for candidate in (UI_DIST_DIR, Path.cwd() / "ui" / "dist"):
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
+def _cors_headers(origin: str, host: str) -> list[tuple[str, str]]:
+    clean_origin = origin.strip()
+    if not clean_origin:
+        return []
+
+    allowed_raw = os.environ.get("STUDIO_ALLOWED_ORIGINS", "")
+    allowed_set = {item.strip() for item in allowed_raw.split(",") if item.strip()}
+    origin_netloc = urlparse(clean_origin).netloc.lower()
+    host_clean = host.strip().lower()
+
+    is_localhost = clean_origin.startswith(
+        ("http://localhost:", "http://127.0.0.1:")
+    ) or clean_origin in {"http://localhost", "http://127.0.0.1"}
+    is_same_host = bool(host_clean and origin_netloc and origin_netloc == host_clean)
+
+    if is_localhost or clean_origin in allowed_set or is_same_host:
+        return [
+            ("Access-Control-Allow-Origin", clean_origin),
+            ("Vary", "Origin"),
+            ("Access-Control-Allow-Headers", "Content-Type"),
+            ("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS"),
+        ]
+    return [("Vary", "Origin")]
+
+
+def _json_response(
+    base_headers: list[tuple[str, str]],
+    data: Any,
+    status: HTTPStatus = HTTPStatus.OK,
+    cache_control: str = "no-store",
+) -> tuple[HTTPStatus, list[tuple[str, str]], bytes]:
+    body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+    resp_headers = [
+        *base_headers,
+        ("Content-Type", "application/json; charset=utf-8"),
+        ("Content-Length", str(len(body))),
+        ("Cache-Control", cache_control),
+    ]
+    return status, resp_headers, body
+
+
+def _dispatch_request(
+    method: str,
+    path: str,
+    headers: dict[str, str],
+    read_body: Callable[[int | None], bytes],
+) -> tuple[HTTPStatus, list[tuple[str, str]], bytes]:
+    """Transport-agnostic HTTP router shared by stdlib HTTP server and WSGI."""
+    verb = method.upper()
+    clean_path = path.split("?", 1)[0]
+    norm_headers = {k.lower(): v for k, v in headers.items()}
+    base_headers = list(_SECURITY_HEADERS) + _cors_headers(
+        norm_headers.get("origin", ""),
+        norm_headers.get("host", ""),
+    )
+
+    if verb == "OPTIONS":
+        return HTTPStatus.NO_CONTENT, base_headers, b""
+
+    if verb in {"GET", "HEAD"}:
+        if clean_path == "/api/health":
+            status, resp_headers, body = _json_response(base_headers, {"status": "ok"})
+            return status, resp_headers, b"" if verb == "HEAD" else body
+        if clean_path == "/api/metadata":
+            status, resp_headers, body = _json_response(
+                base_headers, get_metadata(), cache_control="public, max-age=300"
+            )
+            return status, resp_headers, b"" if verb == "HEAD" else body
+        if clean_path.startswith("/api/"):
+            status, resp_headers, body = _json_response(
+                base_headers, {"error": "Not found"}, status=HTTPStatus.NOT_FOUND
+            )
+            return status, resp_headers, b"" if verb == "HEAD" else body
+
+        dist_dir = resolve_ui_dist_dir()
+        if dist_dir is not None:
+            dist_resolved = dist_dir.resolve()
+            rel = clean_path.lstrip("/") or "index.html"
+            candidate = (dist_resolved / rel).resolve()
+            if candidate.is_relative_to(dist_resolved) and candidate.is_file():
+                target = candidate
+            else:
+                target = dist_resolved / "index.html"
+            if target.is_file():
+                raw = target.read_bytes()
+                mime, _ = mimetypes.guess_type(str(target))
+                content_type = mime or "application/octet-stream"
+                if content_type.startswith(_TEXT_MIME_PREFIXES):
+                    content_type = f"{content_type}; charset=utf-8"
+                rel_target = target.resolve().relative_to(dist_resolved).as_posix()
+                cache_control = (
+                    "public, max-age=31536000, immutable"
+                    if target.parent.name == "assets"
+                    or rel_target.startswith("assets/")
+                    else "no-cache"
+                )
+                resp_headers = [
+                    *base_headers,
+                    ("Content-Type", content_type),
+                    ("Content-Length", str(len(raw))),
+                    ("Cache-Control", cache_control),
+                ]
+                return HTTPStatus.OK, resp_headers, b"" if verb == "HEAD" else raw
+
+        status, resp_headers, body = _json_response(
+            base_headers,
+            {
+                "message": "PolicyEngine France Studio API active.",
+                "endpoints": ["/api/health", "/api/metadata", "/api/simulate"],
+            },
+        )
+        return status, resp_headers, b"" if verb == "HEAD" else body
+
+    if verb == "POST":
+        if clean_path != "/api/simulate":
+            return _json_response(
+                base_headers, {"error": "Not found"}, status=HTTPStatus.NOT_FOUND
+            )
+        cl_raw = (norm_headers.get("content-length") or "").strip()
+        if cl_raw:
+            try:
+                length = int(cl_raw)
+            except ValueError:
+                return _json_response(
+                    base_headers,
+                    {"error": "Invalid Content-Length header"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+            if length < 0 or length > MAX_REQUEST_BYTES:
+                return _json_response(
+                    base_headers,
+                    {"error": "Request body exceeds maximum allowed size"},
+                    status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                )
+            raw = read_body(length) if length > 0 else b"{}"
+        else:
+            raw = read_body(MAX_REQUEST_BYTES + 1)
+            if len(raw) > MAX_REQUEST_BYTES:
+                return _json_response(
+                    base_headers,
+                    {"error": "Request body exceeds maximum allowed size"},
+                    status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                )
+            if not raw:
+                raw = b"{}"
+
+        try:
+            payload = json.loads(raw.decode("utf-8"))
+            if not isinstance(payload, dict):
+                raise ValueError("JSON payload must be an object")
+            result = simulate_household(payload)
+            return _json_response(base_headers, result)
+        except Exception:
+            return _json_response(
+                base_headers,
+                {"error": "Invalid simulation request"},
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+    status, resp_headers, body = _json_response(
+        base_headers,
+        {"error": "Method not allowed"},
+        status=HTTPStatus.METHOD_NOT_ALLOWED,
+    )
+    resp_headers.append(("Allow", "GET, HEAD, POST, OPTIONS"))
+    return status, resp_headers, body
+
+
+def application(environ: dict[str, Any], start_response: Any) -> list[bytes]:
+    """PEP 3333 WSGI callable for production deployment (e.g. gunicorn)."""
+    method = str(environ.get("REQUEST_METHOD") or "GET")
+    path = str(environ.get("PATH_INFO") or "/")
+    headers: dict[str, str] = {}
+    if "HTTP_ORIGIN" in environ:
+        headers["origin"] = str(environ["HTTP_ORIGIN"])
+    if "HTTP_HOST" in environ:
+        headers["host"] = str(environ["HTTP_HOST"])
+    if "CONTENT_LENGTH" in environ:
+        headers["content-length"] = str(environ["CONTENT_LENGTH"])
+
+    stream = environ.get("wsgi.input")
+
+    def _read_body(limit: int | None) -> bytes:
+        if stream is None:
+            return b""
+        if limit is None:
+            return stream.read()
+        return stream.read(limit)
+
+    status, resp_headers, body = _dispatch_request(method, path, headers, _read_body)
+    start_response(f"{status.value} {status.phrase}", resp_headers)
+    return [body]
+
 
 class StudioRequestHandler(BaseHTTPRequestHandler):
     """HTTP handler serving `/api/*` and static Vite assets from `ui/dist`."""
@@ -665,117 +890,62 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:
         return  # Keep console clean during rapid 60fps slider requests
 
-    def _cors_origin(self) -> str:
-        origin = (self.headers.get("Origin") or "").strip()
-        if origin.startswith(("http://localhost:", "http://127.0.0.1:")) or origin in {
-            "http://localhost",
-            "http://127.0.0.1",
-        }:
-            return origin
-        return "http://127.0.0.1:8765"
-
-    def _send_json(self, data: Any, status: int = HTTPStatus.OK) -> None:
-        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+    def _handle(self) -> None:
+        headers = {k.lower(): v for k, v in self.headers.items()}
+        status, resp_headers, body = _dispatch_request(
+            self.command,
+            self.path,
+            headers,
+            lambda n: self.rfile.read(n) if n is not None else self.rfile.read(),
+        )
         self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", self._cors_origin())
-        self.send_header("Vary", "Origin")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        for name, val in resp_headers:
+            self.send_header(name, val)
         self.end_headers()
-        self.wfile.write(body)
+        if body:
+            self.wfile.write(body)
 
     def do_OPTIONS(self) -> None:
-        self.send_response(HTTPStatus.NO_CONTENT)
-        self.send_header("Access-Control-Allow-Origin", self._cors_origin())
-        self.send_header("Vary", "Origin")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.end_headers()
+        self._handle()
 
     def do_GET(self) -> None:
-        path = self.path.split("?", 1)[0]
-        if path == "/api/health":
-            self._send_json({"status": "ok"})
-            return
-        if path == "/api/metadata":
-            self._send_json(get_metadata())
-            return
+        self._handle()
 
-        if UI_DIST_DIR.is_dir():
-            rel = path.lstrip("/") or "index.html"
-            candidate = (UI_DIST_DIR / rel).resolve()
-            if (
-                str(candidate).startswith(str(UI_DIST_DIR.resolve()))
-                and candidate.is_file()
-            ):
-                target = candidate
-            else:
-                target = UI_DIST_DIR / "index.html"
-            if target.is_file():
-                raw = target.read_bytes()
-                mime, _ = mimetypes.guess_type(str(target))
-                self.send_response(HTTPStatus.OK)
-                self.send_header("Content-Type", mime or "application/octet-stream")
-                self.send_header("Content-Length", str(len(raw)))
-                self.end_headers()
-                self.wfile.write(raw)
-                return
-
-        self._send_json(
-            {
-                "message": "PolicyEngine France Studio API active.",
-                "endpoints": ["/api/health", "/api/metadata", "/api/simulate"],
-            }
-        )
+    def do_HEAD(self) -> None:
+        self._handle()
 
     def do_POST(self) -> None:
-        path = self.path.split("?", 1)[0]
-        if path != "/api/simulate":
-            self._send_json({"error": "Not found"}, status=HTTPStatus.NOT_FOUND)
-            return
-        try:
-            length = int(self.headers.get("Content-Length") or 0)
-        except ValueError:
-            self._send_json(
-                {"error": "Invalid Content-Length header"},
-                status=HTTPStatus.BAD_REQUEST,
-            )
-            return
-        if length < 0 or length > MAX_REQUEST_BYTES:
-            self._send_json(
-                {"error": "Request body exceeds maximum allowed size"},
-                status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
-            )
-            return
-        try:
-            raw = self.rfile.read(length) if length > 0 else b"{}"
-            payload = json.loads(raw.decode("utf-8"))
-            if not isinstance(payload, dict):
-                raise ValueError("JSON payload must be an object")
-            result = simulate_household(payload)
-            self._send_json(result)
-        except Exception:
-            self._send_json(
-                {"error": "Invalid simulation request"},
-                status=HTTPStatus.BAD_REQUEST,
-            )
+        self._handle()
+
+
+class StudioHTTPServer(ThreadingHTTPServer):
+    """Threaded stdlib server with fast socket reuse for local restarts."""
+
+    allow_reuse_address = True
+    daemon_threads = True
 
 
 def create_server(host: str = "127.0.0.1", port: int = 8765) -> ThreadingHTTPServer:
-    return ThreadingHTTPServer((host, port), StudioRequestHandler)
+    return StudioHTTPServer((host, port), StudioRequestHandler)
 
 
 def main(argv: list[str] | None = None) -> int:
+    default_host = os.environ.get("STUDIO_HOST", "127.0.0.1")
+    default_port = int(os.environ.get("PORT", "8765"))
+
     parser = argparse.ArgumentParser(
         description="Launch the PolicyEngine France Interactive Studio server."
     )
     parser.add_argument(
-        "--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)"
+        "--host",
+        default=default_host,
+        help=f"Bind host (default: {default_host})",
     )
     parser.add_argument(
-        "--port", type=int, default=8765, help="Bind port (default: 8765)"
+        "--port",
+        type=int,
+        default=default_port,
+        help=f"Bind port (default: {default_port})",
     )
     parser.add_argument(
         "--open", action="store_true", help="Open the Studio URL in the default browser"
@@ -783,6 +953,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     server = create_server(args.host, args.port)
+    if hasattr(signal, "SIGTERM"):
+
+        def _handle_sigterm(_signum: int, _frame: Any) -> None:
+            threading.Thread(target=server.shutdown, daemon=True).start()
+
+        signal.signal(signal.SIGTERM, _handle_sigterm)
+
     url = f"http://{args.host}:{args.port}"
     print(f"PolicyEngine France Studio listening on {url}")
     if args.open:

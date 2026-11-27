@@ -77,3 +77,57 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+  Docker:
+    name: Studio Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build Studio container image
+        run: docker build -t policyengine-fr-studio:ci .
+      - name: Run container and smoke-test endpoints
+        run: |
+          docker run -d --name studio-ci -p 8080:8080 -e WEB_CONCURRENCY=1 policyengine-fr-studio:ci
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/api/health >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          python3 - <<'PY'
+          import json
+          import urllib.request
+
+          with urllib.request.urlopen("http://127.0.0.1:8080/", timeout=5) as r:
+              html = r.read().decode("utf-8")
+              assert '<div id="root">' in html
+
+          with urllib.request.urlopen("http://127.0.0.1:8080/api/metadata", timeout=5) as r:
+              meta = json.loads(r.read())
+              assert "lvt" in meta and "policies" in meta
+
+          req = urllib.request.Request(
+              "http://127.0.0.1:8080/api/simulate",
+              data=json.dumps({
+                  "year": "2024",
+                  "household": {
+                      "couple": False,
+                      "adults": [{"age": 40, "salaire_brut": 45000}],
+                      "patrimoine": {"taxe_fonciere_locale": 1800, "valeur_terrain_imposable": 90000},
+                  },
+                  "reforms": {"lvt_scenario": "S1"},
+                  "include_curve": False,
+              }).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=10) as r:
+              sim = json.loads(r.read())
+              assert sim["reform_active"] is True
+              assert "revenu_disponible" in sim["deltas"]
+          PY
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker logs studio-ci || true
+      - name: Remove test container
+        if: always()
+        run: docker rm -f studio-ci || true
