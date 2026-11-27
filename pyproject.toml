@@ -36,6 +36,9 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/alles-delenda-est/policyengine-fr"
 
+[project.scripts]
+policyengine-fr-studio = "policyengine_fr.studio:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

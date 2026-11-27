@@ -18,7 +18,17 @@ class CountryTaxBenefitSystem(TaxBenefitSystem):
     ]
 
     def __init__(self, reform=None):
-        super().__init__(entities)
+        self._initial_reform = None
+        super().__init__(entities, reform=reform)
+        self._initial_reform = reform
+
+    def apply_reform_set(self, reform):
+        # ``Simulation(reform=...)`` instantiates ``CountryTaxBenefitSystem(reform=reform)``
+        # and then calls ``apply_reform_set(self.reform)`` a second time. Skip the duplicate
+        # pass so relative parameter modifiers and ``add_variable`` calls are not re-run.
+        if reform is not None and reform is self._initial_reform:
+            return
+        super().apply_reform_set(reform)
 
 
 system = CountryTaxBenefitSystem()

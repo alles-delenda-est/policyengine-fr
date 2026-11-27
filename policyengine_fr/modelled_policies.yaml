@@ -6,7 +6,7 @@ core:
     - Revenu fiscal de référence (RFR) — salaires imposables, pensions après abattement plafonné de 10 %, revenus fonciers nets de CSG déductible, revenus du capital soumis au PFU et plus-values immobilières, sous déduction des pensions versées
     - Cotisations sociales salariales par risque (vieillesse plafonnée/déplafonnée, AGIRC-ARRCO T1/T2, CEG T1/T2, CET, APEC cadre) → salaire déclaré (1AJ) et salaire net
     - Cotisations sociales patronales par risque (bandeaux SMIC maladie et famille, vieillesse, chômage, AGS, FNAL, AT/MP, AGIRC-ARRCO, CEG, CET, APEC, CSA, dialogue social), réduction générale (ex-Fillon) et coût du travail (super-brut)
-    - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %, fraction déductible 6,8 % déduite du salaire déclaré)
+    - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 % plafonnée à 4 PASS, fraction déductible 6,8 % déduite du salaire déclaré)
     - Pensions de retraite — abattement commun de 10 % fusionné avec les pensions alimentaires perçues (`pensions_imposables`), CSG par tranches de RFR (0 % / 3,8 % / 6,6 % / 8,3 %), CRDS (0,5 %) et CASA (0,3 %)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement commun de 10 % (perçues)
     - Allocations familiales — base par nombre d'enfants, modulation sur salaires et pensions imposables avec complément dégressif (CSS art. D521-1), majoration pour âge
@@ -14,7 +14,7 @@ core:
     - Revenu de solidarité active (RSA) — montant forfaitaire (socle + majoration parent isolé), forfait logement, base ressources nette (salaires, retraites, pensions alimentaires, revenus du capital et fonciers nets, AF hors majoration d'âge et forfait ASF), condition d'âge/parentalité et seuil de versement de 6 €/mois
     - Prime d'activité (PPA) — montant forfaitaire familial, bonification individuelle (59 à 120 SMIC horaires), pente de 61 % sur les revenus professionnels nets, forfait logement et seuil de versement de 15 €/mois
     - Fiscalité du capital et des hauts revenus — PFU / flat tax (12,8 % IR sur `revenus_capital`), prélèvements sociaux sur le patrimoine (17,2 % en 2024–2025 ; 18,6 % sur `revenus_capital` dès 2026 et maintien à 17,2 % sur revenus fonciers et plus-values immobilières selon LFSS 2026 art. 12), revenus fonciers nets (micro-foncier 30 % ou réel), plus-values immobilières (19 %), CEHR (3 % / 4 %) et IFI (abattement 30 % résidence principale, assujettissement > 1,3 M€, décote)
-    - Fiscalité locale et foncière — taxe foncière (`taxe_fonciere_locale` + 3 % CGI art. 1641), taxe d'habitation sur les résidences secondaires (`thrs_locale` + 3 % CGI art. 1641) et taxe sur la valeur du sol (`taxe_valeur_sol`), accompagnées des réformes paramétrées (`policyengine_fr.reforms.lvt_shift` et `budget_levers`)
+    - Fiscalité locale et foncière — taxe foncière (`taxe_fonciere_locale` + 3 % CGI art. 1641), taxe d'habitation sur les résidences secondaires (`thrs_locale` + 3 % CGI art. 1641) et taxe sur la valeur du sol (`taxe_valeur_sol`), accompagnées des réformes paramétrées (`policyengine_fr.reforms.lvt_shift` — en S3/S3_IFI les loyers sont exonérés d'IR et de prélèvements sociaux mais conservés dans le RFR et les bases ressources — et `budget_levers`)
     - Revenu disponible — agrégat ménage net d'impôts directs, de cotisations/prélèvements sociaux et incluant les prestations sociales modélisées (2024–2025)
   not_modelled:
     - Contribution différentielle sur les hauts revenus (CDHR, CGI art. 224, applicable aux revenus 2025)
@@ -35,9 +35,10 @@ core:
       du secteur privé non agricole (`cadre=False` par défaut, `cadre=True` pour
       l'APEC) sans mutuelle obligatoire d'entreprise, heures supplémentaires
       exonérées, apprentissage, ni régimes spéciaux, fonction publique ou
-      Alsace-Moselle ; la CSG d'activité est au taux plein de 9,2 % sur 98,25 %
-      du brut, et les paramètres annuels (`YEAR`) sont lus au 1er janvier de
-      l'année simulée.
+      Alsace-Moselle ; la CSG d'activité est au taux plein de 9,2 % (assiette
+      98,25 % jusqu'à 4 PASS annuels sans proratisation infra-annuelle ni temps
+      partiel, 100 % au-delà), et les paramètres annuels (`YEAR`) sont lus au
+      1er janvier de l'année simulée.
     - >-
       Cotisations patronales et réduction générale (`cotisations_patronales`,
       `reduction_generale`) — convention annuelle au 1er janvier et SMIC temps

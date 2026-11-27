@@ -9,7 +9,10 @@ equal-yield replacement scenarios (spec 0005 of LVTShift and `LVT_MODULE` of
 - ``S1``     : replaces TFPB, TFPNB, THRS, and DMTO -> indicative national rate 1.10 %
 - ``S2``     : ``S1`` + IR & PS on real-estate capital gains -> 1.16 %
 - ``S2_IFI`` : ``S2`` + IFI -> 1.20 %
-- ``S3``     : ``S2`` + IR & PS on net rental income -> 1.30 %
+- ``S3``     : ``S2`` + IR & PS on net rental income (removes ``revenus_fonciers_nets``
+  from ``revenu_net_imposable`` and ``prelevements_sociaux_patrimoine`` while
+  retaining net rents in ``revenu_fiscal_de_reference`` and ``rsa_base_ressources``
+  so means-tested benefits and RFR-assessed levies remain intact) -> 1.30 %
 - ``S3_IFI`` : ``S3`` + IFI -> 1.34 %
 """
 
@@ -23,6 +26,9 @@ from policyengine_core.periods import period as make_period
 from policyengine_core.reforms import Reform
 
 from policyengine_fr.model_api import *
+from policyengine_fr.variables.gov.dgfip.ir.revenu_fiscal_de_reference import (
+    compute_revenu_fiscal_de_reference,
+)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 YIELDS_PATH = DATA_DIR / "lvt_yields.json"
@@ -67,7 +73,14 @@ def make_lvt_shift_reform(
     *,
     custom_rate: float | None = None,
 ) -> type[Reform]:
-    """Build a PolicyEngine `Reform` implementing an LVTShift equal-yield scenario."""
+    """Build a PolicyEngine `Reform` implementing an LVTShift equal-yield scenario.
+
+    In ``S3`` / ``S3_IFI``, net rental income is removed from progressive IR
+    (``revenu_net_imposable``) and social levies (``prelevements_sociaux_patrimoine``)
+    while staying included in ``revenu_fiscal_de_reference`` (without subtracting
+    the abolished 6.8% rental deductible CSG) and benefit means-tests
+    (preventing spurious RSA eligibility and preserving RFR-based CEHR / CSG tiers).
+    """
     rate = lvt_variant_rate(scenario_id) if custom_rate is None else float(custom_rate)
     replace_gains = scenario_id in {"S2", "S2_IFI", "S3", "S3_IFI"}
     replace_ifi = scenario_id in {"S2_IFI", "S3_IFI"}
@@ -94,7 +107,54 @@ def make_lvt_shift_reform(
             if replace_ifi:
                 self.neutralize_variable("ifi")
             if replace_rents:
-                self.neutralize_variable("revenus_fonciers_nets")
+
+                class revenu_net_imposable_lvt(Variable):
+                    value_type = float
+                    entity = FoyerFiscal
+                    label = "Revenu net imposable du foyer fiscal (réforme LVT S3)"
+                    unit = EUR
+                    definition_period = YEAR
+
+                    def formula(foyer_fiscal, period, parameters):
+                        salaires = foyer_fiscal.sum(
+                            foyer_fiscal.members("salaire_imposable", period)
+                        )
+                        pensions = foyer_fiscal("pensions_imposables", period)
+                        pensions_versees = foyer_fiscal(
+                            "pensions_alimentaires_versees", period
+                        )
+                        return max_(salaires + pensions - pensions_versees, 0)
+
+                revenu_net_imposable_lvt.__name__ = "revenu_net_imposable"
+                self.replace_variable(revenu_net_imposable_lvt)
+
+                pension_var_name = (
+                    "pension_retraite_effective"
+                    if "pension_retraite_effective" in self.variables
+                    else "pension_retraite"
+                )
+
+                class revenu_fiscal_de_reference_lvt(Variable):
+                    value_type = float
+                    entity = FoyerFiscal
+                    label = (
+                        "Revenu fiscal de référence du foyer fiscal (réforme LVT S3)"
+                    )
+                    unit = EUR
+                    definition_period = YEAR
+
+                    def formula(foyer_fiscal, period, parameters):
+                        return compute_revenu_fiscal_de_reference(
+                            foyer_fiscal,
+                            period,
+                            parameters,
+                            pension_var=pension_var_name,
+                            deduct_foncier_csg=False,
+                        )
+
+                revenu_fiscal_de_reference_lvt.__name__ = "revenu_fiscal_de_reference"
+                self.replace_variable(revenu_fiscal_de_reference_lvt)
+
             if replace_gains or replace_rents:
 
                 class prelevements_sociaux_patrimoine_lvt(Variable):

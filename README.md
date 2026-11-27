@@ -17,6 +17,7 @@ All modelling lives in the `policyengine_fr/` package:
 - `tests/` — YAML test suites mirroring the `variables/` tree.
 - `data/` — pinned calibration artifacts with SHA-256 provenance (`lvt_yields.json`).
 - `reforms/` — parameterised policy reforms (`lvt_shift` S1–S3_IFI and `budget_levers` IR/CSG/pension indexation levers).
+- `studio.py` + `../ui/` — interactive React 19 + Vite 7 + Recharts 3 microsimulation Studio (`python -m policyengine_fr.studio --open`).
 
 > For the wider PolicyEngine architecture and the plan for this project, see
 > [`docs/policyengine-ecosystem.md`](docs/policyengine-ecosystem.md) and
@@ -61,6 +62,31 @@ pytest tests/ -q
 The model itself is cross-platform (CI runs on Linux; PolicyEngine country
 packages also test on Windows). `.gitattributes` keeps line endings as LF so
 `ruff format --check` stays consistent across platforms.
+
+## Interactive Studio UI
+
+Build the frontend bundle once and launch the local microsimulation Studio:
+
+```powershell
+cd ui
+npm install
+npm run build
+cd ..
+.venv\Scripts\python.exe -m policyengine_fr.studio --open
+```
+
+For hot-reloading frontend development, run `.venv\Scripts\python.exe -m policyengine_fr.studio` in one terminal (`http://127.0.0.1:8765`) and `npm run dev` inside `ui/` (`http://localhost:5173`, proxying `/api` automatically).
+
+### Deploy with Docker (production)
+
+The repository ships a multi-stage [`Dockerfile`](Dockerfile) (`node:22-alpine` UI build → `python:3.12-slim` non-root `gunicorn` WSGI runtime serving `policyengine_fr.studio:application` with `--preload` shared `BASE_SYSTEM`):
+
+```bash
+docker build -t policyengine-fr-studio .
+docker run --rm -p 8080:8080 policyengine-fr-studio
+```
+
+It honours the standard PaaS `PORT` environment variable (default `8080`), `STUDIO_UI_DIST` (auto-set to `/app/ui/dist`), and `STUDIO_ALLOWED_ORIGINS` (optional comma-separated CORS allowlist; same-origin requests are automatically accepted). Ready-to-use manifests are included for **Render** ([`render.yaml`](render.yaml)), **Fly.io** ([`fly.toml`](fly.toml) in Paris region `cdg`), and any container platform (Cloud Run, Railway, AWS App Runner).
 
 ## Current status
 

@@ -22,6 +22,9 @@ from policyengine_core.periods import period as make_period
 from policyengine_core.reforms import Reform
 
 from policyengine_fr.model_api import *
+from policyengine_fr.variables.gov.dgfip.ir.revenu_fiscal_de_reference import (
+    compute_revenu_fiscal_de_reference,
+)
 
 
 def make_ir_proportional_reform(multiplier: float) -> type[Reform]:
@@ -43,6 +46,43 @@ def make_ir_proportional_reform(multiplier: float) -> type[Reform]:
             self.modify_parameters(_modify)
 
     return ProportionalIRReform
+
+
+def make_ir_freeze_brackets_reform() -> type[Reform]:
+    """Freeze 2025–2034 IR brackets, décote, and QF caps at 2024 levels.
+
+    Applies over ``year:2025:10`` (2025–2034 incomes) so 2024 is untouched.
+    Freezes only the progressive IR bracket thresholds, the single/couple
+    décote thresholds (889 EUR / 1,470 EUR), and the two quotient-familial
+    caps (1,791 EUR / 4,224 EUR); does NOT freeze the 10% salary/pension
+    abatement ceilings and floors (CGI art. 83, 3° and 158, 5, a), pension CSG
+    RFR thresholds, or CEHR thresholds.
+    """
+
+    def _modify(parameters):
+        span = make_period("year:2025:10")
+        for bracket in parameters.gov.dgfip.ir.bareme.brackets:
+            t_2024 = float(bracket.threshold("2024-01-01"))
+            bracket.threshold.update(period=span, value=t_2024)
+        dec = parameters.gov.dgfip.ir.decote
+        dec.seuil_celibataire.update(
+            period=span, value=float(dec.seuil_celibataire("2024-01-01"))
+        )
+        dec.seuil_couple.update(
+            period=span, value=float(dec.seuil_couple("2024-01-01"))
+        )
+        pqf = parameters.gov.dgfip.ir.plafond_quotient_familial
+        pqf.general.update(period=span, value=float(pqf.general("2024-01-01")))
+        pqf.celib_enf.update(period=span, value=float(pqf.celib_enf("2024-01-01")))
+        return parameters
+
+    class FreezeIRBracketsReform(Reform):
+        name = "Freeze IR brackets, décote & QF caps at 2024 levels"
+
+        def apply(self):
+            self.modify_parameters(_modify)
+
+    return FreezeIRBracketsReform
 
 
 def make_csg_delta_reform(delta_rate: float) -> type[Reform]:
@@ -91,24 +131,6 @@ def make_d_p6_targeted_pension_underindexation_reform(
         )
 
         def apply(self):
-            base_var = self.get_variable("pension_retraite")
-
-            class pension_retraite_dp6(Variable):
-                value_type = float
-                entity = Individu
-                label = base_var.label
-                unit = EUR
-                definition_period = YEAR
-
-            pension_retraite_dp6.__name__ = "pension_retraite"
-
-            # Replace consumers via an effective gross pension wrapper on CSG/CRDS/CASA/IR/disposable?
-            # Since `pension_retraite` is an input variable set in the situation, overriding
-            # its downstream adjustment via `modify_pension_situations` or replacing the
-            # four consumers (`pension_retraite_declaree`, `csg_retraite`, `crds_retraite`,
-            # `casa_retraite`, `pension_retraite_nette`, `revenu_fiscal_de_reference`,
-            # `revenu_disponible`) is cleaner if factored through a helper variable.
-            # Add `pension_retraite_effective` and route the 5 readers through it:
             class pension_retraite_effective(Variable):
                 value_type = float
                 entity = Individu
@@ -121,7 +143,24 @@ def make_d_p6_targeted_pension_underindexation_reform(
                     reduit = max_(brut * (1.0 - underindexation_rate), threshold_annual)
                     return where(brut > threshold_annual, reduit, brut)
 
-            self.add_variable(pension_retraite_effective)
+            self.replace_variable(pension_retraite_effective)
+
+            class revenu_fiscal_de_reference_r(Variable):
+                value_type = float
+                entity = FoyerFiscal
+                label = "Revenu fiscal de référence (après mesure D-P6)"
+                unit = EUR
+                definition_period = YEAR
+
+                def formula(foyer_fiscal, period, parameters):
+                    return compute_revenu_fiscal_de_reference(
+                        foyer_fiscal,
+                        period,
+                        parameters,
+                        pension_var="pension_retraite_effective",
+                    )
+
+            revenu_fiscal_de_reference_r.__name__ = "revenu_fiscal_de_reference"
 
             class csg_retraite_r(Variable):
                 value_type = float
@@ -217,6 +256,7 @@ def make_d_p6_targeted_pension_underindexation_reform(
             pension_retraite_nette_r.__name__ = "pension_retraite_nette"
 
             for v in (
+                revenu_fiscal_de_reference_r,
                 csg_retraite_r,
                 csg_retraite_deductible_r,
                 crds_retraite_r,
