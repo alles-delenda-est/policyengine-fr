@@ -94,7 +94,27 @@ def make_lvt_shift_reform(
             if replace_ifi:
                 self.neutralize_variable("ifi")
             if replace_rents:
-                self.neutralize_variable("revenus_fonciers_nets")
+
+                class revenu_net_imposable_lvt(Variable):
+                    value_type = float
+                    entity = FoyerFiscal
+                    label = "Revenu net imposable du foyer fiscal (réforme LVT S3)"
+                    unit = EUR
+                    definition_period = YEAR
+
+                    def formula(foyer_fiscal, period, parameters):
+                        salaires = foyer_fiscal.sum(
+                            foyer_fiscal.members("salaire_imposable", period)
+                        )
+                        pensions = foyer_fiscal("pensions_imposables", period)
+                        pensions_versees = foyer_fiscal(
+                            "pensions_alimentaires_versees", period
+                        )
+                        return max_(salaires + pensions - pensions_versees, 0)
+
+                revenu_net_imposable_lvt.__name__ = "revenu_net_imposable"
+                self.replace_variable(revenu_net_imposable_lvt)
+
             if replace_gains or replace_rents:
 
                 class prelevements_sociaux_patrimoine_lvt(Variable):

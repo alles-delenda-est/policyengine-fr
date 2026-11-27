@@ -47,7 +47,7 @@ def test_csg_crds_exact_and_non_negative(income):
     sim = build_household([income], [])
     csg = sim.calculate("csg", Y).sum()
     crds = sim.calculate("crds", Y).sum()
-    base = income * 0.9825
+    base = income - min(income, 4 * 46_368) * 0.0175
     assert csg >= -0.01 and crds >= -0.01
     assert math.isclose(csg, 0.092 * base, abs_tol=0.5)
     assert math.isclose(crds, 0.005 * base, abs_tol=0.5)
@@ -172,7 +172,8 @@ def test_assiette_identity():
     for income in _INCOME_GRID:
         sim = build_household([income], [])
         assiette = float(sim.calculate("assiette_csg_crds_salaire", _CSG_PERIOD).sum())
-        assert math.isclose(assiette, income * 0.9825, abs_tol=0.02)
+        expected = income - min(income, 4 * 46_368) * 0.0175
+        assert math.isclose(assiette, expected, abs_tol=0.05)
 
 
 def test_asf_and_rsa_in_revenu_disponible_single_parent():

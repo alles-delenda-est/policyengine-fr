@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import threading
+import urllib.error
 import urllib.request
 
 import pytest
@@ -88,6 +89,29 @@ def test_studio_combined_lvt_and_dp6_reform_over_http():
         assert out["reform"]["taxe_fonciere"] == 0.0
         assert out["reform"]["taxe_valeur_sol"] == pytest.approx(1_100.0)
         assert out["dp6_clawback_share"] is not None
+
+        # Invalid JSON returns sanitized 400 error without internal exception leak
+        bad_req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/simulate",
+            data=b"{not-valid-json",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with pytest.raises(urllib.error.HTTPError) as exc_bad:
+            urllib.request.urlopen(bad_req, timeout=5)
+        assert exc_bad.value.code == 400
+        assert json.loads(exc_bad.value.read())["error"] == "Invalid simulation request"
+
+        # Oversized body (> 64 KiB) is rejected with 413
+        big_req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/simulate",
+            data=b"{" + b" " * 70_000 + b"}",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with pytest.raises(urllib.error.HTTPError) as exc_big:
+            urllib.request.urlopen(big_req, timeout=5)
+        assert exc_big.value.code == 413
     finally:
         server.shutdown()
         server.server_close()

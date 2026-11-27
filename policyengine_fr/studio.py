@@ -517,12 +517,11 @@ def simulate_earnings_curve(
     )
     ir_b = np.asarray(sim_b.calculate("impot_revenu", year), dtype=float)
 
-    # Adult 1 net wage at each grid point (every household step adds 1 + int(has_a2) + len(child_keys) individuals)
-    stride = 1 + (1 if has_a2 else 0) + len(child_keys)
-    snet_all = np.asarray(sim_b.calculate("salaire_net", year), dtype=float)
-    snet_a1 = snet_all[0::stride]
-    snet_a2 = snet_all[1::stride] if has_a2 else np.zeros_like(snet_a1)
-    snet_b = snet_a1 + snet_a2
+    # Entity-indexed net wages summed cleanly over each simulated ménage
+    menage_pop = sim_b.populations["menage"]
+    snet_b = np.asarray(
+        menage_pop.sum(menage_pop.members("salaire_net", year)), dtype=float
+    )
 
     dx = np.diff(grid)
     drd_b = np.diff(rd_b)
@@ -657,18 +656,31 @@ def get_metadata() -> dict[str, Any]:
     }
 
 
+MAX_REQUEST_BYTES = 65_536
+
+
 class StudioRequestHandler(BaseHTTPRequestHandler):
     """HTTP handler serving `/api/*` and static Vite assets from `ui/dist`."""
 
     def log_message(self, fmt: str, *args: Any) -> None:
         return  # Keep console clean during rapid 60fps slider requests
 
+    def _cors_origin(self) -> str:
+        origin = (self.headers.get("Origin") or "").strip()
+        if origin.startswith(("http://localhost:", "http://127.0.0.1:")) or origin in {
+            "http://localhost",
+            "http://127.0.0.1",
+        }:
+            return origin
+        return "http://127.0.0.1:8765"
+
     def _send_json(self, data: Any, status: int = HTTPStatus.OK) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", self._cors_origin())
+        self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
@@ -676,7 +688,8 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self) -> None:
         self.send_response(HTTPStatus.NO_CONTENT)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", self._cors_origin())
+        self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
@@ -724,12 +737,30 @@ class StudioRequestHandler(BaseHTTPRequestHandler):
             return
         try:
             length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            self._send_json(
+                {"error": "Invalid Content-Length header"},
+                status=HTTPStatus.BAD_REQUEST,
+            )
+            return
+        if length < 0 or length > MAX_REQUEST_BYTES:
+            self._send_json(
+                {"error": "Request body exceeds maximum allowed size"},
+                status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            )
+            return
+        try:
             raw = self.rfile.read(length) if length > 0 else b"{}"
             payload = json.loads(raw.decode("utf-8"))
+            if not isinstance(payload, dict):
+                raise ValueError("JSON payload must be an object")
             result = simulate_household(payload)
             self._send_json(result)
-        except Exception as exc:
-            self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+        except Exception:
+            self._send_json(
+                {"error": "Invalid simulation request"},
+                status=HTTPStatus.BAD_REQUEST,
+            )
 
 
 def create_server(host: str = "127.0.0.1", port: int = 8765) -> ThreadingHTTPServer:

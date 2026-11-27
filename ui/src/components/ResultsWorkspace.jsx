@@ -355,24 +355,38 @@ function CurvesView({ curve, periodMode, reformActive }) {
 
   const chartData = useMemo(() => {
     if (!curve?.points) return []
-    return curve.points.map((pt) => ({
-      brut: Math.round(scalePeriod(pt.salaire_brut, periodMode)),
-      salaire_net_apres_ir: Math.max(
+    return curve.points.map((pt) => {
+      const salaireNetApresIr = Math.max(
         0,
         scalePeriod(pt.salaire_net - pt.impot_revenu, periodMode)
-      ),
-      rsa: scalePeriod(pt.rsa, periodMode),
-      prime_activite: scalePeriod(pt.prime_activite, periodMode),
-      af_asf: scalePeriod(pt.af_asf, periodMode),
-      revenu_disponible: scalePeriod(pt.revenu_disponible, periodMode),
-      revenu_disponible_reforme:
-        pt.revenu_disponible_reforme !== undefined
-          ? scalePeriod(pt.revenu_disponible_reforme, periodMode)
-          : undefined,
-      emtr_pct: pt.emtr_pct,
-      emtr_reforme_pct: pt.emtr_reforme_pct,
-    }))
+      )
+      const rsa = scalePeriod(pt.rsa, periodMode)
+      const primeActivite = scalePeriod(pt.prime_activite, periodMode)
+      const afAsf = scalePeriod(pt.af_asf, periodMode)
+      const rd = scalePeriod(pt.revenu_disponible, periodMode)
+      const autresRevenus = Math.max(0, rd - salaireNetApresIr - primeActivite - rsa - afAsf)
+      return {
+        brut: Math.round(scalePeriod(pt.salaire_brut, periodMode)),
+        salaire_net_apres_ir: salaireNetApresIr,
+        autres_revenus: autresRevenus,
+        rsa,
+        prime_activite: primeActivite,
+        af_asf: afAsf,
+        revenu_disponible: rd,
+        revenu_disponible_reforme:
+          pt.revenu_disponible_reforme !== undefined
+            ? scalePeriod(pt.revenu_disponible_reforme, periodMode)
+            : undefined,
+        emtr_pct: pt.emtr_pct,
+        emtr_reforme_pct: pt.emtr_reforme_pct,
+      }
+    })
   }, [curve, periodMode])
+
+  const hasAutresRevenus = useMemo(
+    () => chartData.some((d) => d.autres_revenus > 1),
+    [chartData]
+  )
 
   if (!chartData.length) return null
 
@@ -420,6 +434,17 @@ function CurvesView({ curve, periodMode, reformActive }) {
                 fill="#dbe4f8"
                 isAnimationActive={false}
               />
+              {hasAutresRevenus && (
+                <Area
+                  type="monotone"
+                  dataKey="autres_revenus"
+                  stackId="1"
+                  name="Pensions, capital & foncier nets"
+                  stroke={COLORS.slate}
+                  fill="#e5e1d8"
+                  isAnimationActive={false}
+                />
+              )}
               <Area
                 type="monotone"
                 dataKey="prime_activite"
@@ -491,7 +516,11 @@ function CurvesView({ curve, periodMode, reformActive }) {
             <p className="pe-muted-note">
               Part de chaque euro supplémentaire de salaire brut absorbée par les cotisations, la
               CSG/CRDS, l’impôt sur le revenu et la sortie progressive du RSA / de la Prime
-              d’activité (100 % − ΔRevenu disponible / ΔSalaire brut).
+              d’activité (100 % − ΔRevenu disponible / ΔSalaire brut).{' '}
+              <em>
+                Hors aides au logement (APL non modélisées, qui ajoutent en pratique ~30 pts de
+                dégressivité entre 0 et 1,5 SMIC).
+              </em>
             </p>
           </div>
         </div>

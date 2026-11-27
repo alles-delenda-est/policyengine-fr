@@ -32,7 +32,7 @@ export const LEDGER_ROWS = [
   { section: '4. Capital, immobilier & fiscalité locale', key: 'revenus_fonciers_nets', label: 'Revenus fonciers nets imposables', varMeta: 'revenus_fonciers_nets' },
   { section: '4. Capital, immobilier & fiscalité locale', key: 'pfu_ir', label: 'PFU — part impôt sur le revenu (12,8 %)', varMeta: 'pfu_ir', sign: 'levy' },
   { section: '4. Capital, immobilier & fiscalité locale', key: 'impot_plus_values_immobilieres', label: 'IR forfaitaire sur plus-values immobilières (19 %)', varMeta: 'impot_plus_values_immobilieres', sign: 'levy' },
-  { section: '4. Capital, immobilier & fiscalité locale', key: 'prelevements_sociaux_patrimoine', label: 'Prélèvements sociaux sur patrimoine & capital (17,2 %)', varMeta: 'prelevements_sociaux_patrimoine', sign: 'levy' },
+  { section: '4. Capital, immobilier & fiscalité locale', key: 'prelevements_sociaux_patrimoine', label: 'Prélèvements sociaux sur patrimoine & capital (17,2 % ; 18,6 % capital en 2026)', varMeta: 'prelevements_sociaux_patrimoine', sign: 'levy' },
   { section: '4. Capital, immobilier & fiscalité locale', key: 'ifi', label: 'Impôt sur la fortune immobilière (IFI)', varMeta: 'ifi', sign: 'levy' },
   { section: '4. Capital, immobilier & fiscalité locale', key: 'taxe_fonciere', label: 'Taxe foncière (frais d’État 3 % inclus)', varMeta: 'taxe_fonciere', sign: 'levy' },
   { section: '4. Capital, immobilier & fiscalité locale', key: 'taxe_habitation_residence_secondaire', label: 'Taxe d’habitation résidence secondaire (THRS)', varMeta: 'taxe_habitation_residence_secondaire', sign: 'levy' },

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from policyengine_fr import Simulation
+from policyengine_fr import CountryTaxBenefitSystem, Simulation
 from policyengine_fr.reforms import (
     load_lvt_yields,
     lvt_variant_rate,
@@ -22,6 +22,7 @@ def _owner_situation(
     thrs_locale: float = 500.0,
     terrain: float = 120_000.0,
     loyers_bruts: float = 0.0,
+    regime_micro_foncier: bool = True,
     plus_values: float = 0.0,
     patrimoine_autre: float = 0.0,
     revenus_capital: float = 0.0,
@@ -38,6 +39,7 @@ def _owner_situation(
             "ff1": {
                 "declarants": ["a1"],
                 "revenus_fonciers_bruts": {"2024": loyers_bruts},
+                "regime_micro_foncier": {"2024": regime_micro_foncier},
                 "plus_values_immobilieres": {"2024": plus_values},
                 "patrimoine_immobilier_autre": {"2024": patrimoine_autre},
             }
@@ -52,6 +54,11 @@ def _owner_situation(
             }
         },
     }
+
+
+def test_country_tax_benefit_system_accepts_reform_directly():
+    tbs = CountryTaxBenefitSystem(reform=make_lvt_shift_reform("S1"))
+    assert tbs.variables["taxe_fonciere"].is_neutralized is True
 
 
 def test_lvt_yields_provenance_and_rates():
@@ -108,8 +115,10 @@ def test_lvt_s3_ifi_removes_ifi_gains_and_rental_taxes_but_keeps_pfu():
     ) == pytest.approx(5_700.0)
     assert float(ref.calculate("ifi", "2024")[0]) == 0.0
     assert float(ref.calculate("impot_plus_values_immobilieres", "2024")[0]) == 0.0
-    assert float(ref.calculate("revenus_fonciers_nets", "2024")[0]) == 0.0
-    # Financial capital PFU (12.8 %) + PS (17.2 %) on 10 000 € remain untouched
+    # S3_IFI removes net rental income from taxable RNI while keeping financial PFU + PS untouched
+    assert float(ref.calculate("revenu_net_imposable", "2024")[0]) < float(
+        base.calculate("revenu_net_imposable", "2024")[0]
+    )
     assert float(ref.calculate("pfu_ir", "2024")[0]) == pytest.approx(1_280.0)
     assert float(
         ref.calculate("prelevements_sociaux_patrimoine", "2024")[0]
@@ -117,6 +126,25 @@ def test_lvt_s3_ifi_removes_ifi_gains_and_rental_taxes_but_keeps_pfu():
     assert float(ref.calculate("taxe_valeur_sol", "2024")[0]) == pytest.approx(
         800_000 * 0.0134
     )
+
+
+def test_lvt_s3_does_not_leak_rsa_or_wipe_rfr():
+    """S3 exempts rents from IR/PS without falsely making landlords RSA-eligible."""
+    sit = _owner_situation(
+        salaire_brut=0,
+        tf_locale=2_000,
+        thrs_locale=0,
+        terrain=150_000,
+        loyers_bruts=30_000,
+        regime_micro_foncier=False,
+    )
+    base = Simulation(situation=sit)
+    ref = Simulation(situation=sit, reform=make_lvt_shift_reform("S3"))
+
+    assert float(base.calculate_add("rsa", "2024")[0]) == 0.0
+    assert float(ref.calculate_add("rsa", "2024")[0]) == 0.0
+    assert float(ref.calculate("revenu_fiscal_de_reference", "2024")[0]) > 0.0
+    assert float(ref.calculate("revenu_net_imposable", "2024")[0]) == 0.0
 
 
 def test_budget_levers_ir_proportional_and_csg_delta():
@@ -179,3 +207,27 @@ def test_d_p6_targeted_pension_underindexation_matches_day1_clawback_band():
     assert 0.34 <= fiscal_clawback_share <= 0.45, (
         f"Expected mechanical fiscal offset in [0.34, 0.45] per day1 D-P6, got {fiscal_clawback_share:.4f}"
     )
+
+
+def test_d_p6_updates_rfr_and_csg_tier():
+    """Verify D-P6 propagates effective pension into RFR and pension CSG tiers."""
+    sit = {
+        "individus": {
+            "a1": {"age": {"2024": 68}, "pension_retraite": {"2024": 27_700}}
+        },
+        "foyers_fiscaux": {"ff1": {"declarants": ["a1"]}},
+        "familles": {"fam1": {"parents": ["a1"], "enfants": []}},
+        "menages": {"m1": {"personnes_de_reference": ["a1"]}},
+    }
+    b_sim = Simulation(situation=sit)
+    r_sim = Simulation(
+        situation=sit, reform=make_d_p6_targeted_pension_underindexation_reform(0.05)
+    )
+    assert float(
+        b_sim.calculate("revenu_fiscal_de_reference", "2024")[0]
+    ) == pytest.approx(24_930.0)
+    assert float(b_sim.calculate("taux_csg_pension", "2024")[0]) == pytest.approx(0.083)
+    assert float(
+        r_sim.calculate("revenu_fiscal_de_reference", "2024")[0]
+    ) == pytest.approx(23_683.50, abs=0.1)
+    assert float(r_sim.calculate("taux_csg_pension", "2024")[0]) == pytest.approx(0.066)

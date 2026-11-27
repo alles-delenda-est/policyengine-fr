@@ -41,18 +41,18 @@
     csg: 0
     crds: 0
 
-- name: Salaire brut élevé 200 000 € — pas de plafonnement (CSG/CRDS déplafonnées)
-  absolute_error_margin: 0.01
+- name: Salaire brut élevé 200 000 € — abattement 1,75 % plafonné à 4 PASS (CSS art. L136-2 I)
+  absolute_error_margin: 0.02
   period: 2024
   input:
     salaire_brut: 200_000
   output:
-    # assiette = 200 000 × 0,9825 = 196 500
-    assiette_csg_crds_salaire: 196_500
-    csg_deductible: 13_362.00   # × 0,068
-    csg_imposable: 4_716.00     # × 0,024
-    csg: 18_078.00              # × 0,092
-    crds: 982.50               # × 0,005
+    # 4 × PASS 2024 = 185 472 ; abattement = 185 472 × 0,0175 = 3 245,76 -> assiette = 196 754,24
+    assiette_csg_crds_salaire: 196_754.24
+    csg_deductible: 13_379.29   # × 0,068
+    csg_imposable: 4_722.10     # × 0,024
+    csg: 18_101.39              # × 0,092
+    crds: 983.77                # × 0,005
 
 - name: Décomposition CSG — déductible + imposable = CSG totale
   absolute_error_margin: 0.01

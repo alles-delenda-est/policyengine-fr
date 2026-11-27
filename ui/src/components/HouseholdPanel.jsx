@@ -132,7 +132,7 @@ export default function HouseholdPanel({
   lvtMeta,
 }) {
   const [sidebarTab, setSidebarTab] = useState('foyer')
-  const [patOpen, setPatOpen] = useState(false)
+  const [patOpen, setPatOpen] = useState(() => countPatrimoineInputs(household.patrimoine) > 0)
 
   const activeReformsCount = countActiveReforms(reforms)
   const patCount = countPatrimoineInputs(household.patrimoine)
@@ -321,7 +321,7 @@ export default function HouseholdPanel({
             <button
               type="button"
               className="pe-drawer-toggle"
-              aria-expanded={patOpen || patCount > 0}
+              aria-expanded={patOpen}
               onClick={() => setPatOpen((o) => !o)}
             >
               <span>
@@ -331,7 +331,7 @@ export default function HouseholdPanel({
               <span>{patOpen ? '▴' : '▾'}</span>
             </button>
 
-            {(patOpen || patCount > 0) && (
+            {patOpen && (
               <div className="pe-drawer-content">
                 <MoneySliderInput
                   label="Revenus financiers (PFU : dividendes, intérêts)"

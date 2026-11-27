@@ -33,9 +33,10 @@ employer `cout_du_travail`.
   employee contributions: vieillesse plafonnée (1 PASS) & déplafonnée,
   AGIRC-ARRCO Tranche 1 & Tranche 2 (1–8 PASS), CEG T1 & T2, CET (0–8 PASS when
   `salaire_brut > 1 PASS`), and APEC (`cadre=True`).
-- **CSG / CRDS on salary (`csg`, `crds`)** — 98,25 % assiette; 6,8 % deductible
-  CSG deducted to form `salaire_declare` (case 1AJ), and 2,4 % non-deductible CSG
-  + 0,5 % CRDS deducted to form `salaire_net` (net perçu avant IR).
+- **CSG / CRDS on salary (`csg`, `crds`)** — 98,25 % assiette capped at 4 PASS
+  (100 % above); 6,8 % deductible CSG deducted to form `salaire_declare` (case
+  1AJ), and 2,4 % non-deductible CSG + 0,5 % CRDS deducted to form `salaire_net`
+  (net perçu avant IR).
 - **Cotisations patronales (`cotisations_patronales`), `reduction_generale` &
   `cout_du_travail`** — employer maladie and famille (with 2024 and 2025 LFSS
   SMIC bandeaux), vieillesse, chômage, AGS, FNAL (`< 50` vs `>= 50` employees),
@@ -123,8 +124,9 @@ enumerated below and mirrored 1-for-1 under `simplifications:` in
    on 1 January.** `cotisations_salariales` models a non-agricultural
    private-sector employee (`cadre=False` by default, `cadre=True` for APEC)
    without mandatory *mutuelle*, exempt overtime, apprenticeship, civil-service
-   or Alsace-Moselle rules; activity CSG is flat 9,2 % on 98,25 % of gross, and
-   `YEAR` parameters are evaluated on 1 January of the simulated year.
+   or Alsace-Moselle rules; activity CSG is flat 9,2 % (98,25 % assiette capped
+   at 4 PASS, 100 % above), and `YEAR` parameters are evaluated on 1 January of
+   the simulated year.
 2. **Employer cotisations and *réduction générale* evaluate rates and SMIC on
    1 January without infra-annual proration.** Because `cotisations_patronales`
    and `reduction_generale` are `YEAR` variables, `parameters(period)` reads the

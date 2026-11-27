@@ -21,6 +21,7 @@ export default function App() {
   const [household, setHousehold] = useState(initial.household)
   const [reforms, setReforms] = useState(initial.reforms)
   const [activePresetId, setActivePresetId] = useState('custom')
+  const [presetSeq, setPresetSeq] = useState(0)
 
   const [metadata, setMetadata] = useState(null)
   const [result, setResult] = useState(null)
@@ -104,11 +105,13 @@ export default function App() {
     setHousehold(structuredClone(DEFAULT_HOUSEHOLD))
     setReforms({ ...DEFAULT_REFORMS })
     setActivePresetId('custom')
+    setPresetSeq((s) => s + 1)
   }, [])
 
   const handleSelectPreset = (preset) => {
     setHousehold(structuredClone(preset.household))
     setActivePresetId(preset.id)
+    setPresetSeq((s) => s + 1)
   }
 
   const handleHouseholdChange = useCallback((nextH) => {
@@ -133,8 +136,14 @@ export default function App() {
             </p>
           </div>
           <div className="pe-hero-badges">
-            <span className="pe-stat-pill">160 tests YAML · 56 pytest</span>
-            <span className="pe-stat-pill">Validé DGFiP &amp; OpenFisca</span>
+            <span className="pe-stat-pill">
+              {metadata?.policies
+                ? `${metadata.policies.modelled?.length ?? 0} briques · ${
+                    metadata.policies.simplifications?.length ?? 0
+                  } simplifications`
+                : 'Moteur Python vectorisé (2024–2025)'}
+            </span>
+            <span className="pe-stat-pill">Validé DGFiP &amp; OpenFisca (2024)</span>
           </div>
         </div>
       </header>
@@ -185,6 +194,7 @@ export default function App() {
 
       <main className="pe-main-grid">
         <HouseholdPanel
+          key={presetSeq}
           household={household}
           onHouseholdChange={handleHouseholdChange}
           reforms={reforms}

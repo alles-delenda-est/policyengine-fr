@@ -72,8 +72,8 @@ Accepting `reform=None` in `CountryTaxBenefitSystem.__init__` unlocks native
 - **`lvt_shift` (`S1`–`S3_IFI`):** Pairs household `taxe_fonciere`,
   `taxe_habitation_residence_secondaire`, `ifi`, and `taxe_valeur_sol` with
   pinned macro land-base yields from `LVTShift` (`lvt_yields.json`, SHA-256
-  verified) to compute revenue-neutral Land Value Tax rates (`~0,42 %` to
-  `~0,91 %`) and household winner/loser incidence.
+  verified) to compute revenue-neutral Land Value Tax rates (`1,10 %` in `S1` to
+  `1,34 %` in `S3_IFI`) and household winner/loser incidence.
 - **`budget_levers` (including Decision D-P6):** Translates macro PLF levers
   (IR/CSG rate shifts, bracket freezes, and targeted pension under-indexation
   above a statutory pension threshold) into microsimulated household deltas,
