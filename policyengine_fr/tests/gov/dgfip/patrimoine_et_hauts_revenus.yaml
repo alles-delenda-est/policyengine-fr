@@ -136,3 +136,45 @@
     taxe_fonciere: 1_545.00
     taxe_habitation_residence_secondaire: 824.00
     taxe_valeur_sol: 0
+
+- name: Retraité célibataire avec 300 000 € de pension — plafond d'abattement 4 399 € dans le RFR et CEHR
+  absolute_error_margin: 0.05
+  period: 2024
+  input:
+    individus:
+      d1: {pension_retraite: 300_000}
+    foyers_fiscaux:
+      f1: {declarants: [d1]}
+  output:
+    # RFR = 300 000 − plafond abattement pensions 2024 (4 399) = 295 601 €
+    # CEHR = (295 601 − 250 000) × 3 % = 1 368,03 €
+    revenu_fiscal_de_reference: 295_601.00
+    cehr: 1_368.03
+
+- name: "IFI exactement au seuil de 1 300 000 € — non imposable (CGI art. 964 : excède 1 300 000 €)"
+  absolute_error_margin: 0.01
+  period: 2024
+  input:
+    individus:
+      d1: {}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        patrimoine_immobilier_autre: 1_300_000
+  output:
+    ifi: 0
+
+- name: LFSS 2026 (exercice 2026) — prélèvements sociaux à 18,6 % sur dividendes et maintenus à 17,2 % sur loyers nus
+  absolute_error_margin: 0.01
+  period: 2026
+  input:
+    individus:
+      d1: {revenus_capital: 10_000}
+    foyers_fiscaux:
+      f1:
+        declarants: [d1]
+        revenus_fonciers_bruts: 10_000
+        regime_micro_foncier: true
+  output:
+    # 10 000 × 18,6 % (1 860 €) + 7 000 × 17,2 % (1 204 €) = 3 064 €
+    prelevements_sociaux_patrimoine: 3_064.00

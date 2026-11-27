@@ -122,3 +122,85 @@
       famille_1: {parents: [adulte_1], enfants: []}
   output:
     rsa: 0
+
+- name: Couple trois enfants sans revenu, janvier 2024 (+40 % au 3e enfant, CASF R262-1)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+      enfant_3: {age: 12}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1, enfant_2, enfant_3]}
+  output:
+    # forfaitaire 1 519,375 − FL 180,50175 − AF base (445,93 × 0,73 = 325,5289) = 1 013,34435
+    rsa: 1013.34435
+
+- name: Demandeur de 24 ans sans enfant — non éligible (< 25 ans, CASF L262-4)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 24}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa: 0
+
+- name: Demandeur d'exactement 25 ans sans enfant — éligible (borne incluse, CASF L262-4)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 25}
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa: 534.82
+
+- name: Couple avec un enfant de 22 ans sans revenu — compté au RSA (< 25) mais hors AF/ASF (< 20)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 48}
+      adulte_2: {age: 46}
+      enfant_1: {age: 22}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1]}
+  output:
+    # 3 personnes au sens RSA : 607,75 × 1,8 (1 093,95) − FL 3p+ (180,50175) − AF (0) = 913,44825
+    rsa: 913.44825
+
+- name: Couple avec un enfant d'exactement 25 ans sans revenu — exclu du foyer RSA (borne stricte < 25)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 50}
+      adulte_2: {age: 49}
+      enfant_1: {age: 25}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1]}
+  output:
+    # 2 personnes retenues (couple sans enfant à charge) -> 765,765
+    rsa: 765.765
+
+- name: Propriétaire bailleur sans salaire percevant 12 000 €/an de loyers micro-foncier (700 €/mois nets) — RSA nul
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [adulte_1]
+        revenus_fonciers_bruts: 12_000
+        regime_micro_foncier: true
+    familles:
+      famille_1: {parents: [adulte_1], enfants: []}
+  output:
+    rsa: 0

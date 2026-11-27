@@ -1,4 +1,4 @@
-description: Salaire minimum interprofessionnel de croissance (SMIC) horaire brut en métropole.
+description: "Salaire minimum interprofessionnel de croissance (SMIC) horaire brut en métropole (lu au 1er janvier par les variables annuelles cotisations_patronales, reduction_generale et ppa_bonification : 11,65 €/h sur 2024 et 11,88 €/h sur 2025)."
 values:
   2024-01-01: 11.65
   2024-11-01: 11.88

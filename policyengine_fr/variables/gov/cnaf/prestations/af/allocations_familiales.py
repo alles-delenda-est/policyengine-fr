@@ -18,15 +18,17 @@ class allocations_familiales(Variable):
         "(CSS art. D521-1, al. 3) lorsque le dépassement du plafond est "
         "inférieur à douze fois le montant mensuel modulé.\n\n"
         "Simplifications MVP: les ressources prises en compte sont la somme des "
-        "salaires imposables de l'année courante (N) des membres de la famille, "
-        "en lieu et place de la base ressources N-2 réelle (revenu net "
-        "catégoriel de l'année N-2, art. R532-3 CSS). Les deux coïncident pour "
-        "un revenu stable mais divergent pour tout ménage dont le revenu a "
-        "changé d'une année sur l'autre. Métropole uniquement; garde alternée, "
-        "forfait des 20 ans et plancher de versement non modélisés. La "
-        "majoration pour âge est accordée dès le mois du quatorzième "
-        "anniversaire, alors que le droit ne s'ouvre qu'à compter du mois "
-        "suivant (un mois de majoration de trop par enfant, une seule fois)."
+        "salaires imposables et des pensions imposables (retraite + pensions "
+        "alimentaires perçues après abattement de 10 %) de l'année courante (N) "
+        "de la famille, en lieu et place de la base ressources N-2 réelle "
+        "(revenu net catégoriel de l'année N-2, art. R532-3 CSS). Les deux "
+        "coïncident pour un revenu stable mais divergent pour tout ménage dont "
+        "le revenu a changé d'une année sur l'autre. Métropole uniquement; "
+        "garde alternée, forfait des 20 ans et plancher de versement non "
+        "modélisés. La majoration pour âge est accordée dès le mois du "
+        "quatorzième anniversaire, alors que le droit ne s'ouvre qu'à compter "
+        "du mois suivant (un mois de majoration de trop par enfant, une seule "
+        "fois)."
     )
     definition_period = MONTH
     reference = "https://www.service-public.fr/particuliers/vosdroits/F13213"
@@ -58,8 +60,13 @@ class allocations_familiales(Variable):
 
         montant_plein = montant_base + montant_majoration
 
-        # Modulation selon les ressources annuelles de la famille.
-        ressources = famille.sum(famille.members("salaire_imposable", period.this_year))
+        # Modulation selon les ressources annuelles de la famille (salaires + pensions).
+        individus = famille.members
+        salaires = famille.sum(individus("salaire_imposable", period.this_year))
+        pensions_foyer = individus.foyer_fiscal("pensions_imposables", period.this_year)
+        nb_membres_foyer = max_(individus.foyer_fiscal.nb_persons(), 1)
+        pensions = famille.sum(pensions_foyer / nb_membres_foyer)
+        ressources = salaires + pensions
         plafond_1 = (
             af.plafonds.tranche_1_base + af.plafonds.majoration_par_enfant * nb_enfants
         )

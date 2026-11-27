@@ -192,3 +192,29 @@
     # AF 3 enfants, ressources sous le 2e plafond (base déclarée) → demi-taux
     # 120 000 − 12 863,78 − 5 929,10 − CSG 10 846,80 − CRDS 589,50 + AF 2 020,55
     revenu_disponible: 91_791.38
+
+- name: Célibataire actif modeste (30 ans, salaire brut 6 000 €) — cumul RSA + prime d'activité sans double compte
+  absolute_error_margin: 0.02
+  period: 2024
+  input:
+    individus:
+      declarant_1:
+        age: 30
+        salaire_brut: 6_000
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [declarant_1]
+    familles:
+      famille_1:
+        parents: [declarant_1]
+    menages:
+      menage_1:
+        personnes_de_reference: [declarant_1]
+  output:
+    # salaire_net = 6 000 − 678,60 − 542,34 − 29,475 = 4 749,585 € ; IR = 0 €
+    # RSA annuel = 1 889,70 € ; Prime d'activité annuelle = 2 897,25 € (ppa_non_bonifiee déduite)
+    # revenu_disponible = 4 749,585 + 1 889,70 + 2 897,25 = 9 536,53 €
+    impot_revenu: 0.00
+    rsa: 1_889.70
+    prime_activite: 2_897.25
+    revenu_disponible: 9_536.53

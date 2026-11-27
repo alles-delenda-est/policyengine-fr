@@ -10,10 +10,13 @@ class taux_csg_pension_deductible(Variable):
         "Part déductible de la CSG sur les pensions de retraite (spec 0006), "
         "selon la tranche de taux : 0 (exonération), 3,8 % (taux réduit, "
         "intégralement déductible), 4,2 % (taux médian) ou 5,9 % (taux normal). "
-        "La part non déductible (2,4 % aux taux médian et normal) reste imposable."
+        "La part non déductible (2,4 % aux taux médian et normal) reste "
+        "imposable. Suit la même convention d'évaluation sur le RFR de l'année N "
+        "(en lieu et place du RFR N-2 et sans le lissage bisannuel de l'art. "
+        "L136-8 III bis CSS) que `taux_csg_pension`."
     )
     definition_period = YEAR
-    reference = "https://www.service-public.fr/particuliers/vosdroits/F2971"
+    reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000048768785"
 
     def formula(foyer_fiscal, period, parameters):
         taux = foyer_fiscal("taux_csg_pension", period)

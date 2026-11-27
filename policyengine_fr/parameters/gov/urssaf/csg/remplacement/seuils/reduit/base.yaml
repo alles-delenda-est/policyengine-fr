@@ -1,5 +1,5 @@
 description: Seuil de RFR (1 part) plafond du taux réduit de CSG (3,8 %) sur les pensions de retraite
-  (barème 2024, RFR N-2). Au-dessus, taux médian.
+  (barèmes 2024 et 2025, RFR N-2). Au-dessus, taux médian (6,6 %).
 values:
   2024-01-01: 15988
   2025-01-01: 16755
@@ -7,5 +7,7 @@ metadata:
   unit: currency-EUR
   label: Seuil CSG pensions - plafond taux réduit (1 part)
   reference:
-  - title: Service-public / CSG retraite 2024
-    href: https://www.service-public.fr/particuliers/vosdroits/F2971
+    - title: Article L136-8, III du Code de la sécurité sociale
+      href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000048768785
+    - title: Service-Public.fr — CSG et CRDS sur les pensions de retraite (barèmes 2024 et 2025)
+      href: https://www.service-public.fr/particuliers/vosdroits/F2971

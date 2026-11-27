@@ -22,8 +22,13 @@ class cotisations_patronales(Variable):
         "0,50 % déplafonné), CSA (0,30 %), dialogue social (0,016 %) et AT/MP "
         "(entrée `taux_at_mp`, défaut 2,12 %).\n\n"
         "Couche additive de coût du travail : ne modifie ni `salaire_declare` "
-        "ni `revenu_disponible`. Hors champ : versement mobilité local, taxe "
-        "d'apprentissage/formation, forfait social."
+        "ni `revenu_disponible`. Variable annuelle (`YEAR`) : `parameters(period)` "
+        "évalue les taux, le PASS et le SMIC au 1er janvier de l'année simulée "
+        "(sans proratisation infra-annuelle des évolutions en cours d'année "
+        "telles que l'AGS au 1er juil. 2024, le SMIC anticipé au 1er nov. 2024 "
+        "ou l'assurance chômage au 1er mai 2025, qui prennent effet dans le "
+        "modèle au 1er janvier suivant). Hors champ : versement mobilité local, "
+        "taxe d'apprentissage/formation, forfait social."
     )
     definition_period = YEAR
     reference = (

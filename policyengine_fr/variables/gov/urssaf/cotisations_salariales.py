@@ -24,7 +24,10 @@ class cotisations_salariales(Variable):
         "2018 (remplacés par la CSG, hors Alsace-Moselle) ; pas d'exonérations "
         "spécifiques (heures supplémentaires, apprentis, ZRR) ; mutuelle "
         "obligatoire d'entreprise non modélisée ; les allègements bas salaires "
-        "(réduction générale) sont côté employeur (spec 0008)."
+        "(réduction générale) sont côté employeur (spec 0008). Variable "
+        "annuelle (`YEAR`) : `parameters(period)` lit les taux et le PASS en "
+        "vigueur au 1er janvier de l'année simulée (sans proratisation "
+        "infra-annuelle)."
     )
     definition_period = YEAR
     reference = (

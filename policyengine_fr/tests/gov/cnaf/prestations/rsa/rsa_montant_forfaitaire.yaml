@@ -76,3 +76,19 @@
   output:
     # 607,75 × (1 + 0,5 + 0,3 + 0,3) = 607,75 × 2,1
     rsa_montant_forfaitaire: 1276.275
+
+- name: Couple trois enfants, janvier 2024 (5 personnes, +40 % au 3e enfant selon CASF R262-1, ×2,5)
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 40}
+      adulte_2: {age: 40}
+      enfant_1: {age: 4}
+      enfant_2: {age: 9}
+      enfant_3: {age: 12}
+    familles:
+      famille_1: {parents: [adulte_1, adulte_2], enfants: [enfant_1, enfant_2, enfant_3]}
+  output:
+    # 607,75 × (1 + 0,5 + 0,3 + 0,3 + 0,4) = 607,75 × 2,5 = 1 519,375
+    rsa_montant_forfaitaire: 1519.375

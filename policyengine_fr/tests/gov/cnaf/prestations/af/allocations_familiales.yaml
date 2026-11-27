@@ -291,3 +291,25 @@
       famille_1: {parents: [parent_1, parent_2], enfants: [enfant_1, enfant_2, enfant_3, enfant_4]}
   output:
     allocations_familiales: 508.3602
+
+- name: Couple retraité sans salaire (pension 105 000 €), deux enfants — modulation en tranche 2
+  absolute_error_margin: 0.01
+  period: 2024-01
+  input:
+    individus:
+      parent_1: {pension_retraite: 105_000}
+      parent_2: {}
+      enfant_1: {age: 8}
+      enfant_2: {age: 10}
+    foyers_fiscaux:
+      foyer_1:
+        declarants: [parent_1, parent_2]
+        personnes_a_charge: [enfant_1, enfant_2]
+    familles:
+      famille_1:
+        parents: [parent_1, parent_2]
+        enfants: [enfant_1, enfant_2]
+  output:
+    # pension déclarée = 105 000 × (1 − 5,9 %) = 98 805 ; pensions_imposables = 98 805 − 4 399 = 94 406 €
+    # 74 966 < 94 406 <= 99 922 -> tranche 2 (demi-taux) : 142,6976 × 0,5 = 71,3488 €
+    allocations_familiales: 71.3488

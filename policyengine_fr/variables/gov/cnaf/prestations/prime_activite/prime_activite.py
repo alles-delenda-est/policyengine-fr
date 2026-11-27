@@ -19,9 +19,12 @@ class prime_activite(Variable):
         "de prime d'activité (couvert par le RSA) et évite tout double compte "
         "du socle forfaitaire lorsque RSA et prime d'activité se cumulent.\n\n"
         "Simplifications MVP : revenus annuels ÷ 12 (pas de trimestrialisation "
-        "ni de cristallisation) ; forfait logement toujours appliqué ; exclusion "
-        "étudiants/apprentis sous seuil de 0,78 SMIC non modélisée ; RSA déduit "
-        "implicitement via `ppa_non_bonifiee` ; métropole uniquement."
+        "ni de cristallisation), incluant les revenus de capitaux mobiliers "
+        "(`revenus_capital`) et revenus fonciers nets (`revenus_fonciers_nets`) "
+        "via `rsa_base_ressources` (hors taxation forfaitaire de 3 % de "
+        "l'épargne non productrice) ; forfait logement toujours appliqué ; "
+        "exclusion étudiants/apprentis sous seuil de 0,78 SMIC non modélisée ; "
+        "RSA déduit implicitement via `ppa_non_bonifiee` ; métropole uniquement."
     )
     definition_period = MONTH
     reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000038009897"

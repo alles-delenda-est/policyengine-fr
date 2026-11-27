@@ -72,24 +72,28 @@ class impot_plus_values_immobilieres(Variable):
 class prelevements_sociaux_patrimoine(Variable):
     value_type = float
     entity = FoyerFiscal
-    label = "Prélèvements sociaux sur les revenus du patrimoine et du capital (17,2 %)"
+    label = "Prélèvements sociaux sur les revenus du patrimoine et du capital"
     unit = EUR
     documentation = (
-        "Prélèvements sociaux au taux global de 17,2 % (CSG 9,2 % + CRDS "
-        "0,5 % + prélèvement de solidarité 7,5 %, CSS art. L136-6/L136-7 et "
-        "CGI art. 235 ter) sur les revenus du capital financier, les revenus "
-        "fonciers nets et les plus-values immobilières imposables (lignes "
-        "`gains_ps` et `rents_ps + rents_csg` de LVTShift)."
+        "Prélèvements sociaux sur les revenus du capital financier, les revenus "
+        "fonciers nets et les plus-values immobilières imposables (CSS art. "
+        "L136-6 à L136-8 et CGI art. 235 ter ; lignes `gains_ps` et "
+        "`rents_ps + rents_csg` de LVTShift). Taux global de 17,2 % (CSG 9,2 % "
+        "+ CRDS 0,5 % + prélèvement de solidarité 7,5 %) de 2018 à 2025 ; à "
+        "compter du 1er janvier 2026 (LFSS 2026, loi n° 2025-1403 art. 12), "
+        "porté à 18,6 % (CSG 10,6 %) sur les produits de placement financier "
+        "(`revenus_capital`), tandis que les revenus fonciers nus et les "
+        "plus-values immobilières demeurent à 17,2 % (`taux_immobilier`)."
     )
     definition_period = YEAR
-    reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037947692"
+    reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053265282"
 
     def formula(foyer_fiscal, period, parameters):
         capital = foyer_fiscal.sum(foyer_fiscal.members("revenus_capital", period))
         foncier = foyer_fiscal("revenus_fonciers_nets", period)
         pv = foyer_fiscal("plus_values_immobilieres", period)
-        taux = parameters(period).gov.urssaf.patrimoine.taux_global
-        return (capital + foncier + pv) * taux
+        p = parameters(period).gov.urssaf.patrimoine
+        return capital * p.taux_global + (foncier + pv) * p.taux_immobilier
 
 
 class ifi(Variable):
@@ -101,10 +105,11 @@ class ifi(Variable):
         "Impôt sur la fortune immobilière (CGI art. 964 à 977 ; ligne `ifi` "
         "des scénarios S2_IFI et S3_IFI de LVTShift). Assiette égale à la "
         "résidence principale après abattement de 30 % (art. 973 I) augmentée "
-        "des autres biens immobiliers nets ; assujettissement dès 1 300 000 €, "
-        "barème progressif dès 800 000 € (0,50 % à 1,50 %), et décote "
-        "`17 500 − 1,25 % × assiette` entre 1,3 M€ et 1,4 M€ (art. 977 II). "
-        "Hors plafonnement IFI à 75 % des revenus (art. 979)."
+        "des autres biens immobiliers nets ; assujettissement lorsque l'assiette "
+        "excède strictement 1 300 000 € (art. 964), barème progressif dès "
+        "800 000 € (0,50 % à 1,50 %), et décote `17 500 − 1,25 % × assiette` "
+        "entre 1,3 M€ (exclu) et 1,4 M€ (art. 977 II). Hors plafonnement IFI à "
+        "75 % des revenus (art. 979)."
     )
     definition_period = YEAR
     reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036385056"
@@ -117,8 +122,8 @@ class ifi(Variable):
         assiette = rp * (1 - p.abattement_residence_principale) + autre
         brut = p.bareme.calc(assiette)
         decote = where(
-            (assiette >= p.seuil_imposition) & (assiette < p.decote_seuil),
+            (assiette > p.seuil_imposition) & (assiette < p.decote_seuil),
             max_(p.decote_base - p.decote_taux * assiette, 0),
             0,
         )
-        return where(assiette >= p.seuil_imposition, max_(brut - decote, 0), 0)
+        return where(assiette > p.seuil_imposition, max_(brut - decote, 0), 0)

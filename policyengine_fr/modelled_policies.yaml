@@ -1,20 +1,20 @@
 core:
   modelled:
-    - Impôt sur le revenu — barème progressif par part de quotient familial (2024–2025)
+    - Impôt sur le revenu — barème progressif par part de quotient familial (revenus 2024 et 2025)
     - Quotient familial — nombre de parts (déclarants + personnes à charge, majoration parent isolé) et plafonnement
     - Décote de l'impôt sur le revenu (célibataire / couple, 2024–2025)
-    - Revenu fiscal de référence (RFR) — revenu net imposable + revenus du capital soumis au PFU
+    - Revenu fiscal de référence (RFR) — salaires imposables, pensions après abattement plafonné de 10 %, revenus fonciers nets de CSG déductible, revenus du capital soumis au PFU et plus-values immobilières, sous déduction des pensions versées
     - Cotisations sociales salariales par risque (vieillesse plafonnée/déplafonnée, AGIRC-ARRCO T1/T2, CEG T1/T2, CET, APEC cadre) → salaire déclaré (1AJ) et salaire net
-    - Cotisations sociales patronales par risque (bandeaux SMIC maladie et famille, vieillesse, chômage, AGS, FNAL, AT/MP, AGIRC-ARRCO, CEG, CET, APEC, CSA), réduction générale (ex-Fillon) et coût du travail (super-brut)
+    - Cotisations sociales patronales par risque (bandeaux SMIC maladie et famille, vieillesse, chômage, AGS, FNAL, AT/MP, AGIRC-ARRCO, CEG, CET, APEC, CSA, dialogue social), réduction générale (ex-Fillon) et coût du travail (super-brut)
     - CSG et CRDS sur les revenus d'activité salariée (assiette 98,25 %, fraction déductible 6,8 % déduite du salaire déclaré)
     - Pensions de retraite — abattement commun de 10 % fusionné avec les pensions alimentaires perçues (`pensions_imposables`), CSG par tranches de RFR (0 % / 3,8 % / 6,6 % / 8,3 %), CRDS (0,5 %) et CASA (0,3 %)
     - Pensions alimentaires — déduction du revenu global (versées) et imposition après abattement commun de 10 % (perçues)
-    - Allocations familiales — base par nombre d'enfants, modulation selon les revenus avec complément dégressif (CSS art. D521-1), majoration pour âge
+    - Allocations familiales — base par nombre d'enfants, modulation sur salaires et pensions imposables avec complément dégressif (CSS art. D521-1), majoration pour âge
     - Allocation de soutien familial (ASF) — taux simple, en complément différentiel de la pension alimentaire perçue (famille monoparentale)
-    - Revenu de solidarité active (RSA) — montant forfaitaire (socle + majoration parent isolé), forfait logement, base ressources nette (forfait ASF et exclusion des majorations d'âge AF), condition d'âge/parentalité et seuil de versement de 6 €/mois
+    - Revenu de solidarité active (RSA) — montant forfaitaire (socle + majoration parent isolé), forfait logement, base ressources nette (salaires, retraites, pensions alimentaires, revenus du capital et fonciers nets, AF hors majoration d'âge et forfait ASF), condition d'âge/parentalité et seuil de versement de 6 €/mois
     - Prime d'activité (PPA) — montant forfaitaire familial, bonification individuelle (59 à 120 SMIC horaires), pente de 61 % sur les revenus professionnels nets, forfait logement et seuil de versement de 15 €/mois
-    - Fiscalité du capital et des hauts revenus — PFU / flat tax (12,8 % IR ou option barème + 17,2 % prélèvements sociaux), revenus fonciers nets (micro-foncier 30 % ou réel), plus-values immobilières (19 % + 17,2 % PS), CEHR (3 % / 4 %) et IFI (abattement 30 % résidence principale, barème dès 1,3 M€, décote)
-    - Fiscalité locale et foncière — taxe foncière (TFPB), taxe d'habitation sur les résidences secondaires (THRS) avec frais de gestion de 3 % (CGI art. 1641) et taxe sur la valeur du sol (LVT), accompagnées des réformes paramétrées (`policyengine_fr.reforms.lvt_shift` et `budget_levers`)
+    - Fiscalité du capital et des hauts revenus — PFU / flat tax (12,8 % IR sur `revenus_capital`), prélèvements sociaux sur le patrimoine (17,2 % en 2024–2025 ; 18,6 % sur `revenus_capital` dès 2026 et maintien à 17,2 % sur revenus fonciers et plus-values immobilières selon LFSS 2026 art. 12), revenus fonciers nets (micro-foncier 30 % ou réel), plus-values immobilières (19 %), CEHR (3 % / 4 %) et IFI (abattement 30 % résidence principale, assujettissement > 1,3 M€, décote)
+    - Fiscalité locale et foncière — taxe foncière (`taxe_fonciere_locale` + 3 % CGI art. 1641), taxe d'habitation sur les résidences secondaires (`thrs_locale` + 3 % CGI art. 1641) et taxe sur la valeur du sol (`taxe_valeur_sol`), accompagnées des réformes paramétrées (`policyengine_fr.reforms.lvt_shift` et `budget_levers`)
     - Revenu disponible — agrégat ménage net d'impôts directs, de cotisations/prélèvements sociaux et incluant les prestations sociales modélisées (2024–2025)
   not_modelled:
     - Réductions et crédits d'impôt sur le revenu (emploi à domicile, garde d'enfants, dons, investissements locatifs…)
@@ -29,35 +29,42 @@ core:
     # "silent scope-narrowing" check can find them, and kept 1-for-1 with the
     # numbered caveats in docs/coverage.md (enforced by bin/check_doc_currency.py).
     - >-
-      Cotisations salariales — régime général privé à temps plein uniquement :
-      les cotisations salariales par risque modélisent un salarié du secteur
-      privé non agricole (non-cadre par défaut, ou `cadre=True` pour l'APEC)
-      sans complémentaire santé obligatoire d'entreprise, heures supplémentaires
+      Cotisations salariales (`cotisations_salariales`) — régime général privé à
+      temps plein et lecture des paramètres au 1er janvier : modélise un salarié
+      du secteur privé non agricole (`cadre=False` par défaut, `cadre=True` pour
+      l'APEC) sans mutuelle obligatoire d'entreprise, heures supplémentaires
       exonérées, apprentissage, ni régimes spéciaux, fonction publique ou
-      Alsace-Moselle. La CSG sur salaire d'activité est appliquée au taux plein
-      de 9,2 % sur 98,25 % du brut.
+      Alsace-Moselle ; la CSG d'activité est au taux plein de 9,2 % sur 98,25 %
+      du brut, et les paramètres annuels (`YEAR`) sont lus au 1er janvier de
+      l'année simulée.
     - >-
-      Cotisations patronales et réduction générale — taux de droit commun sur
-      base SMIC temps plein annuel : les bandeaux maladie et famille ainsi que
-      la réduction générale dégressive (ex-Fillon jusqu'à 1,6 SMIC, distinguant
-      `< 50` et `>= 50` salariés via `effectif_entreprise`) utilisent le SMIC
-      annuel temps plein (1 820 h) sans proratisation horaire temps partiel, et
-      n'incluent pas le versement mobilité local, le forfait social, la DFS ni
-      les exonérations zonées (ZRR, ZFU, JEI, LODEOM).
+      Cotisations patronales et réduction générale (`cotisations_patronales`,
+      `reduction_generale`) — convention annuelle au 1er janvier et SMIC temps
+      plein : ces variables `YEAR` évaluent les taux, le PASS et le SMIC au
+      1er janvier de l'année simulée sans proratisation infra-annuelle (les
+      changements en cours d'année tels que l'AGS à 0,25 % au 2024-07-01, le
+      SMIC à 11,88 € au 2024-11-01 ou le chômage à 4,00 % au 2025-05-01 prennent
+      effet au 1er janvier suivant) ; le SMIC annuel retenu correspond à un
+      temps plein (1 820 h), hors versement mobilité local, forfait social, DFS
+      et exonérations zonées (ZRR, ZFU, JEI, LODEOM).
     - >-
-      CSG, CRDS et CASA sur les pensions de retraite — RFR de l'année courante
-      et absence de lissage bisannuel : le barème à quatre tranches (0 %, 3,8 %,
-      6,6 %, 8,3 % ; CSS art. L136-8 III) et la CASA (0,3 % ; CASF art. L14-10-4)
-      sont évalués sur `revenu_fiscal_de_reference` de l'année N en lieu et place
-      du RFR N-2, sans la condition de franchissement sur deux années consécutives
-      (CSS art. L136-8 III bis).
+      CSG, CRDS et CASA sur les pensions de retraite (`taux_csg_pension`) — RFR
+      de l'année courante et absence de lissage bisannuel : le barème à quatre
+      tranches (0 %, 3,8 %, 6,6 %, 8,3 % ; CSS art. L136-8 III) et la CASA
+      (0,3 % ; CASF art. L14-10-4) sont évalués sur `revenu_fiscal_de_reference`
+      de l'année N en lieu et place du RFR N-2, sans la condition de
+      franchissement sur deux années consécutives (CSS art. L136-8 III bis).
     - >-
-      Revenu fiscal de référence (`revenu_fiscal_de_reference`) — périmètre des
-      revenus modélisés : le RFR (CGI art. 1417, IV) additionne le
-      `revenu_net_imposable` et les revenus de capitaux mobiliers soumis au PFU
-      (`revenus_capitaux_mobiliers_pfu` hors option barème), mais n'intègre pas
-      les plus-values mobilières exonérées, les cotisations d'épargne retraite
-      déduites ni les revenus exonérés hors périmètre.
+      Revenu fiscal de référence (`revenu_fiscal_de_reference`) — proxy non
+      circulaire sur le périmètre modélisé : le RFR (CGI art. 1417, IV) cumule
+      `salaire_imposable`, les pensions (`pension_retraite` brute de CSG
+      déductible afin d'éviter la circularité en année N avec `taux_csg_pension`,
+      plus `pensions_alimentaires_percues`) après l'abattement de 10 % assorti
+      du plancher par bénéficiaire et du plafond par foyer (CGI art. 158, 5, a),
+      `revenus_fonciers_nets` diminués de 6,8 % de CSG déductible, `revenus_capital`
+      et `plus_values_immobilieres`, sous déduction de `pensions_alimentaires_versees`
+      (hors abattements spécifiques d'assurance-vie, épargne retraite déduite et
+      revenus exonérés non modélisés).
     - >-
       Abattement commun de 10 % sur les pensions (`pensions_imposables`) —
       plafond appliqué globalement au foyer fiscal : le plancher individuel est
@@ -66,32 +73,32 @@ core:
       (CGI art. 158, 5, a) sans proratisation individuelle du plafond entre
       déclarants.
     - >-
-      Pensions alimentaires versées — montant supposé déjà déductible : le
-      plafond légal par enfant majeur (CGI art. 156, II, 2°) et les conditions
-      d'éligibilité (décision de justice, état de besoin) ne sont pas appliqués
-      par le modèle, à l'image d'`openfisca-france` ; `revenu_net_imposable` est
-      borné à zéro (déficits reportables non modélisés).
+      Pensions alimentaires versées (`pensions_alimentaires_versees`) — montant
+      supposé déjà déductible : le plafond légal par enfant majeur (CGI art.
+      156, II, 2°) et les conditions d'éligibilité (décision de justice, état de
+      besoin) ne sont pas appliqués par le modèle, à l'image d'`openfisca-france` ;
+      `revenu_net_imposable` est borné à zéro (déficits reportables non modélisés).
     - >-
-      Quotient familial — cas du veuf/de la veuve avec personne à charge non
-      représentable : le CGI art. 194 accorde au contribuable veuf ayant des
-      enfants à charge les parts de base d'un couple marié (p. ex. 2,5 parts avec
-      un enfant) ; faute de statut matrimonial détaillé, le modèle le représente
-      comme déclarant seul (1,5 part, ou 2 avec `parent_isole`), soit 0,5 à
-      1 part de moins.
+      Quotient familial (`nombre_parts`) — cas du veuf/de la veuve avec personne
+      à charge non représentable : le CGI art. 194 accorde au contribuable veuf
+      ayant des enfants à charge les parts de base d'un couple marié (p. ex.
+      2,5 parts avec un enfant) ; faute de statut matrimonial détaillé, le
+      modèle le représente comme déclarant seul (1,5 part, ou 2 avec
+      `parent_isole`), soit 0,5 à 1 part de moins.
     - >-
-      Allocations familiales — ressources de l'année N au lieu de N-2 : la
-      modulation et le complément dégressif (CSS art. D521-1) utilisent la somme
-      des revenus imposables nets des parents de l'année courante
-      (`salaire_imposable + pensions_imposables`) en lieu et place du revenu net
-      catégoriel N-2 (CSS art. R532-3). Garde alternée, forfait des 20 ans et
-      plancher de versement non modélisés.
+      Allocations familiales (`allocations_familiales`) — ressources de l'année N
+      au lieu de N-2 : la modulation et le complément dégressif (CSS art. D521-1)
+      utilisent la somme de `salaire_imposable` et de `pensions_imposables` de
+      l'année courante de la famille en lieu et place du revenu net catégoriel
+      N-2 complet (CSS art. R532-3, hors revenus fonciers). Garde alternée,
+      forfait des 20 ans et plancher de versement non modélisés.
     - >-
-      Allocation de soutien familial — calcul familial et proxy monoparental : le
-      droit est inféré du seul critère `nb_parents == 1`, et le complément
-      différentiel (`max(asf_pleine - pension/12, 0)`) est calculé globalement au
-      niveau de la famille plutôt qu'enfant par enfant. Taux majoré (orphelin des
-      deux parents), parent défaillant au sein d'un couple et recouvrement
-      CAF↔débiteur non modélisés.
+      Allocation de soutien familial (`allocation_soutien_familial`) — calcul
+      familial et proxy monoparental : le droit est inféré du seul critère
+      `nb_parents == 1`, et le complément différentiel (`max(asf_pleine - pension/12, 0)`)
+      est calculé globalement au niveau de la famille plutôt qu'enfant par enfant.
+      Taux majoré (orphelin des deux parents), parent défaillant au sein d'un
+      couple et recouvrement CAF↔débiteur non modélisés.
     - >-
       Prestations sociales versées brutes de CRDS et mois des 14 ans AF : les AF,
       l'ASF et la prime d'activité sont versées brutes sans retenue de la CRDS
@@ -99,44 +106,54 @@ core:
       s'applique dès le mois/année du 14e anniversaire au lieu du mois suivant.
     - >-
       Revenu de solidarité active (`rsa`) — lissage annuel (`/ 12`), forfait
-      logement systématique et éligibilité simplifiée : les ressources d'activité
-      et de retraite nettes sont ramenées au mois par division par 12 au lieu
-      d'une déclaration trimestrielle (CASF art. R262-7) ; le forfait logement est
-      appliqué à toute famille éligible ; la majoration d'isolement est accordée
-      sans limite de durée (art. L262-9) ; le RSA jeune actif (< 25 ans, art.
-      L262-7-1) et la taxation de l'épargne (3 % / revenus du capital) dans la
-      base ressources ne sont pas modélisés.
+      logement systématique et éligibilité simplifiée : `rsa_base_ressources`
+      lisse sur 12 mois `salaire_net`, `pension_retraite_nette`,
+      `pensions_alimentaires_percues`, `revenus_capital` et `revenus_fonciers_nets`
+      au lieu d'une déclaration trimestrielle (CASF art. R262-7) ; le forfait
+      logement est appliqué à toute famille éligible ; la majoration d'isolement
+      est accordée sans limite de durée (art. L262-9) ; le RSA jeune actif
+      (< 25 ans, art. L262-7-1), la taxation forfaitaire de 3 % de l'épargne non
+      productrice (art. R132-1) et la déduction des pensions versées ne sont pas
+      modélisés.
     - >-
       Prime d'activité (`prime_activite`) — lissage annuel (`/ 12`), forfait
       logement systématique et plancher étudiant/apprenti non modélisé : les
-      revenus professionnels nets (`salaire_net / 12`) et de remplacement sont
-      lissés sur 12 mois au lieu d'être trimestriels ; le forfait logement est
+      revenus professionnels nets (`salaire_net / 12`) et les autres ressources
+      issues de `rsa_base_ressources` (dont `revenus_capital` et
+      `revenus_fonciers_nets`) sont lissés sur 12 mois ; le forfait logement est
       systématique ; le plancher de revenus d'activité (~0,78 SMIC net, CSS art.
       L842-2) applicable aux étudiants salariés et apprentis ainsi que l'isolement
-      temporaire hors `parent_isole` ne sont pas modélisés.
+      temporaire hors `nb_parents == 1` ne sont pas modélisés.
     - >-
-      Fiscalité du capital, revenus fonciers et plus-values immobilières — hors
-      abattements de durée de détention et imputation de déficit foncier :
-      l'option barème des RCM (`option_bareme_rcm`) n'applique pas l'abattement de
-      40 % sur dividendes ; le régime réel foncier n'impute pas les déficits
-      fonciers sur le revenu global (plafond de 10 700 €, CGI art. 156, I, 3°) ;
-      les `plus_values_immobilieres` saisies sont supposées déjà nettes des
-      abattements pour durée de détention (CGI art. 150 VC) et hors surtaxe de
-      l'art. 1609 nonies G.
+      Fiscalité du capital, revenus fonciers et plus-values immobilières
+      (`pfu_ir`, `prelevements_sociaux_patrimoine`, `revenus_fonciers_nets`,
+      `impot_plus_values_immobilieres`) — imposition forfaitaire sans option
+      barème ni abattements de durée : `revenus_capital` est soumis de plein
+      droit au PFU (12,8 % d'IR, sans option globale pour le barème progressif
+      ni abattement de 40 % sur dividendes) et aux prélèvements sociaux de
+      17,2 % en 2024–2025 puis 18,6 % au 2026-01-01 (date des produits de
+      placement de l'art. 12 II de la LFSS 2026, alors que les plus-values
+      mobilières imposées par voie de rôle basculent dès les revenus 2025) ; le
+      régime réel foncier n'impute pas les déficits fonciers sur le revenu global
+      (plafond de 10 700 €, CGI art. 156, I, 3°) ; `plus_values_immobilieres` est
+      saisi net des abattements pour durée de détention (CGI art. 150 VC) et hors
+      surtaxe de l'art. 1609 nonies G.
     - >-
-      CEHR et IFI — lissage exceptionnel CEHR et plafonnement IFI à 75 % non
-      modélisés : la CEHR (CGI art. 223 sexies) est calculée sur le RFR courant
-      sans quotient de lissage des revenus exceptionnels ; l'IFI applique
-      l'abattement de 30 % sur la résidence principale et la décote (1,3–1,4 M€),
-      mais n'applique pas la réduction pour dons (CGI art. 978) ni le plafonnement
-      à 75 % des revenus (CGI art. 979).
+      CEHR et IFI (`cehr`, `ifi`) — lissage exceptionnel CEHR et plafonnement
+      IFI à 75 % non modélisés : la CEHR (CGI art. 223 sexies) est calculée sur
+      le RFR courant sans quotient de lissage des revenus exceptionnels ; l'IFI
+      applique l'abattement de 30 % sur la résidence principale, le seuil strict
+      `> 1 300 000 €` (CGI art. 964) et la décote (1,3–1,4 M€), mais n'applique
+      pas la réduction pour dons (CGI art. 978) ni le plafonnement à 75 % des
+      revenus (CGI art. 979).
     - >-
-      Fiscalité locale et taxe sur la valeur du sol — taux moyens nationaux par
-      défaut : faute de code commune et de taux locaux délibérés, `taxe_fonciere`
-      et `taxe_habitation_residence_secondaire` appliquent les taux moyens
-      nationaux DGFiP (surchargeables par ménage ou via les réformes
-      `lvt_shift`), majorés de 3 % de frais de gestion de l'État (CGI art. 1641),
-      sans exonérations ni dégrèvements liés à l'âge ou au RFR.
+      Fiscalité locale (`taxe_fonciere`, `taxe_habitation_residence_secondaire`,
+      `taxe_valeur_sol`) — montants locaux saisis directement hors calcul de
+      valeur locative cadastrale : le modèle prend en entrée les cotisations
+      locales (`taxe_fonciere_locale`, `thrs_locale`) et y ajoute les frais de
+      gestion de l'État de 3 % (CGI art. 1641), sans calculer les valeurs
+      locatives cadastrales ni les taux communaux/intercommunaux, ni appliquer
+      les exonérations ou dégrèvements liés à l'âge ou au RFR.
     - >-
       Périmètre géographique — France métropolitaine uniquement : les réfactions
       d'impôt sur le revenu DOM (30 % / 40 %, CGI art. 197, I, 3), les barèmes et

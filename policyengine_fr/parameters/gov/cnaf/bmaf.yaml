@@ -7,9 +7,9 @@ metadata:
   unit: currency-EUR
   label: Base mensuelle des allocations familiales (BMAF)
   reference:
-    - title: Article L551-1 du Code de la sécurité sociale (BMAF)
+    - title: Article L551-1 du Code de la sécurité sociale (revalorisation annuelle de la BMAF au 1er avril)
       href: https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006743137
-    - title: Décret n° 2024-396 et revalorisation au 1er avril 2024 (466,44 €) et au 1er avril 2025 (474,37 €, +1,7 %)
-      href: https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049387443
+    - title: Instruction interministérielle n° DSS/2B/2025/38 du 17 mars 2025 relative à la revalorisation des prestations familiales au 1er avril 2025 (474,37 €, après 466,44 € au 1er avril 2024)
+      href: https://sante.gouv.fr/fichiers/bo/2025/2025.6.sante.pdf
     - title: Service-Public.fr — Allocations familiales (montants)
       href: https://www.service-public.fr/particuliers/vosdroits/F13213

@@ -12,8 +12,12 @@ class reduction_generale(Variable):
         "plein dont la rémunération annuelle brute est inférieure à 1,6 SMIC :\n\n"
         "    C = min(T, max((T / 0,6) × (1,6 × SMIC_annuel / brut − 1), 0))\n"
         "    reduction_generale = min(C × brut, cotisations_patronales)\n\n"
-        "avec T = 0,3194 (< 50 salariés) ou 0,3234 (>= 50 salariés) en 2024, "
-        "arrondi légalement à 4 décimales."
+        "avec T = 0,3194 (< 50 salariés) ou 0,3234 (>= 50 salariés) en 2024 "
+        "(0,3193 / 0,3233 en 2025), arrondi légalement à 4 décimales. Variable "
+        "annuelle (`YEAR`) : le SMIC annuel (1 820 h) et le coefficient T sont "
+        "lus au 1er janvier de l'année simulée, sans proratisation infra-annuelle "
+        "(la revalorisation anticipée du SMIC au 1er nov. 2024 prend effet sur "
+        "l'exercice 2025)."
     )
     definition_period = YEAR
     reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000048770016"

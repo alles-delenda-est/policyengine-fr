@@ -88,3 +88,39 @@
       famille_1: {parents: [adulte_1], enfants: []}
   output:
     prime_activite: 0
+
+- name: Couple trois enfants (5 personnes, +40 % au 3e enfant), un actif au SMIC en janvier 2024
+  absolute_error_margin: 0.02
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 38, salaire_brut: 21_203}
+      adulte_2: {age: 37}
+      enfant_1: {age: 4}
+      enfant_2: {age: 8}
+      enfant_3: {age: 11}
+    familles:
+      famille_1:
+        parents: [adulte_1, adulte_2]
+        enfants: [enfant_1, enfant_2, enfant_3]
+  output:
+    # forfaitaire = 595,25 × 2,5 = 1 488,125 ; FL 3p+ = 176,78925 ; AF base = 325,5289
+    ppa_montant_forfaitaire: 1488.125
+    prime_activite: 613.54
+
+- name: Couple avec un enfant de 22 ans, un actif au SMIC en janvier 2024 (compté PPA < 25, hors AF)
+  absolute_error_margin: 0.02
+  period: 2024-01
+  input:
+    individus:
+      adulte_1: {age: 48, salaire_brut: 21_203}
+      adulte_2: {age: 47}
+      enfant_1: {age: 22}
+    familles:
+      famille_1:
+        parents: [adulte_1, adulte_2]
+        enfants: [enfant_1]
+  output:
+    # forfaitaire = 595,25 × 1,8 = 1 071,45 ; FL 3p+ = 176,78925 ; AF = 0
+    ppa_montant_forfaitaire: 1071.45
+    prime_activite: 522.40

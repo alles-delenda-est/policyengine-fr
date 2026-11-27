@@ -118,8 +118,10 @@ def make_lvt_shift_reform(
                             if replace_gains
                             else foyer_fiscal("plus_values_immobilieres", period)
                         )
-                        taux = parameters(period).gov.urssaf.patrimoine.taux_global
-                        return (capital + foncier + pv) * taux
+                        p = parameters(period).gov.urssaf.patrimoine
+                        return (
+                            capital * p.taux_global + (foncier + pv) * p.taux_immobilier
+                        )
 
                 prelevements_sociaux_patrimoine_lvt.__name__ = (
                     "prelevements_sociaux_patrimoine"
