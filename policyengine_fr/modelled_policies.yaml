@@ -17,6 +17,7 @@ core:
     - Fiscalité locale et foncière — taxe foncière (`taxe_fonciere_locale` + 3 % CGI art. 1641), taxe d'habitation sur les résidences secondaires (`thrs_locale` + 3 % CGI art. 1641) et taxe sur la valeur du sol (`taxe_valeur_sol`), accompagnées des réformes paramétrées (`policyengine_fr.reforms.lvt_shift` et `budget_levers`)
     - Revenu disponible — agrégat ménage net d'impôts directs, de cotisations/prélèvements sociaux et incluant les prestations sociales modélisées (2024–2025)
   not_modelled:
+    - Contribution différentielle sur les hauts revenus (CDHR, CGI art. 224, applicable aux revenus 2025)
     - Réductions et crédits d'impôt sur le revenu (emploi à domicile, garde d'enfants, dons, investissements locatifs…)
     - Aides personnelles au logement (APL, ALS, ALF)
     - Autres prestations familiales et minima sociaux (PAJE, complément familial, ARS, AAH, AEEH, ASPA)
@@ -109,21 +110,25 @@ core:
       logement systématique et éligibilité simplifiée : `rsa_base_ressources`
       lisse sur 12 mois `salaire_net`, `pension_retraite_nette`,
       `pensions_alimentaires_percues`, `revenus_capital` et `revenus_fonciers_nets`
-      au lieu d'une déclaration trimestrielle (CASF art. R262-7) ; le forfait
-      logement est appliqué à toute famille éligible ; la majoration d'isolement
-      est accordée sans limite de durée (art. L262-9) ; le RSA jeune actif
-      (< 25 ans, art. L262-7-1), la taxation forfaitaire de 3 % de l'épargne non
-      productrice (art. R132-1) et la déduction des pensions versées ne sont pas
-      modélisés.
+      au lieu d'une déclaration trimestrielle (CASF art. R262-7) et retient les
+      AF à leur base non modulée de tranche 1 ; le forfait logement est appliqué
+      à toute famille éligible ; tout membre `ENFANT` de moins de 25 ans est
+      présumé à charge effective et permanente (art. R262-3) ; la majoration
+      d'isolement est accordée sans limite de durée (art. L262-9) ; le RSA jeune
+      actif (< 25 ans, art. L262-7-1), la taxation forfaitaire de 3 % de
+      l'épargne non productrice (art. R132-1) et la déduction des pensions
+      versées ne sont pas modélisés.
     - >-
-      Prime d'activité (`prime_activite`) — lissage annuel (`/ 12`), forfait
-      logement systématique et plancher étudiant/apprenti non modélisé : les
-      revenus professionnels nets (`salaire_net / 12`) et les autres ressources
-      issues de `rsa_base_ressources` (dont `revenus_capital` et
-      `revenus_fonciers_nets`) sont lissés sur 12 mois ; le forfait logement est
-      systématique ; le plancher de revenus d'activité (~0,78 SMIC net, CSS art.
-      L842-2) applicable aux étudiants salariés et apprentis ainsi que l'isolement
-      temporaire hors `nb_parents == 1` ne sont pas modélisés.
+      Prime d'activité (`prime_activite`) — lissage annuel (`/ 12`), SMIC de
+      bonification au 1er janvier, forfait logement systématique et plancher
+      étudiant/apprenti non modélisé : les revenus professionnels nets
+      (`salaire_net / 12`) et les autres ressources issues de `rsa_base_ressources`
+      (dont `revenus_capital` et `revenus_fonciers_nets`) sont lissés sur 12
+      mois ; `ppa_bonification` lit le SMIC horaire au 1er janvier de l'année
+      (`period.this_year`) ; le forfait logement est systématique ; le plancher
+      de revenus d'activité (~0,78 SMIC net, CSS art. L842-2) applicable aux
+      étudiants salariés et apprentis ainsi que l'isolement temporaire hors
+      `nb_parents == 1` ne sont pas modélisés.
     - >-
       Fiscalité du capital, revenus fonciers et plus-values immobilières
       (`pfu_ir`, `prelevements_sociaux_patrimoine`, `revenus_fonciers_nets`,

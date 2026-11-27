@@ -17,7 +17,7 @@ class rsa_forfait_logement(Variable):
         "modélisée. Métropole uniquement."
     )
     definition_period = MONTH
-    reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000031694448"
+    reference = "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000020526192"
 
     def formula(famille, period, parameters):
         rsa = parameters(period).gov.cnaf.prestations.rsa

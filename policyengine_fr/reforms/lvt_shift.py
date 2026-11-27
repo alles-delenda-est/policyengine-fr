@@ -31,7 +31,7 @@ SOURCE_PATH = DATA_DIR / "lvt_yields.source.json"
 
 def load_lvt_yields() -> tuple[dict, dict]:
     """Load and verify SHA-256 provenance of the pinned LVTShift yields.json."""
-    raw = YIELDS_PATH.read_bytes()
+    raw = YIELDS_PATH.read_bytes().replace(b"\r\n", b"\n")
     source = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
     actual_sha = hashlib.sha256(raw).hexdigest()
     if actual_sha != source["sha256"]:

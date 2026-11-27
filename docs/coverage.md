@@ -179,18 +179,20 @@ enumerated below and mirrored 1-for-1 under `simplifications:` in
     unconditionally, and simplifies eligibility.** `rsa_base_ressources` divides
     annual `salaire_net`, `pension_retraite_nette`, `pensions_alimentaires_percues`,
     `revenus_capital`, and `revenus_fonciers_nets` by 12 instead of quarterly CAF
-    declarations (CASF art. R262-7); *forfait logement* is deducted for every
-    eligible household; single-parent *RSA majoré* has no duration cap (art.
-    L262-9); *RSA jeune actif* (< 25 with 2 years of work, art. L262-7-1), the
-    3 % imputed return on dormant liquid savings (art. R132-1), and paid-alimony
-    deductions are not modelled.
-12. **Prime d'activité smooths annual incomes (`/ 12`), applies *forfait logement*
-    unconditionally, and omits the student/apprentice floor.** Monthly activity
-    income (`salaire_net / 12`) and other resources from `rsa_base_ressources`
-    (including `revenus_capital` and `revenus_fonciers_nets`) are annual figures
-    divided by 12; *forfait logement* is applied unconditionally; and the ~0,78
-    SMIC net activity-income floor for working students and apprentices (CSS art.
-    L842-2) is not enforced.
+    declarations (CASF art. R262-7) and counts AF at its unmodulated Tranche-1
+    base; *forfait logement* is deducted for every eligible household; every
+    `ENFANT` under 25 is treated as *à charge* (art. R262-3); single-parent *RSA
+    majoré* has no duration cap (art. L262-9); *RSA jeune actif* (< 25 with 2
+    years of work, art. L262-7-1), the 3 % imputed return on dormant liquid
+    savings (art. R132-1), and paid-alimony deductions are not modelled.
+12. **Prime d'activité smooths annual incomes (`/ 12`), reads 1-January SMIC in
+    bonification, applies *forfait logement* unconditionally, and omits the
+    student/apprentice floor.** Monthly activity income (`salaire_net / 12`) and
+    other resources from `rsa_base_ressources` (including `revenus_capital` and
+    `revenus_fonciers_nets`) are annual figures divided by 12; `ppa_bonification`
+    evaluates the hourly SMIC as of 1 January (`period.this_year`); *forfait
+    logement* is applied unconditionally; and the ~0,78 SMIC net activity-income
+    floor for working students and apprentices (CSS art. L842-2) is not enforced.
 13. **Capital, rental, and real-estate CGT apply flat regimes without the
     progressive-barème option or holding-period tapers.** `revenus_capital` is
     taxed at the 12,8 % PFU (no progressive-barème election or 40 % dividend
@@ -219,6 +221,9 @@ enumerated below and mirrored 1-for-1 under `simplifications:` in
 
 ## ❌ What is missing from the tax-benefit system
 
+- **Differential high-income tax (CDHR)** — *contribution différentielle sur les
+  hauts revenus* (20 % minimum rate, CGI art. 224, created by LFI 2025 art. 10
+  for 2025 incomes).
 - **Income tax reductions & credits** — childcare (*frais de garde*), domestic
   employment (*emploi à domicile*), charitable donations, Pinel/Denormandie.
 - **Housing benefits** — APL, ALS, ALF (Stage B4 of the benefit roadmap).
